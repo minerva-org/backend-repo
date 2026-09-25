@@ -23,18 +23,6 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authProvider;
 
-    // @Value("${service.security.secure-key-username}")
-    // private String SECURE_KEY_USERNAME;
-
-    // @Value("${service.security.secure-key-password}")
-    // private String SECURE_KEY_PASSWORD;
-
-    // @Value("${service.security.secure-key-username-2}")
-    // private String SECURE_KEY_USERNAME_2;
-
-    // @Value("${service.security.secure-key-password-2}")
-    // private String SECURE_KEY_PASSWORD_2;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
@@ -52,27 +40,4 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-
-    // @Bean
-    // public PasswordEncoder passwordEncoder() {
-    //     return new BCryptPasswordEncoder();
-    // }
-
-    // @Bean
-    // public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
-    //     UserDetails admin = User.builder()
-    //             .username(SECURE_KEY_USERNAME)
-    //             .password(passwordEncoder.encode(SECURE_KEY_PASSWORD))
-    //             .roles("ADMIN")
-    //             .build();
-
-    //     UserDetails dev = User.builder()
-    //             .username(SECURE_KEY_USERNAME_2)
-    //             .password(passwordEncoder.encode(SECURE_KEY_PASSWORD_2))
-    //             .roles("DEV")
-    //             .build();
-
-    //     return new InMemoryUserDetailsManager(admin, dev);
-    // }
-
 }
