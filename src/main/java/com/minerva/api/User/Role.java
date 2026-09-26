@@ -4,6 +4,7 @@ public enum Role {
     ADMIN,
     ALUMNO,
     COORDINADOR,
-    DOCENTE
-
+    DOCENTE,
+    DIRECTOR_GENERAL,
+    DEV
 }
