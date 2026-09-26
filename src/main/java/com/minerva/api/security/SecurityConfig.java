@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .disable())
             .authorizeHttpRequests(authRequest -> authRequest
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/api/planteles/**").hasAnyAuthority("ADMIN", "COORDINADOR", "DEV")
                 .anyRequest().authenticated()
             )
             .sessionManagement(sessionManager ->
