@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class UniversidadDTO {
     private Long id;
     private String nombre;
+    private Boolean activo;
     
 }
