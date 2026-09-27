@@ -19,4 +19,5 @@ public class Universidad {
 
     @Column (name = "detalles")
     private String nombre;
+
 }
