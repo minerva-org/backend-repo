@@ -1,7 +1,9 @@
 package com.minerva.api.mapper;
 
+import com.minerva.api.dto.MateriaDTO;
 import com.minerva.api.dto.PlantelDTO;
 import com.minerva.api.dto.UniversidadDTO;
+import com.minerva.api.model.Materia;
 import com.minerva.api.model.Plantel;
 import com.minerva.api.model.Universidad;
 
@@ -24,6 +26,17 @@ public class Mapper {
         return UniversidadDTO.builder()
             .id(universidad.getId())
             .nombre(universidad.getNombre())
+            .build();
+    }
+
+    public static MateriaDTO toDTO(Materia materia){
+        if(materia == null) return null;
+
+        return MateriaDTO.builder()
+            .id(materia.getId())
+            .nombre(materia.getNombre())
+            .prefijo(materia.getPrefijo())
+            .planEstudioId(materia.getPlanEstudio().getId())
             .build();
     }
 }
