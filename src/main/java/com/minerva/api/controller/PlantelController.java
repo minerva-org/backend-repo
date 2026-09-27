@@ -51,8 +51,8 @@ public class PlantelController {
     }
 
     @PatchMapping("/{plantelId}/soft-delete")
-    public ResponseEntity<?> softDeletePlantel(@PathVariable Long plantelId) {
+    public ResponseEntity<Void> softDeletePlantel(@PathVariable Long plantelId) {
         plantelService.softDeletePlantel(plantelId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.noContent().build();
     }
 }

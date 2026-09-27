@@ -48,4 +48,10 @@ public class UniversidadController {
         universidadService.deleteUniversidad(universidadId);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{universidadId}/soft-delete")
+    public ResponseEntity<Void> softDeleteUniversidad(@PathVariable Long universidadId) {
+        universidadService.softDeleteUniversidad(universidadId);
+        return ResponseEntity.noContent().build();
+    }
 }
