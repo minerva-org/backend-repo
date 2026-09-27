@@ -32,6 +32,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authRequest -> authRequest
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/planteles/**").hasAnyAuthority("ADMIN", "COORDINADOR", "DEV")
+                .requestMatchers("api/universidades/**").hasAnyAuthority("DEV")
                 .anyRequest().authenticated()
             )
             .sessionManagement(sessionManager ->

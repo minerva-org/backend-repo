@@ -1,7 +1,9 @@
 package com.minerva.api.mapper;
 
 import com.minerva.api.dto.PlantelDTO;
+import com.minerva.api.dto.UniversidadDTO;
 import com.minerva.api.model.Plantel;
+import com.minerva.api.model.Universidad;
 
 public class Mapper {
     public static PlantelDTO toDTO(Plantel plantel){
@@ -13,6 +15,15 @@ public class Mapper {
             .direccion(plantel.getDireccion())
             .universidadId(plantel.getUniversidad().getId())
             .activo(plantel.getActivo())
+            .build();
+    }
+
+    public static UniversidadDTO toDTO(Universidad universidad){
+        if(universidad == null) return null;
+
+        return UniversidadDTO.builder()
+            .id(universidad.getId())
+            .nombre(universidad.getNombre())
             .build();
     }
 }
