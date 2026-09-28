@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .requestMatchers("api/universidades/**").hasAnyAuthority("DEV")
                 .requestMatchers("api/materias/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
                 .requestMatchers("api/unidades/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/temas/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
                 .anyRequest().authenticated()
             )
             .sessionManagement(sessionManager ->

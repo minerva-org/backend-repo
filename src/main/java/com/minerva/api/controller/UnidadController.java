@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.minerva.api.dto.UnidadDTO;
 import com.minerva.api.service.UnidadService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
+import lombok.RequiredArgsConstructor;
 
 @RestController 
 @RequestMapping ("api/unidades")
+@RequiredArgsConstructor 
 public class UnidadController {
     private UnidadService unidadService;
 
