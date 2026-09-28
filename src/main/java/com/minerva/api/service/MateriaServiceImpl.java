@@ -100,7 +100,7 @@ public class MateriaServiceImpl implements MateriaService{
         Materia materia = materiaRepository.findById(materiaId)
             .orElseThrow(() -> new RuntimeException("Materia no encontrado con el Id: " + materiaId));
 
-            materiaRepository.delete(materia);
+        materiaRepository.delete(materia);
     }
 
     @Override

@@ -10,23 +10,19 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter 
+@Getter  
 @Setter 
 @Entity 
-@Table (name = "materia")
-public class Materia {
-    
-    @Id 
-    @Column (name = "id", nullable = false, unique = true)
+@Table (name = "unidad")
+public class Unidad {
+    @Id
+    @Column (name = "id", nullable = false, unique = true) 
     private String id;
 
     @Column (name = "detalles", nullable = false)
     private String nombre;
 
-    @Column (name = "prefijo", nullable = false)
-    private String prefijo;
-
-    @JoinColumn (name = "id_planEstudio", nullable = false)
-    @ManyToOne (fetch = FetchType.LAZY)
-    private PlanEstudio planEstudio;
+    @ManyToOne (fetch = FetchType.LAZY, optional = false)
+    @JoinColumn (name = "id_materia", nullable = false)
+    private Materia materia;
 }

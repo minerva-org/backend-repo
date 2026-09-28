@@ -43,7 +43,7 @@ public class UniversidadController {
         return ResponseEntity.ok(universidadService.updateUniversidad(universidadId, universidadDTO));
     } 
 
-    @DeleteMapping ("{universidadId}")
+    @DeleteMapping ("/{universidadId}")
     public ResponseEntity<Void> deleteUniversidad(@PathVariable Long universidadId){
         universidadService.deleteUniversidad(universidadId);
         return ResponseEntity.noContent().build();

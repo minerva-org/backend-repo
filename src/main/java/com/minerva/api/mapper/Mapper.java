@@ -2,9 +2,11 @@ package com.minerva.api.mapper;
 
 import com.minerva.api.dto.MateriaDTO;
 import com.minerva.api.dto.PlantelDTO;
+import com.minerva.api.dto.UnidadDTO;
 import com.minerva.api.dto.UniversidadDTO;
 import com.minerva.api.model.Materia;
 import com.minerva.api.model.Plantel;
+import com.minerva.api.model.Unidad;
 import com.minerva.api.model.Universidad;
 
 public class Mapper {
@@ -38,5 +40,15 @@ public class Mapper {
             .prefijo(materia.getPrefijo())
             .planEstudioId(materia.getPlanEstudio().getId())
             .build();
+    }
+
+    public static UnidadDTO toDTO(Unidad unidad){
+        if(unidad == null) return null;
+
+        return UnidadDTO.builder()
+        .id(unidad.getId())
+        .nombre(unidad.getNombre())
+        .idMateria(unidad.getMateria().getId())
+        .build();
     }
 }
