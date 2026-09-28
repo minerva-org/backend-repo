@@ -1,10 +1,12 @@
 package com.minerva.api.mapper;
 
+import com.minerva.api.dto.ConceptoDTO;
 import com.minerva.api.dto.MateriaDTO;
 import com.minerva.api.dto.PlantelDTO;
 import com.minerva.api.dto.TemaDTO;
 import com.minerva.api.dto.UnidadDTO;
 import com.minerva.api.dto.UniversidadDTO;
+import com.minerva.api.model.Concepto;
 import com.minerva.api.model.Materia;
 import com.minerva.api.model.Plantel;
 import com.minerva.api.model.Tema;
@@ -61,6 +63,16 @@ public class Mapper {
         .id(tema.getId())
         .nombre(tema.getNombre())
         .unidadId(tema.getUnidad().getId())
+        .build();
+    }
+
+    public static ConceptoDTO toDTO(Concepto concepto){
+        if(concepto == null) return null;
+
+        return ConceptoDTO.builder()
+        .id(concepto.getId())
+        .nombre(concepto.getNombre())
+        .temaId(concepto.getTema().getId())
         .build();
     }
 }
