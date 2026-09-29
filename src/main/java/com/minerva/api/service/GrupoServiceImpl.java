@@ -8,9 +8,11 @@ import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Persona;
+import com.minerva.api.model.Plantel;
 import com.minerva.api.User.Roles;
 import com.minerva.api.repository.GrupoRepository;
 import com.minerva.api.repository.PersonaRepository;
+import com.minerva.api.repository.PlantelRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,11 @@ public class GrupoServiceImpl implements GrupoService {
 
     private final GrupoRepository grupoRepository;
     private final PersonaRepository personaRepository;
+    private final PlantelRepository plantelRepository;
+
+    private boolean esDocenteValido(Persona persona) {
+        return persona.getRol() == Roles.DOCENTE || persona.getRol() == Roles.COORDINADOR;
+    }
 
     @Override
     @Transactional
@@ -57,16 +64,36 @@ public class GrupoServiceImpl implements GrupoService {
         String docenteId = grupoDTO.getDocenteId().trim();
         Persona docente = personaRepository.findById(docenteId)
             .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + docenteId));
-        if (docente.getRol() != Roles.DOCENTE) {
-            throw new IllegalArgumentException("La persona indicada no tiene rol de docente");
+        if (!esDocenteValido(docente)) {
+            throw new IllegalArgumentException("La persona indicada no tiene un rol de docente o coordinador");
         }
+
+        if (grupoDTO.getPlantelId() == null) {
+            throw new IllegalArgumentException("El plantel es obligatorio");
+        }
+        Plantel plantel = plantelRepository.findById(grupoDTO.getPlantelId())
+            .orElseThrow(() -> new EntityNotFoundException("Plantel no encontrado con el id: " + grupoDTO.getPlantelId()));
 
         Grupo grupo = new Grupo();
         grupo.setId(id);
         grupo.setClaveGrupo(claveGrupo);
         grupo.setNombre(nombre);
         grupo.setSemestre(semestre);
+        grupo.setActivo(grupoDTO.getActivo() != null ? grupoDTO.getActivo() : true);
         grupo.setDocente(docente);
+        grupo.setPlantel(plantel);
+
+        if (grupoDTO.getAlumnosIds() != null) {
+            for (String alumnoId : grupoDTO.getAlumnosIds()) {
+                if (alumnoId == null || alumnoId.isBlank()) continue;
+                Persona alumno = personaRepository.findById(alumnoId.trim())
+                    .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
+                if (alumno.getRol() != Roles.ALUMNO) {
+                    throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
+                }
+                grupo.addAlumno(alumno);
+            }
+        }
 
         return Mapper.toDTO(grupoRepository.save(grupo));
     }
@@ -104,14 +131,36 @@ public class GrupoServiceImpl implements GrupoService {
             grupo.setSemestre(semestre);
         }
 
+        if (grupoDTO.getActivo() != null) {
+            grupo.setActivo(grupoDTO.getActivo());
+        }
+
         if (grupoDTO.getDocenteId() != null) {
             String docenteId = grupoDTO.getDocenteId().trim();
             Persona docente = personaRepository.findById(docenteId)
                 .orElseThrow(() -> new EntityNotFoundException("No existe una persona con el id: " + docenteId));
-            if (docente.getRol() != Roles.DOCENTE) {
-                throw new IllegalArgumentException("La persona indicada no tiene rol de docente");
+            if (!esDocenteValido(docente)) {
+                throw new IllegalArgumentException("La persona indicada no tiene un rol de docente o coordinador");
             }
             grupo.setDocente(docente);
+        }
+
+        if (grupoDTO.getPlantelId() != null) {
+            Plantel plantel = plantelRepository.findById(grupoDTO.getPlantelId())
+                .orElseThrow(() -> new EntityNotFoundException("Plantel no encontrado con el id: " + grupoDTO.getPlantelId()));
+            grupo.setPlantel(plantel);
+        }
+
+        if (grupoDTO.getAlumnosIds() != null) {
+            for (String alumnoId : grupoDTO.getAlumnosIds()) {
+                if (alumnoId == null || alumnoId.isBlank()) continue;
+                Persona alumno = personaRepository.findById(alumnoId.trim())
+                    .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
+                if (alumno.getRol() != Roles.ALUMNO) {
+                    throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
+                }
+                grupo.addAlumno(alumno);
+            }
         }
 
         return Mapper.toDTO(grupoRepository.save(grupo));
@@ -151,6 +200,18 @@ public class GrupoServiceImpl implements GrupoService {
             throw new EntityNotFoundException("Persona no encontrada con el id: " + docenteId);
         }
         return grupoRepository.findByDocenteId(docenteId)
+            .stream()
+            .map(Mapper::toDTO)
+            .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GrupoDTO> findAllByPlantelId(Long plantelId) {
+        if (plantelId == null) {
+            return findAll();
+        }
+        return grupoRepository.findByPlantelId(plantelId)
             .stream()
             .map(Mapper::toDTO)
             .toList();

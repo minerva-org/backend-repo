@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import com.minerva.api.dto.PlantelDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Plantel;
-import com.minerva.api.model.Universidad;
+import com.minerva.api.model.Institucion;
 import com.minerva.api.repository.PlantelRepository;
-import com.minerva.api.repository.UniversidadRepository;
+import com.minerva.api.repository.InstitucionRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +17,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor 
 @Service 
 public class PlantelServiceImpl implements PlantelService {
-    private final UniversidadRepository universidadRepository; 
+    private final InstitucionRepository institucionRepository; 
     private final PlantelRepository plantelRepository;
 
     //Inserciones
     @Override
     public PlantelDTO savePlantel(PlantelDTO planteldto) {
-        Long Uid = planteldto.getUniversidadId();
-        Universidad u = universidadRepository.findById(Uid)
-            .orElseThrow(() -> new EntityNotFoundException("Universidad no encontrado con el Id: " + Uid));       
+        Long Uid = planteldto.getInstitucionId();
+        Institucion u = institucionRepository.findById(Uid)
+            .orElseThrow(() -> new EntityNotFoundException("Institucion no encontrado con el Id: " + Uid));       
 
         if (plantelRepository.existsByNombreIgnoreCase(planteldto.getNombre())) {
         throw new IllegalArgumentException("Ya existe un plantel con ese nombre");
@@ -33,7 +33,7 @@ public class PlantelServiceImpl implements PlantelService {
             Plantel plan = new Plantel();
             plan.setNombre(planteldto.getNombre());
             plan.setDireccion(planteldto.getDireccion());
-            plan.setUniversidad(u);
+            plan.setInstitucion(u);
             plan.setActivo(planteldto.getActivo() != null ? planteldto.getActivo() : true);
 
             Plantel plantelGuardado = plantelRepository.save(plan);
@@ -56,11 +56,11 @@ public class PlantelServiceImpl implements PlantelService {
             plan.setNombre(nombre);
         }
 
-        if (planteldto.getUniversidadId() != null) {
-            Universidad universidad = universidadRepository.findById(planteldto.getUniversidadId())
+        if (planteldto.getInstitucionId() != null) {
+            Institucion institucion = institucionRepository.findById(planteldto.getInstitucionId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                    "Universidad no encontrado con el Id: " + planteldto.getUniversidadId()));
-            plan.setUniversidad(universidad);
+                    "Institucion no encontrado con el Id: " + planteldto.getInstitucionId()));
+            plan.setInstitucion(institucion);
         }
 
         if (planteldto.getDireccion() != null) {

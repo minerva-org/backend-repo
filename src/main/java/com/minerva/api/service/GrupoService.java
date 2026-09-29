@@ -7,6 +7,7 @@ import com.minerva.api.dto.GrupoDTO;
 public interface GrupoService {
     List<GrupoDTO> findAll();
     List<GrupoDTO> findAllByDocenteId(String docenteId);
+    List<GrupoDTO> findAllByPlantelId(Long plantelId);
     GrupoDTO getGrupoById(String grupoId);
     GrupoDTO saveGrupo(GrupoDTO grupoDTO);
     GrupoDTO updateGrupo(String grupoId, GrupoDTO grupoDTO);

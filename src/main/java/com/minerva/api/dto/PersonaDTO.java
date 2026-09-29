@@ -13,6 +13,7 @@ public class PersonaDTO {
     private String apellido;
     private String email;
     private Roles rol;
+    private Boolean activo;
     private Long plantelId;
     private String username;
 }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder 
 @AllArgsConstructor 
 @NoArgsConstructor 
-public class UniversidadDTO {
+public class InstitucionDTO {
     private Long id;
     private String nombre;
     private Boolean activo;

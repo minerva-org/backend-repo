@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
 
 @RestController 
-@RequestMapping ("api/unidades")
+@RequestMapping("/api/unidades")
 @RequiredArgsConstructor 
 public class UnidadController {
-    private UnidadService unidadService;
+    private final UnidadService unidadService;
 
     @GetMapping 
     public ResponseEntity<List<UnidadDTO>> getAllUnidades(){

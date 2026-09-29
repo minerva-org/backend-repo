@@ -28,6 +28,11 @@ public class GrupoController {
         return ResponseEntity.ok(grupoService.findAllByDocenteId(docenteId));
     }
 
+    @GetMapping(params = "plantelId")
+    public ResponseEntity<List<GrupoDTO>> getGruposByPlantel(@RequestParam Long plantelId) {
+        return ResponseEntity.ok(grupoService.findAllByPlantelId(plantelId));
+    }
+
     @GetMapping("/{grupoId}")
     public ResponseEntity<GrupoDTO> getGrupoById(@PathVariable String grupoId) {
         return ResponseEntity.ok(grupoService.getGrupoById(grupoId));

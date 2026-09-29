@@ -2,11 +2,10 @@ package com.minerva.api.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-
-
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -26,30 +25,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-            .csrf(csrf ->
-                csrf
-                .disable())
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authRequest -> authRequest
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/api/planteles/**").hasAnyAuthority("ADMIN", "COORDINADOR", "DEV")
-                .requestMatchers("api/universidades/**").hasAnyAuthority("DEV")
-                .requestMatchers("api/materias/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
-                .requestMatchers("api/unidades/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
-                .requestMatchers("api/temas/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
-                .requestMatchers("api/conceptos/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
-                .requestMatchers("api/quizzes/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
-                .requestMatchers("api/preguntas/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
-                .requestMatchers("api/quiz-x-pregunta/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
-                .requestMatchers("api/opciones/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
-                .requestMatchers("api/grupos/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
-                .requestMatchers("api/personas/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/api/**").hasAnyAuthority(
+                    "ADMIN", "ROLE_ADMIN",
+                    "ALUMNO", "ROLE_ALUMNO",
+                    "DOCENTE", "ROLE_DOCENTE",
+                    "COORDINADOR", "ROLE_COORDINADOR",
+                    "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                    "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                    "DEV", "ROLE_DEV"
+                )
                 .anyRequest().authenticated()
             )
-            .sessionManagement(sessionManager ->
-                sessionManager
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+            .sessionManagement(sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authProvider)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
     }
 }

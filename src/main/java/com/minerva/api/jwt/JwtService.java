@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.security.Key;
 
+import org.springframework.security.core.GrantedAuthority;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,13 @@ public class JwtService {
     }
     
     private String getToken(Map<String, Object> extraClaims, UserDetails user){
+        String role = user.getAuthorities().stream()
+            .findFirst()
+            .map(GrantedAuthority::getAuthority)
+            .orElse("USER");
+
+        extraClaims.put("role", role);
+
         return Jwts
             .builder()
             .setClaims(extraClaims)

@@ -39,9 +39,16 @@ public class Grupo {
     @Column(name = "semestre", nullable = false)
     private String semestre;
 
+    @Column(name = "activo", nullable = false)
+    private boolean activo = true;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_docente", nullable = false)
     private Persona docente;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_plantel", nullable = false)
+    private Plantel plantel;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

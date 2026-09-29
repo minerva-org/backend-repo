@@ -59,9 +59,8 @@ public class PersonaServiceImpl implements PersonaService {
         Plantel plantel = plantelRepository.findById(dto.getPlantelId())
             .orElseThrow(() -> new EntityNotFoundException("Plantel no encontrado con el id: " + dto.getPlantelId()));
 
-        if (dto.getUsername() == null || dto.getUsername().isBlank())
-            throw new IllegalArgumentException("El username es obligatorio");
-        String username = dto.getUsername().trim();
+        String requestedUsername = dto.getUsername() == null ? "" : dto.getUsername().trim();
+        String username = requestedUsername.isBlank() ? generateUniqueUsernameFromEmail(email) : requestedUsername;
         if (userRepository.existsByUsernameIgnoreCase(username))
             throw new IllegalArgumentException("Ya existe un usuario con ese username: " + username);
 
@@ -71,6 +70,7 @@ public class PersonaServiceImpl implements PersonaService {
         persona.setApellido(dto.getApellido().trim());
         persona.setEmail(email);
         persona.setRol(dto.getRol());
+        persona.setActivo(dto.getActivo() == null ? true : dto.getActivo());
         persona.setPlantel(plantel);
         persona = personaRepository.save(persona);
 
@@ -103,6 +103,7 @@ public class PersonaServiceImpl implements PersonaService {
         }
 
         if (dto.getRol() != null) persona.setRol(dto.getRol());
+        if (dto.getActivo() != null) persona.setActivo(dto.getActivo());
 
         if (dto.getPlantelId() != null) {
             Plantel plantel = plantelRepository.findById(dto.getPlantelId())
@@ -157,5 +158,19 @@ public class PersonaServiceImpl implements PersonaService {
         PersonaDTO dto = Mapper.toDTO(persona);
         userRepository.findByPersonaId(persona.getId()).ifPresent(u -> dto.setUsername(u.getUsername()));
         return dto;
+    }
+
+    private String generateUniqueUsernameFromEmail(String email) {
+        String base = email.split("@")[0].trim().toLowerCase();
+        String sanitized = base.replaceAll("[^a-z0-9._-]", "");
+        String candidate = sanitized.isBlank() ? "usuario" : sanitized;
+
+        int suffix = 1;
+        while (userRepository.existsByUsernameIgnoreCase(candidate)) {
+            candidate = sanitized + suffix;
+            suffix++;
+        }
+
+        return candidate;
     }
 }
