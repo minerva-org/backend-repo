@@ -115,7 +115,6 @@ public class Mapper {
         .id(quizXPregunta.getId())
         .quizId(quizXPregunta.getQuiz().getId())
         .preguntaId(quizXPregunta.getPregunta().getId())
-        .conceptoId(quizXPregunta.getConcepto().getId())
         .build();
     }
 

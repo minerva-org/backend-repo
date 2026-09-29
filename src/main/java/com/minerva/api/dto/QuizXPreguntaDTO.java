@@ -13,5 +13,4 @@ public class QuizXPreguntaDTO {
     private String id;
     private String quizId;
     private String preguntaId;
-    private String conceptoId;
 }
