@@ -37,7 +37,7 @@ public class User implements UserDetails {
 
     @Column(name = "reestablecimiento", nullable = false)
     @Builder.Default
-    private boolean reestablecimiento = true;
+    private boolean reestablecimiento = false;
 
     @Enumerated(EnumType.STRING)
     Role role;
