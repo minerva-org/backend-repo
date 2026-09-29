@@ -3,12 +3,14 @@ package com.minerva.api.mapper;
 import com.minerva.api.dto.ConceptoDTO;
 import com.minerva.api.dto.MateriaDTO;
 import com.minerva.api.dto.PlantelDTO;
+import com.minerva.api.dto.QuizDTO;
 import com.minerva.api.dto.TemaDTO;
 import com.minerva.api.dto.UnidadDTO;
 import com.minerva.api.dto.UniversidadDTO;
 import com.minerva.api.model.Concepto;
 import com.minerva.api.model.Materia;
 import com.minerva.api.model.Plantel;
+import com.minerva.api.model.Quiz;
 import com.minerva.api.model.Tema;
 import com.minerva.api.model.Unidad;
 import com.minerva.api.model.Universidad;
@@ -75,4 +77,17 @@ public class Mapper {
         .temaId(concepto.getTema().getId())
         .build();
     }
+
+    public static QuizDTO toDTO(Quiz quiz) {
+    if (quiz == null) return null;
+
+    return QuizDTO.builder()
+        .id(quiz.getId())
+        .nombre(quiz.getNombre())
+        .fechaCreacion(quiz.getFechaCreacion())
+        .fechaInicio(quiz.getFechaInicio())
+        .fechaFinalizacion(quiz.getFechaFinalizacion())
+        .grupoId(quiz.getGrupo().getId())
+        .build();
+}
 }
