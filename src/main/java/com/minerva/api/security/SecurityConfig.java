@@ -32,6 +32,17 @@ public class SecurityConfig {
             .authorizeHttpRequests(authRequest -> authRequest
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/planteles/**").hasAnyAuthority("ADMIN", "COORDINADOR", "DEV")
+                .requestMatchers("api/universidades/**").hasAnyAuthority("DEV")
+                .requestMatchers("api/materias/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/unidades/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/temas/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/conceptos/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/quizzes/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/preguntas/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/quiz-x-pregunta/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/opciones/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/grupos/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/personas/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
                 .anyRequest().authenticated()
             )
             .sessionManagement(sessionManager ->

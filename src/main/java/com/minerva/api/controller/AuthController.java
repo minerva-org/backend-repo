@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.minerva.api.request.LoginRequest;
-import com.minerva.api.request.RegisterRequest;
 import com.minerva.api.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,9 +23,9 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
-    @PostMapping(value = "register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request){
-        return ResponseEntity.ok(authService.register(request));
-    }
+    // @PostMapping(value = "register")
+    // public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request){
+    //     return ResponseEntity.ok(authService.register(request));
+    // }
 }
 
