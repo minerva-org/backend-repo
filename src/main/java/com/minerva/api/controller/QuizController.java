@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.dto.QuizDTO;
 import com.minerva.api.service.QuizService;
+import com.minerva.api.service.QuizXPreguntaService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class QuizController {
 
     private final QuizService quizService;
+    private final QuizXPreguntaService quizXPreguntaService;
 
     @GetMapping
     public ResponseEntity<List<QuizDTO>> getAllQuizzes() {
@@ -39,6 +42,11 @@ public class QuizController {
     @GetMapping("/{quizId}")
     public ResponseEntity<QuizDTO> getQuizById(@PathVariable String quizId) {
         return ResponseEntity.ok(quizService.getQuizById(quizId));
+    }
+
+    @GetMapping("/{quizId}/preguntas")
+        public ResponseEntity<List<PreguntaDTO>> getPreguntasDelQuiz(@PathVariable String quizId) {
+        return ResponseEntity.ok(quizXPreguntaService.findPreguntasByQuizId(quizId));
     }
 
     @PostMapping

@@ -22,7 +22,6 @@ public class PreguntaServiceImpl implements PreguntaService {
 
     private final PreguntaRepository preguntaRepository;
     private final ConceptoRepository conceptoRepository;
-    private final QuizRepository quizRepository;
 
     @Override
     @Transactional
