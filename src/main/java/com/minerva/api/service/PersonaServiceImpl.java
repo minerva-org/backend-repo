@@ -141,7 +141,7 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PersonaDTO> findAllByPlantelId(String plantelId) {
+    public List<PersonaDTO> findAllByPlantelId(Long plantelId) {
         if (!plantelRepository.existsById(plantelId))
             throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
         return personaRepository.findByPlantelId(plantelId).stream().map(this::toDTOConUsername).toList();
