@@ -11,7 +11,6 @@ import com.minerva.api.model.Concepto;
 import com.minerva.api.model.Pregunta;
 import com.minerva.api.repository.ConceptoRepository;
 import com.minerva.api.repository.PreguntaRepository;
-import com.minerva.api.repository.QuizRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

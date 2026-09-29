@@ -2,6 +2,7 @@ package com.minerva.api.mapper;
 
 import com.minerva.api.dto.ConceptoDTO;
 import com.minerva.api.dto.MateriaDTO;
+import com.minerva.api.dto.OpcionDTO;
 import com.minerva.api.dto.PlantelDTO;
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.dto.QuizDTO;
@@ -11,6 +12,7 @@ import com.minerva.api.dto.UnidadDTO;
 import com.minerva.api.dto.UniversidadDTO;
 import com.minerva.api.model.Concepto;
 import com.minerva.api.model.Materia;
+import com.minerva.api.model.Opcion;
 import com.minerva.api.model.Plantel;
 import com.minerva.api.model.Pregunta;
 import com.minerva.api.model.Quiz;
@@ -115,5 +117,16 @@ public class Mapper {
         .preguntaId(quizXPregunta.getPregunta().getId())
         .conceptoId(quizXPregunta.getConcepto().getId())
         .build();
-}
+    }
+
+    public static OpcionDTO toDTO(Opcion opcion) {
+    if (opcion == null) return null;
+
+    return OpcionDTO.builder()
+        .id(opcion.getId())
+        .descripcion(opcion.getDescripcion())
+        .esCorrecta(opcion.getEsCorrecta())
+        .preguntaId(opcion.getPregunta().getId())
+        .build();
+    }
 }
