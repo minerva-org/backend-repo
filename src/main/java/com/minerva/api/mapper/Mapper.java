@@ -1,6 +1,7 @@
 package com.minerva.api.mapper;
 
 import com.minerva.api.dto.ConceptoDTO;
+import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.dto.MateriaDTO;
 import com.minerva.api.dto.OpcionDTO;
 import com.minerva.api.dto.PlantelDTO;
@@ -11,6 +12,7 @@ import com.minerva.api.dto.TemaDTO;
 import com.minerva.api.dto.UnidadDTO;
 import com.minerva.api.dto.UniversidadDTO;
 import com.minerva.api.model.Concepto;
+import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Materia;
 import com.minerva.api.model.Opcion;
 import com.minerva.api.model.Plantel;
@@ -127,6 +129,18 @@ public class Mapper {
         .descripcion(opcion.getDescripcion())
         .esCorrecta(opcion.getEsCorrecta())
         .preguntaId(opcion.getPregunta().getId())
+        .build();
+    }
+
+    public static GrupoDTO toDTO(Grupo grupo) {
+    if (grupo == null) return null;
+
+    return GrupoDTO.builder()
+        .id(grupo.getId())
+        .claveGrupo(grupo.getClaveGrupo())
+        .nombre(grupo.getNombre())
+        .semestre(grupo.getSemestre())
+        .docenteId(grupo.getDocente().getId())
         .build();
     }
 }
