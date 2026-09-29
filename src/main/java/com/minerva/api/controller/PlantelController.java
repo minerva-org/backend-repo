@@ -20,7 +20,7 @@ import com.minerva.api.service.PlantelService;
 @RestController 
 @RequestMapping ("/api/planteles")
 public class PlantelController {
-    @Autowired 
+    @Autowired  
     private PlantelService plantelService;
     
     @GetMapping 
@@ -43,6 +43,12 @@ public class PlantelController {
     public ResponseEntity<PlantelDTO> updatePlantel(@PathVariable Long plantelId, @RequestBody PlantelDTO plantelDTO) {
         return ResponseEntity.ok(plantelService.updatePlantel(plantelId, plantelDTO));
     }
+    
+    @PatchMapping("/{plantelId}/soft-delete")
+    public ResponseEntity<Void> softDeletePlantel(@PathVariable Long plantelId) {
+        plantelService.softDeletePlantel(plantelId);
+        return ResponseEntity.noContent().build();
+    }
 
     @DeleteMapping("/{plantelId}")
     public ResponseEntity<Void> deletePlantel(@PathVariable Long plantelId) {
@@ -50,9 +56,4 @@ public class PlantelController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{plantelId}/soft-delete")
-    public ResponseEntity<?> softDeletePlantel(@PathVariable Long plantelId) {
-        plantelService.softDeletePlantel(plantelId);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 }

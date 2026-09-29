@@ -6,10 +6,13 @@ import org.springframework.stereotype.Service;
 
 import com.minerva.api.dto.UniversidadDTO;
 import com.minerva.api.mapper.Mapper;
+import com.minerva.api.model.Plantel;
 import com.minerva.api.model.Universidad;
+import com.minerva.api.repository.PlantelRepository;
 import com.minerva.api.repository.UniversidadRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service 
@@ -17,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class UniversidadServiceImpl implements UniversidadService{
 
     private final UniversidadRepository universidadRepository;
+    private final PlantelRepository plantelRepository;
 
     @Override
     public UniversidadDTO saveUniversidad(UniversidadDTO universidadDTO) {
@@ -63,6 +67,21 @@ public class UniversidadServiceImpl implements UniversidadService{
             .orElseThrow(() -> new EntityNotFoundException("La no se ha encontrado la Universidad con la id: " + universidadId ));
 
         universidadRepository.delete(universidad);
+    }
+
+    @Override
+    @Transactional 
+    public void softDeleteUniversidad(Long universidadId) {
+        Universidad universidad = universidadRepository.findById(universidadId)
+            .orElseThrow(() -> new EntityNotFoundException(
+                "No se ha encontrado la Universidad con el Id: " + universidadId));
+
+        universidad.setActivo(false);
+        universidadRepository.save(universidad);
+
+        List<Plantel> planteles = plantelRepository.findByUniversidadIdAndActivoTrue(universidadId);
+        planteles.forEach(p -> p.setActivo(false));
+        plantelRepository.saveAll(planteles);
     }
 
     //Consultas

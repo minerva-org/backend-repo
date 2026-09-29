@@ -7,11 +7,10 @@ import lombok.NoArgsConstructor;
 
 @Data 
 @Builder 
-@AllArgsConstructor 
 @NoArgsConstructor 
-public class UniversidadDTO {
-    private Long id;
+@AllArgsConstructor 
+public class UnidadDTO {
+    private String id;
     private String nombre;
-    private Boolean activo;
-    
+    private String idMateria;
 }

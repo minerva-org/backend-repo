@@ -33,6 +33,10 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/planteles/**").hasAnyAuthority("ADMIN", "COORDINADOR", "DEV")
                 .requestMatchers("api/universidades/**").hasAnyAuthority("DEV")
+                .requestMatchers("api/materias/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/unidades/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/temas/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
+                .requestMatchers("api/conceptos/**").hasAnyAuthority("DEV", "DOCENTE", "COORDINADOR")
                 .anyRequest().authenticated()
             )
             .sessionManagement(sessionManager ->

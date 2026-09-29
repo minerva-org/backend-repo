@@ -15,9 +15,13 @@ public class Universidad {
     
     @Id 
     @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @Column (name = "id", nullable = false)
     private Long Id;
 
-    @Column (name = "detalles")
+    @Column (name = "detalles", nullable = false)
     private String nombre;
+
+    @Column (name = "activo", nullable = false)
+    private Boolean activo = true;
 
 }

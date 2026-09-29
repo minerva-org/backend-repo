@@ -10,6 +10,8 @@ public interface UniversidadService {
     UniversidadDTO updateUniversidad(Long universidadId, UniversidadDTO universidadDTO);
 
     void deleteUniversidad(Long universidadId);
+
+    void softDeleteUniversidad(Long universidadId);
     
     List<UniversidadDTO> findAll();
 
