@@ -1,6 +1,6 @@
 package com.minerva.api.User;
 
-public enum Role {
+public enum Roles {
     ADMIN,
     ALUMNO,
     COORDINADOR,

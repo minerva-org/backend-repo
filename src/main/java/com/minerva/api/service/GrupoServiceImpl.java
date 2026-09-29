@@ -1,7 +1,6 @@
 package com.minerva.api.service;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,7 +8,7 @@ import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Persona;
-import com.minerva.api.model.RolPersona;
+import com.minerva.api.User.Roles;
 import com.minerva.api.repository.GrupoRepository;
 import com.minerva.api.repository.PersonaRepository;
 
@@ -58,7 +57,7 @@ public class GrupoServiceImpl implements GrupoService {
         String docenteId = grupoDTO.getDocenteId().trim();
         Persona docente = personaRepository.findById(docenteId)
             .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + docenteId));
-        if (docente.getRol() != RolPersona.DOCENTE) {
+        if (docente.getRol() != Roles.DOCENTE) {
             throw new IllegalArgumentException("La persona indicada no tiene rol de docente");
         }
 
@@ -109,7 +108,7 @@ public class GrupoServiceImpl implements GrupoService {
             String docenteId = grupoDTO.getDocenteId().trim();
             Persona docente = personaRepository.findById(docenteId)
                 .orElseThrow(() -> new EntityNotFoundException("No existe una persona con el id: " + docenteId));
-            if (docente.getRol() != RolPersona.DOCENTE) {
+            if (docente.getRol() != Roles.DOCENTE) {
                 throw new IllegalArgumentException("La persona indicada no tiene rol de docente");
             }
             grupo.setDocente(docente);
@@ -176,7 +175,7 @@ public class GrupoServiceImpl implements GrupoService {
         Persona alumno = personaRepository.findById(alumnoId)
             .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
 
-        if (alumno.getRol() != RolPersona.ALUMNO) {
+        if (alumno.getRol() != Roles.ALUMNO) {
             throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
         }
         if (grupo.getAlumnos().contains(alumno)) {

@@ -4,6 +4,7 @@ import com.minerva.api.dto.ConceptoDTO;
 import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.dto.MateriaDTO;
 import com.minerva.api.dto.OpcionDTO;
+import com.minerva.api.dto.PersonaDTO;
 import com.minerva.api.dto.PlantelDTO;
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.dto.QuizDTO;
@@ -15,6 +16,7 @@ import com.minerva.api.model.Concepto;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Materia;
 import com.minerva.api.model.Opcion;
+import com.minerva.api.model.Persona;
 import com.minerva.api.model.Plantel;
 import com.minerva.api.model.Pregunta;
 import com.minerva.api.model.Quiz;
@@ -143,4 +145,16 @@ public class Mapper {
         .docenteId(grupo.getDocente().getId())
         .build();
     }
+
+    public static PersonaDTO toDTO(Persona persona) {
+    if (persona == null) return null;
+    return PersonaDTO.builder()
+        .id(persona.getId())
+        .nombre(persona.getNombre())
+        .apellido(persona.getApellido())
+        .email(persona.getEmail())
+        .rol(persona.getRol())
+        .plantelId(persona.getPlantel().getId())
+        .build();
+}
 }

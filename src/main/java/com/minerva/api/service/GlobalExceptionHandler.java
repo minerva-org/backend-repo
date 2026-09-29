@@ -1,4 +1,4 @@
-package com.minerva.api.controller;
+package com.minerva.api.service;
 
 import java.util.HashMap;
 import java.util.Map;

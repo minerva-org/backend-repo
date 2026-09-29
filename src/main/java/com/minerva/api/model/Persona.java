@@ -1,15 +1,14 @@
 package com.minerva.api.model;
 
-import javax.management.relation.Role;
-
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import com.minerva.api.User.Roles;
 
-@Getter
-@Setter
+@Getter 
+@Setter 
 @ToString(exclude = "plantel")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
@@ -21,18 +20,18 @@ public class Persona {
     @Column(name = "id")
     private String id;
 
-    @Column(name = "nombre", nullable = false)
+    @Column(nullable = false)
     private String nombre;
 
-    @Column(name = "apellido", nullable = false)
+    @Column(nullable = false)
     private String apellido;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "rol", nullable = false)
-    private Role rol;
+    @Column(nullable = false)
+    private Roles rol;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_plantel", nullable = false)
