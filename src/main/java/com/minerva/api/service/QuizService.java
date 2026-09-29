@@ -14,6 +14,6 @@ public interface QuizService {
     QuizDTO saveQuiz(QuizDTO quizDTO);
 
     QuizDTO updateQuiz(String quizId, QuizDTO quizDTO);
-    
+
     void deleteQuiz(String quizId);
 }
