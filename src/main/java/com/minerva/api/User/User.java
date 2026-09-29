@@ -29,7 +29,7 @@ public class User implements UserDetails {
     private String password;
 
     @Column(name = "reestablecimiento", nullable = false)
-    private boolean reestablecimiento = true;
+    private boolean reestablecimiento = false;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_persona", nullable = false, unique = true)
