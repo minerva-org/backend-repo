@@ -68,6 +68,13 @@ public class SecurityConfig {
                         "DOCENTE", "ROLE_DOCENTE"
                     )
 
+                .requestMatchers("/api/quiz-x-pregunta/**")
+                    .hasAnyAuthority(
+                        "DEV", "ROLE_DEV",
+                        "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                        "COORDINADOR", "ROLE_COORDINADOR",
+                        "DOCENTE", "ROLE_DOCENTE"
+                    )
                 .requestMatchers("/api/quizzes/**")
                     .hasAnyAuthority(
                         "DEV", "ROLE_DEV",
