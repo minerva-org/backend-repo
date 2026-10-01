@@ -219,12 +219,28 @@ public class GrupoServiceImpl implements GrupoService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<GrupoDTO> findAllByAlumnoId(String alumnoId) {
+        Persona alumno = personaRepository.findById(alumnoId)
+            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
+
+        if (alumno.getRol() != Roles.ALUMNO) {
+            throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
+        }
+
+        return grupoRepository.findDistinctByAlumnosId(alumnoId)
+            .stream()
+            .map(Mapper::toDTO)
+            .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<String> getAlumnosIdsDeGrupo(String grupoId) {
         Grupo grupo = grupoRepository.findById(grupoId)
             .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
 
         return grupo.getAlumnos().stream()
-            .map(Persona::getId)
+            .map(alumno -> alumno.getId())
             .toList();
     }
 

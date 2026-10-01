@@ -15,4 +15,6 @@ public interface GrupoRepository extends JpaRepository<Grupo, String> {
     List<Grupo> findByDocenteId(String docenteId);
 
     List<Grupo> findByPlantelId(Long plantelId);
+
+    List<Grupo> findDistinctByAlumnosId(String alumnoId);
 }

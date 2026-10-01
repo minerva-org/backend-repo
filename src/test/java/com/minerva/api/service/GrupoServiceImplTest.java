@@ -79,4 +79,24 @@ class GrupoServiceImplTest {
         assertEquals("P-1", result.getDocenteId());
         assertTrue(result.getAlumnosIds() != null && result.getAlumnosIds().contains("A-1"));
     }
+
+    @Test
+    void findAllByAlumnoId_shouldReturnGroupsForAlumno() {
+        Persona alumno = new Persona();
+        alumno.setId("A-1");
+        alumno.setRol(Roles.ALUMNO);
+
+        Grupo grupo = new Grupo();
+        grupo.setId("G-1");
+        grupo.addAlumno(alumno);
+
+        when(personaRepository.findById("A-1")).thenReturn(Optional.of(alumno));
+        when(grupoRepository.findDistinctByAlumnosId("A-1")).thenReturn(java.util.List.of(grupo));
+
+        var result = grupoService.findAllByAlumnoId("A-1");
+
+        assertEquals(1, result.size());
+        assertEquals("G-1", result.get(0).getId());
+        assertTrue(result.get(0).getAlumnosIds().contains("A-1"));
+    }
 }
