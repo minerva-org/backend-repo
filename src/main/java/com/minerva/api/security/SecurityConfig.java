@@ -32,12 +32,14 @@ public class SecurityConfig {
 
                 .requestMatchers("/api/planteles/**")
                     .hasAnyAuthority(
+                        "DEV", "ROLE_DEV",
                         "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                         "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL"
                     )
 
                 .requestMatchers("/api/personas/**")
                     .hasAnyAuthority(
+                        "DEV", "ROLE_DEV",
                         "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                         "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
                         "COORDINADOR", "ROLE_COORDINADOR"
@@ -52,6 +54,7 @@ public class SecurityConfig {
                         "/api/opciones/**"
                     )
                     .hasAnyAuthority(
+                        "DEV", "ROLE_DEV",
                         "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                         "COORDINADOR", "ROLE_COORDINADOR",
                         "DOCENTE", "ROLE_DOCENTE"
@@ -59,6 +62,7 @@ public class SecurityConfig {
 
                 .requestMatchers("/api/grupos/**")
                     .hasAnyAuthority(
+                        "DEV", "ROLE_DEV",
                         "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                         "COORDINADOR", "ROLE_COORDINADOR",
                         "DOCENTE", "ROLE_DOCENTE"
@@ -66,13 +70,14 @@ public class SecurityConfig {
 
                 .requestMatchers("/api/quizzes/**")
                     .hasAnyAuthority(
+                        "DEV", "ROLE_DEV",
                         "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                         "COORDINADOR", "ROLE_COORDINADOR",
                         "DOCENTE", "ROLE_DOCENTE",
                         "ALUMNO", "ROLE_ALUMNO"
                     )
 
-                .requestMatchers("/api/**").authenticated()
+                .requestMatchers("/api/**").hasAnyAuthority("DEV", "ROLE_DEV")
                 .anyRequest().authenticated()
             )
             .sessionManagement(sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
