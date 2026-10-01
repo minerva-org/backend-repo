@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.minerva.api.User.User;
+import com.minerva.api.dto.AlumnoGrupoDTO;
 import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.service.GrupoService;
 
@@ -67,6 +68,11 @@ public class GrupoController {
     @GetMapping("/{grupoId}/alumnos")
     public ResponseEntity<List<String>> getAlumnosDeGrupo(@PathVariable String grupoId) {
         return ResponseEntity.ok(grupoService.getAlumnosIdsDeGrupo(grupoId));
+    }
+
+    @GetMapping("/{grupoId}/alumnos-detalle")
+    public ResponseEntity<List<AlumnoGrupoDTO>> getAlumnosDetalleDeGrupo(@PathVariable String grupoId) {
+        return ResponseEntity.ok(grupoService.getAlumnosDetalleDeGrupo(grupoId));
     }
 
     @PostMapping("/{grupoId}/alumnos/{alumnoId}")

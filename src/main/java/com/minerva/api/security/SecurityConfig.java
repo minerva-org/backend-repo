@@ -16,89 +16,95 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor 
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final AuthenticationProvider authProvider;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final AuthenticationProvider authProvider;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(authRequest -> authRequest
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                return http
+                                .csrf(csrf -> csrf.disable())
+                                .authorizeHttpRequests(authRequest -> authRequest
+                                                .requestMatchers("/auth/**").permitAll()
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                .requestMatchers("/api/planteles/**")
+                                                .requestMatchers("/api/planteles/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL")
+
+                                                .requestMatchers("/api/personas/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE")
+
+                                                .requestMatchers(
+                                                                "/api/materias/**",
+                                                                "/api/unidades/**",
+                                                                "/api/temas/**",
+                                                                "/api/conceptos/**",
+                                                                "/api/preguntas/**",
+                                                                "/api/opciones/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE")
+
+                                                .requestMatchers(HttpMethod.GET, "/api/grupos/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE",
+                                                                "ALUMNO", "ROLE_ALUMNO")
+
+                                .requestMatchers(HttpMethod.GET, "/api/grupos/mis-grupos")
                     .hasAnyAuthority(
                         "DEV", "ROLE_DEV",
                         "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
-                        "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL"
+                        "COORDINADOR", "ROLE_COORDINADOR",
+                        "DOCENTE", "ROLE_DOCENTE",
+                        "ALUMNO", "ROLE_ALUMNO"
                     )
-
-                .requestMatchers("/api/personas/**")
+                                .requestMatchers("/api/grupos/**")
                     .hasAnyAuthority(
                         "DEV", "ROLE_DEV",
                         "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                         "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
-                        "COORDINADOR", "ROLE_COORDINADOR"
-                    )
-
-                .requestMatchers(
-                        "/api/materias/**",
-                        "/api/unidades/**",
-                        "/api/temas/**",
-                        "/api/conceptos/**",
-                        "/api/preguntas/**",
-                        "/api/opciones/**"
-                    )
-                    .hasAnyAuthority(
-                        "DEV", "ROLE_DEV",
-                        "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                         "COORDINADOR", "ROLE_COORDINADOR",
                         "DOCENTE", "ROLE_DOCENTE"
                     )
 
-                .requestMatchers(HttpMethod.GET, "/api/grupos/mis-grupos")
-                    .hasAnyAuthority(
-                        "DEV", "ROLE_DEV",
-                        "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
-                        "COORDINADOR", "ROLE_COORDINADOR",
-                        "DOCENTE", "ROLE_DOCENTE",
-                        "ALUMNO", "ROLE_ALUMNO"
-                    )
+                                                .requestMatchers("/api/quiz-x-pregunta/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE")
+                                                .requestMatchers("/api/quizzes/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE",
+                                                                "ALUMNO", "ROLE_ALUMNO")
 
-                .requestMatchers("/api/grupos/**")
-                    .hasAnyAuthority(
-                        "DEV", "ROLE_DEV",
-                        "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
-                        "COORDINADOR", "ROLE_COORDINADOR",
-                        "DOCENTE", "ROLE_DOCENTE"
-                    )
-
-                .requestMatchers("/api/quiz-x-pregunta/**")
-                    .hasAnyAuthority(
-                        "DEV", "ROLE_DEV",
-                        "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
-                        "COORDINADOR", "ROLE_COORDINADOR",
-                        "DOCENTE", "ROLE_DOCENTE"
-                    )
-                .requestMatchers("/api/quizzes/**")
-                    .hasAnyAuthority(
-                        "DEV", "ROLE_DEV",
-                        "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
-                        "COORDINADOR", "ROLE_COORDINADOR",
-                        "DOCENTE", "ROLE_DOCENTE",
-                        "ALUMNO", "ROLE_ALUMNO"
-                    )
-
-                .requestMatchers("/api/**").hasAnyAuthority("DEV", "ROLE_DEV")
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authProvider)
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .build();
-    }
+                                                .requestMatchers("/api/**").hasAnyAuthority("DEV", "ROLE_DEV")
+                                                .anyRequest().authenticated())
+                                .sessionManagement(
+                                                sessionManager -> sessionManager
+                                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authenticationProvider(authProvider)
+                                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                                .build();
+        }
 }

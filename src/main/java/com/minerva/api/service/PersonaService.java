@@ -9,6 +9,10 @@ public interface PersonaService {
 
     List<PersonaDTO> findAllByPlantelId(Long plantelId);
 
+    List<PersonaDTO> findAllDocentesByPlantelId(Long plantelId);
+
+    List<PersonaDTO> findAllByPlantelIdAndRol(Long plantelId, Roles rol);
+
     List<PersonaDTO> findAllByRol(Roles rol);
 
     PersonaDTO getPersonaById(String personaId);

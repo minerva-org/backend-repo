@@ -1,6 +1,7 @@
 package com.minerva.api.service;
 
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,13 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PersonaServiceImpl implements PersonaService {
+
+    private static final Set<Roles> ROLES_CON_PASSWORD_PERSONAL = Set.of(
+        Roles.DOCENTE,
+        Roles.COORDINADOR,
+        Roles.DIRECTOR_PLANTEL,
+        Roles.ALUMNO
+    );
 
     private final PersonaRepository personaRepository;
     private final PlantelRepository plantelRepository;
@@ -76,7 +84,17 @@ public class PersonaServiceImpl implements PersonaService {
 
         User user = new User();
         user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(defaultPassword));
+        String rawPassword = ROLES_CON_PASSWORD_PERSONAL.contains(dto.getRol())
+            ? dto.getPassword()
+            : defaultPassword;
+
+        if (ROLES_CON_PASSWORD_PERSONAL.contains(dto.getRol())) {
+            if (rawPassword == null || rawPassword.isBlank()) {
+                throw new IllegalArgumentException("La contraseña es obligatoria para este rol");
+            }
+        }
+
+        user.setPassword(passwordEncoder.encode(rawPassword));
         user.setReestablecimiento(true);
         user.setPersona(persona);
         userRepository.save(user);
@@ -146,6 +164,32 @@ public class PersonaServiceImpl implements PersonaService {
         if (!plantelRepository.existsById(plantelId))
             throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
         return personaRepository.findByPlantelId(plantelId).stream().map(this::toDTOConUsername).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PersonaDTO> findAllDocentesByPlantelId(Long plantelId) {
+        if (!plantelRepository.existsById(plantelId)) {
+            throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
+        }
+
+        return personaRepository.findByPlantelId(plantelId)
+            .stream()
+            .filter(persona -> persona.getRol() == Roles.DOCENTE || persona.getRol() == Roles.COORDINADOR)
+            .map(this::toDTOConUsername)
+            .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PersonaDTO> findAllByPlantelIdAndRol(Long plantelId, Roles rol) {
+        if (!plantelRepository.existsById(plantelId)) {
+            throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
+        }
+        return personaRepository.findByPlantelIdAndRol(plantelId, rol)
+            .stream()
+            .map(this::toDTOConUsername)
+            .toList();
     }
 
     @Override

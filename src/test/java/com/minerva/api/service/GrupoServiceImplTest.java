@@ -91,7 +91,7 @@ class GrupoServiceImplTest {
         grupo.addAlumno(alumno);
 
         when(personaRepository.findById("A-1")).thenReturn(Optional.of(alumno));
-        when(grupoRepository.findDistinctByAlumnosId("A-1")).thenReturn(java.util.List.of(grupo));
+        when(grupoRepository.findByAlumnos_Id("A-1")).thenReturn(java.util.List.of(grupo));
 
         var result = grupoService.findAllByAlumnoId("A-1");
 

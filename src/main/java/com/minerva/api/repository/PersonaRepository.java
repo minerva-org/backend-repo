@@ -13,4 +13,6 @@ public interface PersonaRepository extends JpaRepository<Persona, String> {
     List<Persona> findByPlantelId(Long plantelId);
     
     List<Persona> findByRol(Roles rol);
+
+    List<Persona> findByPlantelIdAndRol(Long plantelId, Roles rol);
 }

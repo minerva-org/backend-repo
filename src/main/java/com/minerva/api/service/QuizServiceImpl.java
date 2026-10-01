@@ -1,6 +1,7 @@
 package com.minerva.api.service;
 
 import java.time.Instant;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -9,8 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.minerva.api.dto.QuizDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Grupo;
+import com.minerva.api.model.Persona;
 import com.minerva.api.model.Quiz;
 import com.minerva.api.repository.GrupoRepository;
+import com.minerva.api.repository.PersonaRepository;
 import com.minerva.api.repository.QuizRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -22,6 +25,7 @@ public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
     private final GrupoRepository grupoRepository;
+    private final PersonaRepository personaRepository;
 
     @Override
     @Transactional
@@ -146,6 +150,31 @@ public class QuizServiceImpl implements QuizService {
             throw new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId);
         }
         return quizRepository.findByGrupoId(grupoId)
+            .stream()
+            .map(Mapper::toDTO)
+            .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuizDTO> findAllByAlumnoId(String alumnoId) {
+        Persona alumno = personaRepository.findById(alumnoId)
+            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
+
+        if (alumno.getRol() != com.minerva.api.User.Roles.ALUMNO) {
+            throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
+        }
+
+        List<String> grupoIds = grupoRepository.findByAlumnos_Id(alumnoId)
+            .stream()
+            .map(grupo -> grupo.getId())
+            .toList();
+
+        if (grupoIds.isEmpty()) {
+            return List.of();
+        }
+
+        return quizRepository.findByGrupoIdIn(grupoIds)
             .stream()
             .map(Mapper::toDTO)
             .toList();
