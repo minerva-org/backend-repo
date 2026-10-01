@@ -2,7 +2,7 @@ FROM eclipse-temurin:26-jdk AS build
 WORKDIR /workspace
 
 COPY . .
-RUN chmod +x mvnw && ./mvnw -DskipTests package
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw && ./mvnw -DskipTests package
 
 FROM eclipse-temurin:26-jre
 WORKDIR /app
