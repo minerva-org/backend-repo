@@ -29,15 +29,50 @@ public class SecurityConfig {
             .authorizeHttpRequests(authRequest -> authRequest
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/**").hasAnyAuthority(
-                    "ADMIN", "ROLE_ADMIN",
-                    "ALUMNO", "ROLE_ALUMNO",
-                    "DOCENTE", "ROLE_DOCENTE",
-                    "COORDINADOR", "ROLE_COORDINADOR",
-                    "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
-                    "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
-                    "DEV", "ROLE_DEV"
-                )
+
+                .requestMatchers("/api/planteles/**")
+                    .hasAnyAuthority(
+                        "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                        "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL"
+                    )
+
+                .requestMatchers("/api/personas/**")
+                    .hasAnyAuthority(
+                        "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                        "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                        "COORDINADOR", "ROLE_COORDINADOR"
+                    )
+
+                .requestMatchers(
+                        "/api/materias/**",
+                        "/api/unidades/**",
+                        "/api/temas/**",
+                        "/api/conceptos/**",
+                        "/api/preguntas/**",
+                        "/api/opciones/**"
+                    )
+                    .hasAnyAuthority(
+                        "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                        "COORDINADOR", "ROLE_COORDINADOR",
+                        "DOCENTE", "ROLE_DOCENTE"
+                    )
+
+                .requestMatchers("/api/grupos/**")
+                    .hasAnyAuthority(
+                        "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                        "COORDINADOR", "ROLE_COORDINADOR",
+                        "DOCENTE", "ROLE_DOCENTE"
+                    )
+
+                .requestMatchers("/api/quizzes/**")
+                    .hasAnyAuthority(
+                        "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                        "COORDINADOR", "ROLE_COORDINADOR",
+                        "DOCENTE", "ROLE_DOCENTE",
+                        "ALUMNO", "ROLE_ALUMNO"
+                    )
+
+                .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
             )
             .sessionManagement(sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
