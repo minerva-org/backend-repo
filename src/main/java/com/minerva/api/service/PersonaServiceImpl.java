@@ -150,6 +150,13 @@ public class PersonaServiceImpl implements PersonaService {
         return personaRepository.findAll().stream().map(this::toDTOConUsername).toList();
     }
 
+    public List<PersonaDTO> findAllByPlantelIdAndRolAndStatus(long plantelid, Roles rol, boolean activo){
+        return personaRepository.findByPlantelIdAndRolAndActivo(plantelid, rol, activo)
+            .stream()
+            .map(this::toDTOConUsername)
+            .toList();
+    }
+
     @Override
     @Transactional(readOnly = true)
     public PersonaDTO getPersonaById(String personaId) {
@@ -157,6 +164,7 @@ public class PersonaServiceImpl implements PersonaService {
             .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
         return toDTOConUsername(persona);
     }
+
 
     @Override
     @Transactional(readOnly = true)

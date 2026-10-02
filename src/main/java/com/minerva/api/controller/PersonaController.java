@@ -37,6 +37,11 @@ public class PersonaController {
         return ResponseEntity.ok(personaService.findAllByPlantelIdAndRol(plantelId, Roles.ALUMNO));
     }
 
+    @GetMapping(params = {"plantelId", "rol=ALUMNO","activo"})
+    public ResponseEntity<List<PersonaDTO>> getAlumnosActivosByPlantel(@RequestParam Long plantelId, @RequestParam boolean activo) {
+        return ResponseEntity.ok(personaService.findAllByPlantelIdAndRolAndStatus(plantelId, Roles.ALUMNO, activo));
+    }
+
     @GetMapping(params = "rol")
     public ResponseEntity<List<PersonaDTO>> getByRol(@RequestParam Roles rol) {
         return ResponseEntity.ok(personaService.findAllByRol(rol));
