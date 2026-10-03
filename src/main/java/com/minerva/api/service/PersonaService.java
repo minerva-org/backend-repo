@@ -9,7 +9,7 @@ public interface PersonaService {
 
     List<PersonaDTO> findAllByPlantelId(Long plantelId);
 
-    List<PersonaDTO> findAllByPlantelIdAndRolAndStatus(long plantelid, Roles rol, boolean activo);
+    List<PersonaDTO> findAllByPlantelIdAndRolAndStatus(long plantelid, Roles rol, Boolean activo);
 
     List<PersonaDTO> findAllDocentesByPlantelId(Long plantelId);
 

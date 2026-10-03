@@ -27,19 +27,20 @@ public class PersonaController {
         return ResponseEntity.ok(personaService.findAllByPlantelId(plantelId));
     }
 
-    @GetMapping(params = {"plantelId", "rol=DOCENTE"})
-    public ResponseEntity<List<PersonaDTO>> getDocentesByPlantel(@RequestParam Long plantelId) {
-        return ResponseEntity.ok(personaService.findAllDocentesByPlantelId(plantelId));
-    }
+    // @GetMapping(params = {"plantelId", "rol=DOCENTE"})
+    // public ResponseEntity<List<PersonaDTO>> getDocentesByPlantel(@RequestParam Long plantelId) {
+    //     return ResponseEntity.ok(personaService.findAllDocentesByPlantelId(plantelId));
+    // }
 
-    @GetMapping(params = {"plantelId", "rol=ALUMNO"})
-    public ResponseEntity<List<PersonaDTO>> getAlumnosByPlantel(@RequestParam Long plantelId) {
-        return ResponseEntity.ok(personaService.findAllByPlantelIdAndRol(plantelId, Roles.ALUMNO));
-    }
+    // @GetMapping(params = {"plantelId", "rol=ALUMNO"})
+    // public ResponseEntity<List<PersonaDTO>> getAlumnosByPlantel(@RequestParam Long plantelId) {
+    //     return ResponseEntity.ok(personaService.findAllByPlantelIdAndRol(plantelId, Roles.ALUMNO));
+    // }
 
-    @GetMapping(params = {"plantelId", "rol=ALUMNO","activo"})
-    public ResponseEntity<List<PersonaDTO>> getAlumnosActivosByPlantel(@RequestParam Long plantelId, @RequestParam boolean activo) {
-        return ResponseEntity.ok(personaService.findAllByPlantelIdAndRolAndStatus(plantelId, Roles.ALUMNO, activo));
+    @GetMapping(params = {"plantelId", "rol"})
+    public ResponseEntity<List<PersonaDTO>> getAlumnosActivosByPlantel(
+        @RequestParam Long plantelId, @RequestParam Roles rol, @RequestParam (required = false) Boolean activo) {
+        return ResponseEntity.ok(personaService.findAllByPlantelIdAndRolAndStatus(plantelId, rol, activo));
     }
 
     @GetMapping(params = "rol")

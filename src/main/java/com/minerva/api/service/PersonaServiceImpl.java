@@ -150,8 +150,14 @@ public class PersonaServiceImpl implements PersonaService {
         return personaRepository.findAll().stream().map(this::toDTOConUsername).toList();
     }
 
-    public List<PersonaDTO> findAllByPlantelIdAndRolAndStatus(long plantelid, Roles rol, boolean activo){
-        return personaRepository.findByPlantelIdAndRolAndActivo(plantelid, rol, activo)
+    public List<PersonaDTO> findAllByPlantelIdAndRolAndStatus(long plantelid, Roles rol, Boolean activo){
+        if (activo != null) {
+            return personaRepository.findByPlantelIdAndRolAndActivo(plantelid, rol, activo)
+                .stream()
+                .map(this::toDTOConUsername)
+                .toList();
+        }
+        return personaRepository.findByPlantelIdAndRol(plantelid, rol)  
             .stream()
             .map(this::toDTOConUsername)
             .toList();

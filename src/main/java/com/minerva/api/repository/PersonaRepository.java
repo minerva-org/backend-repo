@@ -16,5 +16,5 @@ public interface PersonaRepository extends JpaRepository<Persona, String> {
 
     List<Persona> findByPlantelIdAndRol(Long plantelId, Roles rol);
 
-    List<Persona> findByPlantelIdAndRolAndActivo(Long plantelId,Roles rol, boolean status);
+    List<Persona> findByPlantelIdAndRolAndActivo(Long plantelId,Roles rol, Boolean status);
 }
