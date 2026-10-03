@@ -5,6 +5,7 @@ import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.dto.MateriaDTO;
 import com.minerva.api.dto.OpcionDTO;
 import com.minerva.api.dto.PersonaDTO;
+import com.minerva.api.dto.PersonaResponseDTO;
 import com.minerva.api.dto.PlantelDTO;
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.dto.QuizDTO;
@@ -48,7 +49,20 @@ public class Mapper {
             .build();
     }
 
-    public static PersonaDTO toDTO(Persona persona) {
+    public static PersonaResponseDTO toDTO(Persona persona) {
+        if (persona == null) return null;
+
+        return PersonaResponseDTO.builder()
+            .nombre(persona.getNombre())
+            .apellido(persona.getApellido())
+            .email(persona.getEmail())
+            .rol(persona.getRol())
+            .activo(persona.getActivo())
+            .plantelId(persona.getPlantel() != null ? persona.getPlantel().getId() : null)
+            .build();
+    }
+
+        public static PersonaDTO toDTO(Persona persona, String password) {
         if (persona == null) return null;
 
         return PersonaDTO.builder()
@@ -61,6 +75,8 @@ public class Mapper {
             .plantelId(persona.getPlantel() != null ? persona.getPlantel().getId() : null)
             .build();
     }
+
+    
 
     public static MateriaDTO toDTO(Materia materia) {
         if (materia == null) return null;

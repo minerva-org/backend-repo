@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.minerva.api.dto.PersonaDTO;
+import com.minerva.api.dto.PersonaResponseDTO;
 import com.minerva.api.User.Roles;
 import com.minerva.api.service.PersonaService;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +19,12 @@ public class PersonaController {
     private final PersonaService personaService;
 
     @GetMapping
-    public ResponseEntity<List<PersonaDTO>> getAll() {
+    public ResponseEntity<List<PersonaResponseDTO>> getAll() {
         return ResponseEntity.ok(personaService.findAll());
     }
 
     @GetMapping(params = "plantelId")
-    public ResponseEntity<List<PersonaDTO>> getByPlantel(@RequestParam Long plantelId) {
+    public ResponseEntity<List<PersonaResponseDTO>> getByPlantel(@RequestParam Long plantelId) {
         return ResponseEntity.ok(personaService.findAllByPlantelId(plantelId));
     }
 
@@ -38,28 +39,28 @@ public class PersonaController {
     // }
 
     @GetMapping(params = {"plantelId", "rol"})
-    public ResponseEntity<List<PersonaDTO>> getAlumnosActivosByPlantel(
+    public ResponseEntity<List<PersonaResponseDTO>> getAlumnosActivosByPlantel(
         @RequestParam Long plantelId, @RequestParam Roles rol, @RequestParam (required = false) Boolean activo) {
         return ResponseEntity.ok(personaService.findAllByPlantelIdAndRolAndStatus(plantelId, rol, activo));
     }
 
     @GetMapping(params = "rol")
-    public ResponseEntity<List<PersonaDTO>> getByRol(@RequestParam Roles rol) {
+    public ResponseEntity<List<PersonaResponseDTO>> getByRol(@RequestParam Roles rol) {
         return ResponseEntity.ok(personaService.findAllByRol(rol));
     }
 
     @GetMapping("/{personaId}")
-    public ResponseEntity<PersonaDTO> getById(@PathVariable String personaId) {
+    public ResponseEntity<PersonaResponseDTO> getById(@PathVariable String personaId) {
         return ResponseEntity.ok(personaService.getPersonaById(personaId));
     }
 
     @PostMapping
-    public ResponseEntity<PersonaDTO> save(@RequestBody PersonaDTO dto) {
+    public ResponseEntity<PersonaResponseDTO> save(@RequestBody PersonaDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(personaService.savePersona(dto));
     }
 
     @PatchMapping("/{personaId}")
-    public ResponseEntity<PersonaDTO> update(@PathVariable String personaId, @RequestBody PersonaDTO dto) {
+    public ResponseEntity<PersonaResponseDTO> update(@PathVariable String personaId, @RequestBody PersonaDTO dto) {
         return ResponseEntity.ok(personaService.updatePersona(personaId, dto));
     }
 

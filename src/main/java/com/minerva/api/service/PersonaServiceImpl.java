@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.minerva.api.User.User;
 import com.minerva.api.dto.PersonaDTO;
+import com.minerva.api.dto.PersonaResponseDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Persona;
 import com.minerva.api.model.Plantel;
@@ -41,7 +42,7 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional
-    public PersonaDTO savePersona(PersonaDTO dto) {
+    public PersonaResponseDTO savePersona(PersonaDTO dto) {
         if (dto.getId() == null || dto.getId().isBlank())
             throw new IllegalArgumentException("El id es obligatorio");
         String id = dto.getId().trim();
@@ -99,14 +100,14 @@ public class PersonaServiceImpl implements PersonaService {
         user.setPersona(persona);
         userRepository.save(user);
 
-        PersonaDTO resultado = Mapper.toDTO(persona);
+        PersonaResponseDTO resultado = Mapper.toDTO(persona);
         resultado.setUsername(username);
         return resultado;
     }
 
     @Override
     @Transactional
-    public PersonaDTO updatePersona(String personaId, PersonaDTO dto) {
+    public PersonaResponseDTO updatePersona(String personaId, PersonaDTO dto) {
         Persona persona = personaRepository.findById(personaId)
             .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
 
@@ -130,7 +131,7 @@ public class PersonaServiceImpl implements PersonaService {
         }
         // username NO se actualiza aquí — es un cambio de cuenta, no de datos de persona
 
-        PersonaDTO resultado = Mapper.toDTO(personaRepository.save(persona));
+        PersonaResponseDTO resultado = Mapper.toDTO(personaRepository.save(persona));
         userRepository.findByPersonaId(personaId).ifPresent(u -> resultado.setUsername(u.getUsername()));
         return resultado;
     }
@@ -146,11 +147,11 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PersonaDTO> findAll() {
+    public List<PersonaResponseDTO> findAll() {
         return personaRepository.findAll().stream().map(this::toDTOConUsername).toList();
     }
 
-    public List<PersonaDTO> findAllByPlantelIdAndRolAndStatus(long plantelid, Roles rol, Boolean activo){
+    public List<PersonaResponseDTO> findAllByPlantelIdAndRolAndStatus(long plantelid, Roles rol, Boolean activo){
         if (activo != null) {
             return personaRepository.findByPlantelIdAndRolAndActivo(plantelid, rol, activo)
                 .stream()
@@ -165,7 +166,7 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
-    public PersonaDTO getPersonaById(String personaId) {
+    public PersonaResponseDTO getPersonaById(String personaId) {
         Persona persona = personaRepository.findById(personaId)
             .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
         return toDTOConUsername(persona);
@@ -174,7 +175,7 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PersonaDTO> findAllByPlantelId(Long plantelId) {
+    public List<PersonaResponseDTO> findAllByPlantelId(Long plantelId) {
         if (!plantelRepository.existsById(plantelId))
             throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
         return personaRepository.findByPlantelId(plantelId).stream().map(this::toDTOConUsername).toList();
@@ -182,7 +183,7 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PersonaDTO> findAllDocentesByPlantelId(Long plantelId) {
+    public List<PersonaResponseDTO> findAllDocentesByPlantelId(Long plantelId) {
         if (!plantelRepository.existsById(plantelId)) {
             throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
         }
@@ -196,7 +197,7 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PersonaDTO> findAllByPlantelIdAndRol(Long plantelId, Roles rol) {
+    public List<PersonaResponseDTO> findAllByPlantelIdAndRol(Long plantelId, Roles rol) {
         if (!plantelRepository.existsById(plantelId)) {
             throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
         }
@@ -208,12 +209,12 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PersonaDTO> findAllByRol(Roles rol) {
+    public List<PersonaResponseDTO> findAllByRol(Roles rol) {
         return personaRepository.findByRol(rol).stream().map(this::toDTOConUsername).toList();
     }
 
-    private PersonaDTO toDTOConUsername(Persona persona) {
-        PersonaDTO dto = Mapper.toDTO(persona);
+    private PersonaResponseDTO toDTOConUsername(Persona persona) {
+        PersonaResponseDTO dto = Mapper.toDTO(persona);
         userRepository.findByPersonaId(persona.getId()).ifPresent(u -> dto.setUsername(u.getUsername()));
         return dto;
     }
