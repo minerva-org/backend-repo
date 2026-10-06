@@ -86,6 +86,7 @@ public class Mapper {
             .nombre(materia.getNombre())
             .prefijo(materia.getPrefijo())
             .planEstudioId(materia.getPlanEstudio() != null ? materia.getPlanEstudio().getId() : null)
+            .activo(materia.getActivo())
             .build();
     }
 
