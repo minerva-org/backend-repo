@@ -9,6 +9,8 @@ public interface QuizService {
 
     List<QuizDTO> findAllByGrupoId(String grupoId);
 
+    List<QuizDTO> findAllByAlumnoId(String alumnoId);
+
     QuizDTO getQuizById(String quizId);
 
     QuizDTO saveQuiz(QuizDTO quizDTO);

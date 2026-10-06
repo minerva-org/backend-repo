@@ -3,10 +3,10 @@ package com.minerva.api.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.minerva.api.model.Universidad;
+import com.minerva.api.model.Institucion;
 
-public interface UniversidadRepository extends JpaRepository<Universidad, Long>{
-    List<Universidad> findAll();
+public interface InstitucionRepository extends JpaRepository<Institucion, Long>{
+    List<Institucion> findAll();
 
     boolean existsByNombreIgnoreCase(String nombre);
 

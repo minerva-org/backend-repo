@@ -2,20 +2,27 @@ package com.minerva.api.service;
 
 import java.util.List;
 import com.minerva.api.dto.PersonaDTO;
+import com.minerva.api.dto.PersonaResponseDTO;
 import com.minerva.api.User.Roles;
 
 public interface PersonaService {
-    List<PersonaDTO> findAll();
+    List<PersonaResponseDTO> findAll();
 
-    List<PersonaDTO> findAllByPlantelId(Long plantelId);
+    List<PersonaResponseDTO> findAllByPlantelId(Long plantelId);
 
-    List<PersonaDTO> findAllByRol(Roles rol);
+    List<PersonaResponseDTO> findAllByPlantelIdAndRolAndStatus(long plantelid, Roles rol, Boolean activo);
 
-    PersonaDTO getPersonaById(String personaId);
+    List<PersonaResponseDTO> findAllDocentesByPlantelId(Long plantelId);
 
-    PersonaDTO savePersona(PersonaDTO dto);
+    List<PersonaResponseDTO> findAllByPlantelIdAndRol(Long plantelId, Roles rol);
 
-    PersonaDTO updatePersona(String personaId, PersonaDTO dto);
+    List<PersonaResponseDTO> findAllByRol(Roles rol);
+
+    PersonaResponseDTO getPersonaById(String personaId);
+
+    PersonaResponseDTO savePersona(PersonaDTO dto);
+
+    PersonaResponseDTO updatePersona(String personaId, PersonaDTO dto);
     
     void deletePersona(String personaId);
 }

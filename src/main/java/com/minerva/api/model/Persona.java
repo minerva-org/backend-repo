@@ -33,6 +33,9 @@ public class Persona {
     @Column(nullable = false)
     private Roles rol;
 
+    @Column(nullable = false)
+    private Boolean activo = true;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_plantel", nullable = false)
     private Plantel plantel;

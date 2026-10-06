@@ -5,11 +5,14 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.minerva.api.dto.TemaDTO;
 import com.minerva.api.dto.UnidadDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Materia;
 import com.minerva.api.model.Unidad;
+import com.minerva.api.repository.ConceptoRepository;
 import com.minerva.api.repository.MateriaRepository;
+import com.minerva.api.repository.TemaRepository;
 import com.minerva.api.repository.UnidadRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -21,6 +24,23 @@ public class UnidadServiceImpl implements UnidadService{
 
     private final UnidadRepository unidadRepository;
     private final MateriaRepository materiaRepository;
+    private final TemaRepository temaRepository;
+    private final ConceptoRepository conceptoRepository;
+
+    private UnidadDTO toUnidadDetailDto(Unidad unidad) {
+        UnidadDTO dto = Mapper.toDTO(unidad);
+        if (dto == null) return null;
+        dto.setTemas(temaRepository.findByUnidadId(unidad.getId()).stream()
+            .map(tema -> {
+                TemaDTO temaDto = Mapper.toDTO(tema);
+                temaDto.setConceptos(conceptoRepository.findByTemaId(tema.getId()).stream()
+                    .map(Mapper::toDTO)
+                    .toList());
+                return temaDto;
+            })
+            .toList());
+        return dto;
+    }
 
     @Override
     @Transactional
@@ -54,7 +74,7 @@ public class UnidadServiceImpl implements UnidadService{
         unidad.setNombre(nombre);
         unidad.setMateria(materia);
 
-        return Mapper.toDTO(unidadRepository.save(unidad));
+        return toUnidadDetailDto(unidadRepository.save(unidad));
     }
 
     @Override
@@ -86,7 +106,7 @@ public class UnidadServiceImpl implements UnidadService{
         unidad.setNombre(nombreDestino);
         unidad.setMateria(materiaDestino);
 
-        return Mapper.toDTO(unidadRepository.save(unidad));
+        return toUnidadDetailDto(unidadRepository.save(unidad));
     }
 
     @Override
@@ -101,7 +121,7 @@ public class UnidadServiceImpl implements UnidadService{
     public List<UnidadDTO> findAll() {
         return unidadRepository.findAll()
             .stream()
-            .map(Mapper::toDTO)
+            .map(this::toUnidadDetailDto)
             .toList();
     }
 
@@ -110,7 +130,7 @@ public class UnidadServiceImpl implements UnidadService{
         Unidad unidad = unidadRepository.findById(unidadId)
             .orElseThrow(() -> new EntityNotFoundException("Unidad no encontrada con el id: " + unidadId));
 
-        return Mapper.toDTO(unidad);
+        return toUnidadDetailDto(unidad);
     }
 
     @Override
@@ -125,7 +145,7 @@ public class UnidadServiceImpl implements UnidadService{
             }
             unidades = unidadRepository.findByMateriaId(materiaId);
         }
-        return unidades.stream().map(Mapper::toDTO).toList();
+        return unidades.stream().map(this::toUnidadDetailDto).toList();
     }
     
 }

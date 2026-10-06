@@ -6,5 +6,6 @@ public enum Roles {
     COORDINADOR,
     DOCENTE,
     DIRECTOR_GENERAL,
+    DIRECTOR_PLANTEL,
     DEV
 }

@@ -5,10 +5,12 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.minerva.api.dto.ConceptoDTO;
 import com.minerva.api.dto.TemaDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Tema;
 import com.minerva.api.model.Unidad;
+import com.minerva.api.repository.ConceptoRepository;
 import com.minerva.api.repository.TemaRepository;
 import com.minerva.api.repository.UnidadRepository;
 
@@ -21,6 +23,16 @@ public class TemaServiceImpl implements TemaService {
 
     private final UnidadRepository unidadRepository;
     private final TemaRepository temaRepository;
+    private final ConceptoRepository conceptoRepository;
+
+    private TemaDTO toTemaDetailDto(Tema tema) {
+        TemaDTO dto = Mapper.toDTO(tema);
+        if (dto == null) return null;
+        dto.setConceptos(conceptoRepository.findByTemaId(tema.getId()).stream()
+            .map(Mapper::toDTO)
+            .toList());
+        return dto;
+    }
 
     @Override
     @Transactional
@@ -54,7 +66,7 @@ public class TemaServiceImpl implements TemaService {
         tema.setNombre(nombre);
         tema.setUnidad(unidad);
 
-        return Mapper.toDTO(temaRepository.save(tema));
+        return toTemaDetailDto(temaRepository.save(tema));
     }
 
     @Override
@@ -86,7 +98,7 @@ public class TemaServiceImpl implements TemaService {
         tema.setNombre(nombreDestino);
         tema.setUnidad(unidadDestino);
 
-        return Mapper.toDTO(temaRepository.save(tema));
+        return toTemaDetailDto(temaRepository.save(tema));
     }
 
     @Override
@@ -103,7 +115,7 @@ public class TemaServiceImpl implements TemaService {
     public List<TemaDTO> findAll() {
         return temaRepository.findAll()
             .stream()
-            .map(Mapper::toDTO)
+            .map(this::toTemaDetailDto)
             .toList();
     }
 
@@ -113,7 +125,7 @@ public class TemaServiceImpl implements TemaService {
         Tema tema = temaRepository.findById(temaId)
             .orElseThrow(() -> new EntityNotFoundException("Tema no encontrado con el id: " + temaId));
 
-        return Mapper.toDTO(tema);
+        return toTemaDetailDto(tema);
     }
 
     @Override
@@ -128,6 +140,6 @@ public class TemaServiceImpl implements TemaService {
             }
             temas = temaRepository.findByUnidadId(unidadId);
         }
-        return temas.stream().map(Mapper::toDTO).toList();
+        return temas.stream().map(this::toTemaDetailDto).toList();
     }
 }

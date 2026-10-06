@@ -55,3 +55,4 @@ Desktop.ini
 postgres_data/
 minerva_data/
 *.pid
+**/*.class

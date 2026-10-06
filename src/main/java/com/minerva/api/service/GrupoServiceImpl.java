@@ -1,16 +1,20 @@
 package com.minerva.api.service;
 
 import java.util.List;
+import java.util.Comparator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.minerva.api.dto.AlumnoGrupoDTO;
 import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Persona;
+import com.minerva.api.model.Plantel;
 import com.minerva.api.User.Roles;
 import com.minerva.api.repository.GrupoRepository;
 import com.minerva.api.repository.PersonaRepository;
+import com.minerva.api.repository.PlantelRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,16 @@ public class GrupoServiceImpl implements GrupoService {
 
     private final GrupoRepository grupoRepository;
     private final PersonaRepository personaRepository;
+    private final PlantelRepository plantelRepository;
+
+    private boolean esDocenteValido(Persona persona) {
+        return persona.getRol() == Roles.DOCENTE || persona.getRol() == Roles.COORDINADOR;
+    }
+
+    private Grupo buscarGrupoPorIdOClave(String identificador) {
+        return grupoRepository.findByIdOrClaveGrupo(identificador)
+                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + identificador));
+    }
 
     @Override
     @Transactional
@@ -56,17 +70,39 @@ public class GrupoServiceImpl implements GrupoService {
         }
         String docenteId = grupoDTO.getDocenteId().trim();
         Persona docente = personaRepository.findById(docenteId)
-            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + docenteId));
-        if (docente.getRol() != Roles.DOCENTE) {
-            throw new IllegalArgumentException("La persona indicada no tiene rol de docente");
+                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + docenteId));
+        if (!esDocenteValido(docente)) {
+            throw new IllegalArgumentException("La persona indicada no tiene un rol de docente o coordinador");
         }
+
+        if (grupoDTO.getPlantelId() == null) {
+            throw new IllegalArgumentException("El plantel es obligatorio");
+        }
+        Plantel plantel = plantelRepository.findById(grupoDTO.getPlantelId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Plantel no encontrado con el id: " + grupoDTO.getPlantelId()));
 
         Grupo grupo = new Grupo();
         grupo.setId(id);
         grupo.setClaveGrupo(claveGrupo);
         grupo.setNombre(nombre);
         grupo.setSemestre(semestre);
+        grupo.setActivo(grupoDTO.getActivo() != null ? grupoDTO.getActivo() : true);
         grupo.setDocente(docente);
+        grupo.setPlantel(plantel);
+
+        if (grupoDTO.getAlumnosIds() != null) {
+            for (String alumnoId : grupoDTO.getAlumnosIds()) {
+                if (alumnoId == null || alumnoId.isBlank())
+                    continue;
+                Persona alumno = personaRepository.findById(alumnoId.trim())
+                        .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
+                if (alumno.getRol() != Roles.ALUMNO) {
+                    throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
+                }
+                grupo.addAlumno(alumno);
+            }
+        }
 
         return Mapper.toDTO(grupoRepository.save(grupo));
     }
@@ -75,7 +111,7 @@ public class GrupoServiceImpl implements GrupoService {
     @Transactional
     public GrupoDTO updateGrupo(String grupoId, GrupoDTO grupoDTO) {
         Grupo grupo = grupoRepository.findById(grupoId)
-            .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
+                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
 
         if (grupoDTO.getClaveGrupo() != null) {
             String claveGrupo = grupoDTO.getClaveGrupo().trim();
@@ -104,14 +140,38 @@ public class GrupoServiceImpl implements GrupoService {
             grupo.setSemestre(semestre);
         }
 
+        if (grupoDTO.getActivo() != null) {
+            grupo.setActivo(grupoDTO.getActivo());
+        }
+
         if (grupoDTO.getDocenteId() != null) {
             String docenteId = grupoDTO.getDocenteId().trim();
             Persona docente = personaRepository.findById(docenteId)
-                .orElseThrow(() -> new EntityNotFoundException("No existe una persona con el id: " + docenteId));
-            if (docente.getRol() != Roles.DOCENTE) {
-                throw new IllegalArgumentException("La persona indicada no tiene rol de docente");
+                    .orElseThrow(() -> new EntityNotFoundException("No existe una persona con el id: " + docenteId));
+            if (!esDocenteValido(docente)) {
+                throw new IllegalArgumentException("La persona indicada no tiene un rol de docente o coordinador");
             }
             grupo.setDocente(docente);
+        }
+
+        if (grupoDTO.getPlantelId() != null) {
+            Plantel plantel = plantelRepository.findById(grupoDTO.getPlantelId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Plantel no encontrado con el id: " + grupoDTO.getPlantelId()));
+            grupo.setPlantel(plantel);
+        }
+
+        if (grupoDTO.getAlumnosIds() != null) {
+            for (String alumnoId : grupoDTO.getAlumnosIds()) {
+                if (alumnoId == null || alumnoId.isBlank())
+                    continue;
+                Persona alumno = personaRepository.findById(alumnoId.trim())
+                        .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
+                if (alumno.getRol() != Roles.ALUMNO) {
+                    throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
+                }
+                grupo.addAlumno(alumno);
+            }
         }
 
         return Mapper.toDTO(grupoRepository.save(grupo));
@@ -121,7 +181,7 @@ public class GrupoServiceImpl implements GrupoService {
     @Transactional
     public void deleteGrupo(String grupoId) {
         Grupo grupo = grupoRepository.findById(grupoId)
-            .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
+                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
 
         grupoRepository.delete(grupo);
     }
@@ -130,18 +190,15 @@ public class GrupoServiceImpl implements GrupoService {
     @Transactional(readOnly = true)
     public List<GrupoDTO> findAll() {
         return grupoRepository.findAll()
-            .stream()
-            .map(Mapper::toDTO)
-            .toList();
+                .stream()
+                .map(Mapper::toDTO)
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public GrupoDTO getGrupoById(String grupoId) {
-        Grupo grupo = grupoRepository.findById(grupoId)
-            .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
-
-        return Mapper.toDTO(grupo);
+        return Mapper.toDTO(buscarGrupoPorIdOClave(grupoId));
     }
 
     @Override
@@ -151,6 +208,34 @@ public class GrupoServiceImpl implements GrupoService {
             throw new EntityNotFoundException("Persona no encontrada con el id: " + docenteId);
         }
         return grupoRepository.findByDocenteId(docenteId)
+                .stream()
+                .map(Mapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GrupoDTO> findAllByPlantelId(Long plantelId) {
+        if (plantelId == null) {
+            return findAll();
+        }
+        return grupoRepository.findByPlantelId(plantelId)
+                .stream()
+                .map(Mapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GrupoDTO> findAllByAlumnoId(String alumnoId) {
+        Persona alumno = personaRepository.findById(alumnoId)
+            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
+
+        if (alumno.getRol() != Roles.ALUMNO) {
+            throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
+        }
+
+        return grupoRepository.findByAlumnos_Id(alumnoId)
             .stream()
             .map(Mapper::toDTO)
             .toList();
@@ -159,21 +244,32 @@ public class GrupoServiceImpl implements GrupoService {
     @Override
     @Transactional(readOnly = true)
     public List<String> getAlumnosIdsDeGrupo(String grupoId) {
-        Grupo grupo = grupoRepository.findById(grupoId)
-            .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
+        Grupo grupo = buscarGrupoPorIdOClave(grupoId);
 
         return grupo.getAlumnos().stream()
-            .map(Persona::getId)
+            .map(alumno -> alumno.getId())
             .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AlumnoGrupoDTO> getAlumnosDetalleDeGrupo(String grupoId) {
+        Grupo grupo = buscarGrupoPorIdOClave(grupoId);
+
+        return grupo.getAlumnos().stream()
+            .sorted(Comparator.comparing((Persona alumno) -> alumno.getApellido())
+                .thenComparing(alumno -> alumno.getNombre()))
+                .map(alumno -> new AlumnoGrupoDTO(alumno.getId(), alumno.getNombre(), alumno.getApellido()))
+                .toList();
     }
 
     @Override
     @Transactional
     public void agregarAlumno(String grupoId, String alumnoId) {
         Grupo grupo = grupoRepository.findById(grupoId)
-            .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
+                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
         Persona alumno = personaRepository.findById(alumnoId)
-            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
+                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
 
         if (alumno.getRol() != Roles.ALUMNO) {
             throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
@@ -189,9 +285,9 @@ public class GrupoServiceImpl implements GrupoService {
     @Transactional
     public void quitarAlumno(String grupoId, String alumnoId) {
         Grupo grupo = grupoRepository.findById(grupoId)
-            .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
+                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
         Persona alumno = personaRepository.findById(alumnoId)
-            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
+                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
 
         if (!grupo.getAlumnos().contains(alumno)) {
             throw new IllegalArgumentException("El alumno no pertenece a este grupo");

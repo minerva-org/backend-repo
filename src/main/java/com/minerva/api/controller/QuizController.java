@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.minerva.api.User.User;
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.dto.QuizDTO;
 import com.minerva.api.service.QuizService;
@@ -37,6 +39,12 @@ public class QuizController {
     @GetMapping(params = "grupoId")
     public ResponseEntity<List<QuizDTO>> getQuizzesByGrupo(@RequestParam String grupoId) {
         return ResponseEntity.ok(quizService.findAllByGrupoId(grupoId));
+    }
+
+    @GetMapping("/mis-quizzes")
+    public ResponseEntity<List<QuizDTO>> getMisQuizzes(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(quizService.findAllByAlumnoId(user.getPersona().getId()));
     }
 
     @GetMapping("/{quizId}")

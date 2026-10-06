@@ -12,6 +12,6 @@ public class PlantelDTO {
     private Long id;
     private String nombre;
     private String direccion;
-    private Long universidadId;
+    private Long institucionId;
     private Boolean activo;
 }
