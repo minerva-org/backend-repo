@@ -1,90 +1,91 @@
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\ApiApplication.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\AuthController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\AuthResponse.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\ConceptoController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\GrupoController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\InstitucionController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\MateriaController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\OpcionController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\PersonaController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\PlantelController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\PreguntaController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\QuizController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\QuizXPreguntaController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\TemaController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\controller\UnidadController.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\AlumnoGrupoDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\ConceptoDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\GrupoDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\InstitucionDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\MateriaDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\OpcionDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\PersonaDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\PlantelDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\PreguntaDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\QuizDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\QuizXPreguntaDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\TemaDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\dto\UnidadDTO.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\jwt\JwtAuthenticationFilter.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\jwt\JwtService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\mapper\Mapper.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\Concepto.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\Grupo.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\Institucion.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\Materia.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\Opcion.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\Persona.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\PlanEstudio.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\Plantel.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\Pregunta.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\Quiz.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\QuizXPregunta.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\Tema.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\model\Unidad.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\ConceptoRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\GrupoRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\InstitucionRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\MateriaRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\OpcionRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\PersonaRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\PlanEstudioRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\PlantelRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\PreguntaRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\QuizRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\QuizXPreguntaRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\TemaRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\repository\UnidadRepository.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\request\LoginRequest.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\request\RegisterRequest.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\security\ApplicationConfig.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\security\SecurityConfig.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\AuthService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\ConceptoService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\ConceptoServiceImpl.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\GlobalExceptionHandler.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\GrupoService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\GrupoServiceImpl.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\InstitucionService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\InstitucionServiceImpl.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\MateriaService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\MateriaServiceImpl.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\OpcionService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\OpcionServiceImpl.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\PersonaService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\PersonaServiceImpl.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\PlantelService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\PlantelServiceImpl.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\PreguntaService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\PreguntaServiceImpl.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\QuizService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\QuizServiceImpl.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\QuizXPreguntaService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\QuizXPreguntaServiceImpl.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\TemaService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\TemaServiceImpl.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\UnidadService.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\service\UnidadServiceImpl.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\User\Roles.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\User\User.java
-C:\SEMESTRE AGOSTO-DICIEMBRE 2026\ING WEB\backend-repo\src\main\java\com\minerva\api\User\UserRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\ApiApplication.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\AuthController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\AuthResponse.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\ConceptoController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\GrupoController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\InstitucionController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\MateriaController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\OpcionController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\PersonaController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\PlantelController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\PreguntaController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\QuizController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\QuizXPreguntaController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\TemaController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\UnidadController.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\AlumnoGrupoDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\ConceptoDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\GrupoDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\InstitucionDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\MateriaDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\OpcionDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\PersonaDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\PersonaResponseDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\PlantelDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\PreguntaDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\QuizDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\QuizXPreguntaDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\TemaDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\UnidadDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\jwt\JwtAuthenticationFilter.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\jwt\JwtService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\mapper\Mapper.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Concepto.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Grupo.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Institucion.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Materia.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Opcion.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Persona.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\PlanEstudio.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Plantel.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Pregunta.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Quiz.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\QuizXPregunta.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Tema.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Unidad.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\ConceptoRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\GrupoRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\InstitucionRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\MateriaRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\OpcionRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\PersonaRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\PlanEstudioRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\PlantelRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\PreguntaRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\QuizRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\QuizXPreguntaRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\TemaRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\repository\UnidadRepository.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\request\LoginRequest.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\request\RegisterRequest.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\security\ApplicationConfig.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\security\SecurityConfig.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\AuthService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\ConceptoService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\ConceptoServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\GlobalExceptionHandler.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\GrupoService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\GrupoServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\InstitucionService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\InstitucionServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\MateriaService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\MateriaServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\OpcionService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\OpcionServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\PersonaService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\PersonaServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\PlantelService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\PlantelServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\PreguntaService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\PreguntaServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\QuizService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\QuizServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\QuizXPreguntaService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\QuizXPreguntaServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\TemaService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\TemaServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\UnidadService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\UnidadServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\User\Roles.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\User\User.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\User\UserRepository.java

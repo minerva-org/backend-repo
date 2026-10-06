@@ -17,4 +17,5 @@ public class MateriaDTO {
     private String prefijo;
     private String planEstudioId;
     private List<UnidadDTO> unidades;
+    private Boolean activo;
 }

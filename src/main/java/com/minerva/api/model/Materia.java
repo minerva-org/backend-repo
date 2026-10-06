@@ -29,4 +29,7 @@ public class Materia {
     @JoinColumn (name = "id_planEstudio", nullable = true)
     @ManyToOne (fetch = FetchType.LAZY)
     private PlanEstudio planEstudio;
+
+    @Column (name = "activo", nullable = false)
+    private Boolean activo = true;
 }
