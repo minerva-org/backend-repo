@@ -154,6 +154,7 @@ public class MateriaServiceImpl implements MateriaService{
         materia.setNombre(nombre);
         materia.setPrefijo(materiaDTO.getPrefijo());
         materia.setPlanEstudio(planEstudio);
+        materia.setActivo(materiaDTO.getActivo());
 
         Materia materiaGuardada = materiaRepository.save(materia);
         persistNestedHierarchy(materiaGuardada, materiaDTO.getUnidades());
