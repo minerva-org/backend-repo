@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.minerva.api.dto.MateriaDTO;
@@ -44,6 +45,12 @@ public class MateriaController {
     @PatchMapping("{materiaId}")
     public ResponseEntity<MateriaDTO> updateMateria(@PathVariable String materiaId, @RequestBody MateriaDTO materiaDTO){
         return ResponseEntity.ok(materiaService.updateMateria(materiaId, materiaDTO));
+    }
+
+    @PatchMapping("/{materiaId}/estado")
+    public ResponseEntity<Void> softDeletePlantel(@PathVariable String materiaId, @RequestParam Boolean estado) {
+        materiaService.updateEstado(materiaId, estado);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping ("/{materiaId}")

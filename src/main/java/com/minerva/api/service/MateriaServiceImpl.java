@@ -1,6 +1,4 @@
 package com.minerva.api.service;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -210,6 +208,17 @@ public class MateriaServiceImpl implements MateriaService{
     }
 
     @Override
+    public void updateEstado(String materialId, Boolean estado) {
+        Materia materia = materiaRepository.findById(materialId)
+            .orElseThrow(() -> new RuntimeException("Materia no encontrado con el Id: " + materialId));
+
+                materia.setActivo(estado);
+                unidadRepository.cambiarEstadoPorMateria(materialId, estado);
+                temaRepository.cambiarEstadoPorMateria(materialId, estado);
+                conceptoRepository.cambiarEstadoPorMateria(materialId, estado);
+    }
+
+    @Override
     public List<MateriaDTO> findAll() {
         return materiaRepository.findAll()
             .stream()
@@ -224,5 +233,6 @@ public class MateriaServiceImpl implements MateriaService{
 
         return toMateriaDetailDto(materia);
     }
+
     
 }

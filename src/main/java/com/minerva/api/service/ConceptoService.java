@@ -10,6 +10,8 @@ public interface ConceptoService {
     ConceptoDTO updateConcepto(String conceptoId, ConceptoDTO conceptoDTO);
 
     void deleteConcepto(String conceptoId);
+
+    void softDeleteConcepto(String conceptoId);
     
     List<ConceptoDTO> findAll();
 

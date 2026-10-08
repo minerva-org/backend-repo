@@ -10,6 +10,8 @@ public interface TemaService {
     TemaDTO updateTema(String temaId, TemaDTO temaDTO);
 
     void deleteTema(String temaId);
+
+    void softDeleteTema(String temaId);
     
     List<TemaDTO> findAll();
 

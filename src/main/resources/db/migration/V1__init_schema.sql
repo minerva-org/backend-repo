@@ -44,6 +44,7 @@ CREATE TABLE materia (
     detalles VARCHAR(255) NOT NULL,
     prefijo VARCHAR(255) NOT NULL,
     id_plan_estudio VARCHAR(255) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_materia_plan_estudio
         FOREIGN KEY (id_plan_estudio) REFERENCES plan_estudio (detalles)
 );
@@ -52,6 +53,7 @@ CREATE TABLE unidad (
     id VARCHAR(255) PRIMARY KEY,
     detalles VARCHAR(255) NOT NULL,
     id_materia VARCHAR(255) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_unidad_materia
         FOREIGN KEY (id_materia) REFERENCES materia (id)
 );
@@ -60,6 +62,7 @@ CREATE TABLE tema (
     id VARCHAR(255) PRIMARY KEY,
     detalles VARCHAR(255) NOT NULL,
     id_unidad VARCHAR(255) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_tema_unidad
         FOREIGN KEY (id_unidad) REFERENCES unidad (id)
 );
@@ -68,6 +71,7 @@ CREATE TABLE concepto (
     id VARCHAR(255) PRIMARY KEY,
     detalles VARCHAR(255) NOT NULL,
     id_tema VARCHAR(255) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_concepto_tema
         FOREIGN KEY (id_tema) REFERENCES tema (id)
 );

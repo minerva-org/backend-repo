@@ -111,6 +111,15 @@ public class TemaServiceImpl implements TemaService {
     }
 
     @Override
+    public void softDeleteTema(String temaId) {
+        Tema tema = temaRepository.findById(temaId)
+            .orElseThrow(()-> new EntityNotFoundException("Tema no encontrado con el id: " + temaId));
+
+        tema.setActivo(false);
+        temaRepository.save(tema);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<TemaDTO> findAll() {
         return temaRepository.findAll()
