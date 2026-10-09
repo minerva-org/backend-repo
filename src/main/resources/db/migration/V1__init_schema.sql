@@ -80,6 +80,7 @@ CREATE TABLE pregunta (
     id VARCHAR(255) PRIMARY KEY,
     descripcion VARCHAR(255) NOT NULL,
     id_concepto VARCHAR(255) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_pregunta_concepto
         FOREIGN KEY (id_concepto) REFERENCES concepto (id)
 );
@@ -133,4 +134,11 @@ CREATE TABLE quiz_x_pregunta (
         FOREIGN KEY (id_quiz) REFERENCES quiz (id),
     CONSTRAINT fk_quiz_x_pregunta_pregunta
         FOREIGN KEY (id_pregunta) REFERENCES pregunta (id)
+);
+
+CREATE TABLE configuraciones (
+    id VARCHAR(255) PRIMARY KEY,
+    valor VARCHAR(255) NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
+    fecha_actualizacion TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

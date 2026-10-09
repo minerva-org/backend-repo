@@ -20,7 +20,7 @@ import com.minerva.api.repository.TemaRepository;
 import com.minerva.api.repository.UnidadRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service 
@@ -194,6 +194,10 @@ public class MateriaServiceImpl implements MateriaService{
             materia.setPlanEstudio(null);
         }
 
+        if(materiaDTO.getActivo() != null){
+            materia.setActivo(materiaDTO.getActivo());
+        }
+
         Materia materiaActualizada = materiaRepository.save(materia);
         persistNestedHierarchy(materiaActualizada, materiaDTO.getUnidades());
         return toMateriaDetailDto(materiaActualizada);
@@ -208,6 +212,7 @@ public class MateriaServiceImpl implements MateriaService{
     }
 
     @Override
+    @Transactional 
     public void updateEstado(String materialId, Boolean estado) {
         Materia materia = materiaRepository.findById(materialId)
             .orElseThrow(() -> new RuntimeException("Materia no encontrado con el Id: " + materialId));
@@ -216,6 +221,7 @@ public class MateriaServiceImpl implements MateriaService{
                 unidadRepository.cambiarEstadoPorMateria(materialId, estado);
                 temaRepository.cambiarEstadoPorMateria(materialId, estado);
                 conceptoRepository.cambiarEstadoPorMateria(materialId, estado);
+                materiaRepository.save(materia);
     }
 
     @Override

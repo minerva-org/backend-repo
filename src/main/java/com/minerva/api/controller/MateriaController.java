@@ -42,13 +42,13 @@ public class MateriaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(materiaCreada);
     }
 
-    @PatchMapping("{materiaId}")
+    @PatchMapping("/{materiaId}")
     public ResponseEntity<MateriaDTO> updateMateria(@PathVariable String materiaId, @RequestBody MateriaDTO materiaDTO){
         return ResponseEntity.ok(materiaService.updateMateria(materiaId, materiaDTO));
     }
 
     @PatchMapping("/{materiaId}/estado")
-    public ResponseEntity<Void> softDeletePlantel(@PathVariable String materiaId, @RequestParam Boolean estado) {
+    public ResponseEntity<Void> updateEstadoMateria(@PathVariable String materiaId, @RequestParam Boolean estado) {
         materiaService.updateEstado(materiaId, estado);
         return ResponseEntity.noContent().build();
     }
