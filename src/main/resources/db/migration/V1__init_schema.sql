@@ -44,6 +44,7 @@ CREATE TABLE materia (
     detalles VARCHAR(255) NOT NULL,
     prefijo VARCHAR(255) NOT NULL,
     id_plan_estudio VARCHAR(255) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_materia_plan_estudio
         FOREIGN KEY (id_plan_estudio) REFERENCES plan_estudio (detalles)
 );
@@ -52,6 +53,7 @@ CREATE TABLE unidad (
     id VARCHAR(255) PRIMARY KEY,
     detalles VARCHAR(255) NOT NULL,
     id_materia VARCHAR(255) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_unidad_materia
         FOREIGN KEY (id_materia) REFERENCES materia (id)
 );
@@ -60,6 +62,7 @@ CREATE TABLE tema (
     id VARCHAR(255) PRIMARY KEY,
     detalles VARCHAR(255) NOT NULL,
     id_unidad VARCHAR(255) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_tema_unidad
         FOREIGN KEY (id_unidad) REFERENCES unidad (id)
 );
@@ -68,6 +71,7 @@ CREATE TABLE concepto (
     id VARCHAR(255) PRIMARY KEY,
     detalles VARCHAR(255) NOT NULL,
     id_tema VARCHAR(255) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_concepto_tema
         FOREIGN KEY (id_tema) REFERENCES tema (id)
 );
@@ -76,6 +80,7 @@ CREATE TABLE pregunta (
     id VARCHAR(255) PRIMARY KEY,
     descripcion VARCHAR(255) NOT NULL,
     id_concepto VARCHAR(255) NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_pregunta_concepto
         FOREIGN KEY (id_concepto) REFERENCES concepto (id)
 );
@@ -129,4 +134,11 @@ CREATE TABLE quiz_x_pregunta (
         FOREIGN KEY (id_quiz) REFERENCES quiz (id),
     CONSTRAINT fk_quiz_x_pregunta_pregunta
         FOREIGN KEY (id_pregunta) REFERENCES pregunta (id)
+);
+
+CREATE TABLE configuraciones (
+    id VARCHAR(255) PRIMARY KEY,
+    valor VARCHAR(255) NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
+    fecha_actualizacion TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

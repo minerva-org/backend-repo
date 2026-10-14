@@ -1,4 +1,5 @@
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\ApiApplication.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\config\CorsConfig.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\AuthController.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\AuthResponse.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\ConceptoController.java
@@ -15,6 +16,7 @@ C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\UnidadController.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\AlumnoGrupoDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\ConceptoDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\ConfiguracionDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\GrupoDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\InstitucionDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\MateriaDTO.java
@@ -31,6 +33,7 @@ C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\jwt\JwtService.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\mapper\Mapper.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Concepto.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Configuracion.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Grupo.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Institucion.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Materia.java
@@ -63,6 +66,8 @@ C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\AuthService.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\ConceptoService.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\ConceptoServiceImpl.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\ConfiguracionService.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\ConfiguracionServiceImpl.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\GlobalExceptionHandler.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\GrupoService.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\GrupoServiceImpl.java

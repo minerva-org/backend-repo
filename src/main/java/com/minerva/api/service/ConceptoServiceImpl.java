@@ -98,6 +98,16 @@ public class ConceptoServiceImpl implements ConceptoService {
     }
 
     @Override
+    public void softDeleteConcepto(String conceptoId) {
+        Concepto concepto = conceptoRepository.findById(conceptoId)
+            .orElseThrow(() -> new EntityNotFoundException("Concepto no encontrado con el id: " + conceptoId));
+        
+        concepto.setActivo(false);
+        conceptoRepository.save(concepto);
+
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<ConceptoDTO> findAll() {
         return conceptoRepository.findAll()
@@ -128,6 +138,5 @@ public class ConceptoServiceImpl implements ConceptoService {
             Conceptos = conceptoRepository.findByTemaId(temaId);
         }
         return Conceptos.stream().map(Mapper::toDTO).toList();
-    }
-    
+    }    
 }

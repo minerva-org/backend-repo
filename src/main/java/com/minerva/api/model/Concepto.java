@@ -26,4 +26,7 @@ public class Concepto {
     @ManyToOne (fetch = FetchType.LAZY)
     private Tema tema;
 
+    @Column (name = "activo")
+    private Boolean activo = true;
+
 }

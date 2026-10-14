@@ -26,4 +26,7 @@ public class Pregunta {
     @ManyToOne (fetch = FetchType.LAZY, optional = false)
     @JoinColumn (name = "id_concepto", nullable = false)
     private Concepto concepto;
+
+    @Column (name = "activo")
+    private Boolean activo = true;
 }

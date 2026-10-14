@@ -49,10 +49,11 @@ public class Mapper {
             .build();
     }
 
-    public static PersonaResponseDTO toDTO(Persona persona) {
+    public static PersonaDTO toDTO(Persona persona) {
         if (persona == null) return null;
 
-        return PersonaResponseDTO.builder()
+        return PersonaDTO.builder()
+            .id(persona.getId())
             .nombre(persona.getNombre())
             .apellido(persona.getApellido())
             .email(persona.getEmail())

@@ -114,8 +114,18 @@ public class UnidadServiceImpl implements UnidadService{
         Unidad unidad = unidadRepository.findById(unidadId)
             .orElseThrow(() -> new EntityNotFoundException("Unidad no encontrada con el id: " + unidadId));
         
-        unidadRepository.delete(unidad);
-    }
+            unidadRepository.delete(unidad);
+        }
+
+    @Override
+    public void softDeleteUnidad(String unidadId) {
+        Unidad unidad = unidadRepository.findById(unidadId)
+            .orElseThrow(()-> new EntityNotFoundException("No se encontro la unidad con el id: " + unidadId));
+
+        unidad.setActivo(false);
+        unidadRepository.save(unidad);
+            
+        }
 
     @Override
     public List<UnidadDTO> findAll() {
@@ -147,5 +157,6 @@ public class UnidadServiceImpl implements UnidadService{
         }
         return unidades.stream().map(this::toUnidadDetailDto).toList();
     }
+
     
 }

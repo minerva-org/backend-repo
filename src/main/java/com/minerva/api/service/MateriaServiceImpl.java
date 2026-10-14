@@ -1,6 +1,4 @@
 package com.minerva.api.service;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -22,7 +20,7 @@ import com.minerva.api.repository.TemaRepository;
 import com.minerva.api.repository.UnidadRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service 
@@ -196,6 +194,10 @@ public class MateriaServiceImpl implements MateriaService{
             materia.setPlanEstudio(null);
         }
 
+        if(materiaDTO.getActivo() != null){
+            materia.setActivo(materiaDTO.getActivo());
+        }
+
         Materia materiaActualizada = materiaRepository.save(materia);
         persistNestedHierarchy(materiaActualizada, materiaDTO.getUnidades());
         return toMateriaDetailDto(materiaActualizada);
@@ -207,6 +209,19 @@ public class MateriaServiceImpl implements MateriaService{
             .orElseThrow(() -> new RuntimeException("Materia no encontrado con el Id: " + materiaId));
 
         materiaRepository.delete(materia);
+    }
+
+    @Override
+    @Transactional 
+    public void updateEstado(String materialId, Boolean estado) {
+        Materia materia = materiaRepository.findById(materialId)
+            .orElseThrow(() -> new RuntimeException("Materia no encontrado con el Id: " + materialId));
+
+                materia.setActivo(estado);
+                unidadRepository.cambiarEstadoPorMateria(materialId, estado);
+                temaRepository.cambiarEstadoPorMateria(materialId, estado);
+                conceptoRepository.cambiarEstadoPorMateria(materialId, estado);
+                materiaRepository.save(materia);
     }
 
     @Override
@@ -224,5 +239,6 @@ public class MateriaServiceImpl implements MateriaService{
 
         return toMateriaDetailDto(materia);
     }
+
     
 }
