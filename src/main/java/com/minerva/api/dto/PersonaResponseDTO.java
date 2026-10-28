@@ -9,11 +9,12 @@ import lombok.*;
 @NoArgsConstructor
 
 public class PersonaResponseDTO {
+    private String id;
     private String nombre;
-    private String apellido;
+    private String apellidoPaterno;
+    private String apellidoMaterno;
     private String email;
     private Roles rol;
     private Boolean activo;
     private Long plantelId;
-    private String username;
 }

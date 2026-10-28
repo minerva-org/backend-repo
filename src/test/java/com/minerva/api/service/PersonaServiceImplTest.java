@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.minerva.api.User.Roles;
 import com.minerva.api.User.User;
 import com.minerva.api.User.UserRepository;
-import com.minerva.api.dto.PersonaDTO;
+import com.minerva.api.dto.PersonaRequestDTO;
 import com.minerva.api.model.Persona;
 import com.minerva.api.model.Plantel;
 import com.minerva.api.repository.PersonaRepository;

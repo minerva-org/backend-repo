@@ -32,10 +32,13 @@ C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\jwt\JwtAuthenticationFilter.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\jwt\JwtService.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\mapper\Mapper.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Alumno.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Concepto.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Configuracion.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Grupo.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Institucion.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Intento.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\IntentoDetalle.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Materia.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Opcion.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\model\Persona.java

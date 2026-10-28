@@ -1,10 +1,12 @@
 package com.minerva.api.mapper;
 
+import com.minerva.api.dto.AlumnoDTO;
 import com.minerva.api.dto.ConceptoDTO;
+import com.minerva.api.dto.DocenteDTO;
 import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.dto.MateriaDTO;
 import com.minerva.api.dto.OpcionDTO;
-import com.minerva.api.dto.PersonaDTO;
+import com.minerva.api.dto.PersonaRequestDTO;
 import com.minerva.api.dto.PersonaResponseDTO;
 import com.minerva.api.dto.PlantelDTO;
 import com.minerva.api.dto.PreguntaDTO;
@@ -13,7 +15,9 @@ import com.minerva.api.dto.QuizXPreguntaDTO;
 import com.minerva.api.dto.TemaDTO;
 import com.minerva.api.dto.UnidadDTO;
 import com.minerva.api.dto.InstitucionDTO;
+import com.minerva.api.model.Alumno;
 import com.minerva.api.model.Concepto;
+import com.minerva.api.model.Docente;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Materia;
 import com.minerva.api.model.Opcion;
@@ -49,32 +53,58 @@ public class Mapper {
             .build();
     }
 
-    public static PersonaDTO toDTO(Persona persona) {
-        if (persona == null) return null;
-
-        return PersonaDTO.builder()
-            .id(persona.getId())
-            .nombre(persona.getNombre())
-            .apellido(persona.getApellido())
-            .email(persona.getEmail())
-            .rol(persona.getRol())
-            .activo(persona.getActivo())
-            .plantelId(persona.getPlantel() != null ? persona.getPlantel().getId() : null)
-            .build();
+    public static PersonaRequestDTO toDTO(Persona persona) {
+    PersonaRequestDTO dto = new PersonaRequestDTO();
+    copiarComunes(persona, dto);
+    return dto;
     }
 
-        public static PersonaDTO toDTO(Persona persona, String password) {
-        if (persona == null) return null;
+    public static PersonaResponseDTO toResponse(Persona p) {
+        PersonaResponseDTO dto = new PersonaResponseDTO();
+        dto.setId(p.getId());
+        dto.setNombre(p.getNombre());
+        dto.setApellidoPaterno(p.getApellidoPaterno() != null ? p.getApellidoPaterno() : p.getApellidoMaterno());
+        dto.setApellidoMaterno(p.getApellidoMaterno());
+        dto.setEmail(p.getEmail());
+        dto.setRol(p.getRol());
+        dto.setActivo(p.getActivo());
+        dto.setPlantelId(p.getPlantel().getId());   // Long
+        return dto;
+    }
 
-        return PersonaDTO.builder()
-            .id(persona.getId())
-            .nombre(persona.getNombre())
-            .apellido(persona.getApellido())
-            .email(persona.getEmail())
-            .rol(persona.getRol())
-            .activo(persona.getActivo())
-            .plantelId(persona.getPlantel() != null ? persona.getPlantel().getId() : null)
-            .build();
+    public static AlumnoDTO toDTO(Alumno alumno) {
+        AlumnoDTO dto = new AlumnoDTO();
+        copiarComunes(alumno, dto);
+        dto.setNombreTutor(alumno.getNombreTutor());
+        dto.setNumeroTutor(alumno.getNumeroTutor());
+        dto.setFechaIngreso(alumno.getFechaIngreso());
+        dto.setPromedio(alumno.getPromedio()); 
+        return dto;
+    }
+
+    public static DocenteDTO toDTO(Docente docente) {
+        DocenteDTO dto = new DocenteDTO();
+        copiarComunes(docente, dto);
+        dto.setCarrera(docente.getCarrera());
+        dto.setTituloEdu(docente.getTituloEdu());
+        return dto;
+    }
+
+    private static void copiarComunes(Persona p, PersonaRequestDTO dto) {
+        dto.setId(p.getId());
+        dto.setNombre(p.getNombre());
+        dto.setApellidoPaterno(p.getApellidoPaterno());
+        dto.setApellidoMaterno(p.getApellidoMaterno());
+        dto.setEmail(p.getEmail());
+        dto.setRol(p.getRol());
+        dto.setActivo(p.getActivo());
+        dto.setPlantelId(p.getPlantel().getId());
+        dto.setCalle(p.getCalle());
+        dto.setColonia(p.getColonia());
+        dto.setMunicipio(p.getMunicipio());
+        dto.setEstado(p.getEstado());
+        dto.setCodigoPostal(p.getCodigoPostal());
+        dto.setNumeroTelefono(p.getNumeroTelefono());
     }
 
     

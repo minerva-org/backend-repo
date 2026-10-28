@@ -11,8 +11,9 @@ import com.minerva.api.User.Roles;
 @Setter 
 @ToString(exclude = "plantel")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Inheritance(strategy = InheritanceType.JOINED)
 @Entity
-@Table(name = "persona")
+@Table(name = "personas")
 public class Persona {
 
     @Id
@@ -23,8 +24,11 @@ public class Persona {
     @Column(nullable = false)
     private String nombre;
 
-    @Column(nullable = false)
-    private String apellido;
+    @Column(name = "apellido_paterno")
+    private String apellidoPaterno;
+
+    @Column(name = "apellido_materno", nullable = false)
+    private String apellidoMaterno;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -32,11 +36,32 @@ public class Persona {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Roles rol;
+    
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_plantel", nullable = false)
+    private Plantel plantel;
 
     @Column(nullable = false)
     private Boolean activo = true;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_plantel", nullable = false)
-    private Plantel plantel;
+    @Column (name = "calle", length = 50)
+    private String calle;
+
+    @Column (name = "colonia", length = 50)
+    private String colonia;
+
+    @Column (name = "municipio", length = 50)
+    private String municipio;
+
+    @Column (name = "estado", length = 50)
+    private String estado;
+
+    @Column (name = "codigo_postal", length = 50)
+    private String codigoPostal;
+
+    @Column (name = "numero_telefono", length = 10)
+    private String numeroTelefono;
+
+    @Column (name = "password")
+    private String password;
 }
