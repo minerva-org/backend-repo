@@ -1,5 +1,6 @@
 package com.minerva.api.controller;
 
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ public class QuizController {
 
     private final QuizService quizService;
     private final QuizXPreguntaService quizXPreguntaService;
+    // private final IntentoService intentoService;
 
     @GetMapping
     public ResponseEntity<List<QuizDTO>> getAllQuizzes() {
@@ -53,7 +55,7 @@ public class QuizController {
     }
 
     @GetMapping("/{quizId}/preguntas")
-        public ResponseEntity<List<PreguntaDTO>> getPreguntasDelQuiz(@PathVariable String quizId) {
+    public ResponseEntity<List<PreguntaDTO>> getPreguntasDelQuiz(@PathVariable String quizId) {
         return ResponseEntity.ok(quizXPreguntaService.findPreguntasByQuizId(quizId));
     }
 

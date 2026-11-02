@@ -1,10 +1,12 @@
 package com.minerva.api.mapper;
 
+import com.minerva.api.dto.AlumnoDTO;
 import com.minerva.api.dto.ConceptoDTO;
+import com.minerva.api.dto.DocenteDTO;
 import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.dto.MateriaDTO;
 import com.minerva.api.dto.OpcionDTO;
-import com.minerva.api.dto.PersonaDTO;
+import com.minerva.api.dto.PersonaDatosCompletosResponseDTO;
 import com.minerva.api.dto.PersonaResponseDTO;
 import com.minerva.api.dto.PlantelDTO;
 import com.minerva.api.dto.PreguntaDTO;
@@ -13,7 +15,9 @@ import com.minerva.api.dto.QuizXPreguntaDTO;
 import com.minerva.api.dto.TemaDTO;
 import com.minerva.api.dto.UnidadDTO;
 import com.minerva.api.dto.InstitucionDTO;
+import com.minerva.api.model.Alumno;
 import com.minerva.api.model.Concepto;
+import com.minerva.api.model.Docente;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Materia;
 import com.minerva.api.model.Opcion;
@@ -49,13 +53,13 @@ public class Mapper {
             .build();
     }
 
-    public static PersonaDTO toDTO(Persona persona) {
+        public static PersonaResponseDTO toDTO(Persona persona) {
         if (persona == null) return null;
 
-        return PersonaDTO.builder()
+        return PersonaResponseDTO.builder()
             .id(persona.getId())
             .nombre(persona.getNombre())
-            .apellido(persona.getApellido())
+            .apellidoPaterno(persona.getApellidoPaterno())
             .email(persona.getEmail())
             .rol(persona.getRol())
             .activo(persona.getActivo())
@@ -63,18 +67,36 @@ public class Mapper {
             .build();
     }
 
-        public static PersonaDTO toDTO(Persona persona, String password) {
+        public static PersonaResponseDTO toDTO(Persona persona, String password) {
         if (persona == null) return null;
 
-        return PersonaDTO.builder()
+        return PersonaResponseDTO.builder()
             .id(persona.getId())
             .nombre(persona.getNombre())
-            .apellido(persona.getApellido())
+            .apellidoPaterno(persona.getApellidoPaterno())
             .email(persona.getEmail())
             .rol(persona.getRol())
             .activo(persona.getActivo())
             .plantelId(persona.getPlantel() != null ? persona.getPlantel().getId() : null)
             .build();
+    }
+
+    public static PersonaDatosCompletosResponseDTO todoPersonaDTO(Persona persona){
+        if(persona == null) return null;
+
+        return new PersonaDatosCompletosResponseDTO(
+            persona.getId(),
+            persona.getNombre(),
+            persona.getApellidoPaterno(),
+            persona.getApellidoMaterno(),
+            persona.getEmail(),
+            persona.getRol(),
+            persona.getColonia(),
+            persona.getMunicipio(),
+            persona.getEstado(),
+            persona.getCodigoPostal(),
+            persona.getNumeroTelefono()
+        );
     }
 
     

@@ -21,6 +21,8 @@ public interface GrupoRepository extends JpaRepository<Grupo, String> {
 
     List<Grupo> findByAlumnos_Id(String alumnoId);
 
+    boolean existsByIdAndAlumnos_Id(String grupoId, String alumnoId);
+
     @Query("SELECT g FROM Grupo g WHERE g.id = :identifier OR LOWER(g.claveGrupo) = LOWER(:identifier)")
     Optional<Grupo> findByIdOrClaveGrupo(@Param("identifier") String identifier);
 }

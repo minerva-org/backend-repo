@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.minerva.api.dto.ConceptoDTO;
 import com.minerva.api.dto.TemaDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Tema;

@@ -257,9 +257,9 @@ public class GrupoServiceImpl implements GrupoService {
         Grupo grupo = buscarGrupoPorIdOClave(grupoId);
 
         return grupo.getAlumnos().stream()
-            .sorted(Comparator.comparing((Persona alumno) -> alumno.getApellido())
+            .sorted(Comparator.comparing((Persona alumno) -> alumno.getApellidoPaterno())
                 .thenComparing(alumno -> alumno.getNombre()))
-                .map(alumno -> new AlumnoGrupoDTO(alumno.getId(), alumno.getNombre(), alumno.getApellido()))
+                .map(alumno -> new AlumnoGrupoDTO(alumno.getId(), alumno.getNombre(), alumno.getApellidoPaterno()))
                 .toList();
     }
 

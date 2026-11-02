@@ -1,4 +1,4 @@
-INSERT INTO persona (id, nombre, apellido, email, rol, id_plantel)
+INSERT INTO personas (id, nombre, apellido_materno, email, rol, id_plantel)
 VALUES ('DIRECTOR-GENERAL-DEFAULT', 'Director', 'General', 'director.general@minerva.local', 'DIRECTOR_GENERAL', 1)
 ON CONFLICT (id) DO NOTHING;
 

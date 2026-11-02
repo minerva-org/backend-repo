@@ -1,8 +1,8 @@
-ALTER TABLE plantel DROP CONSTRAINT IF EXISTS fk_plantel_universidad;
-ALTER TABLE plantel RENAME COLUMN id_universidad TO id_institucion;
+ALTER TABLE planteles DROP CONSTRAINT IF EXISTS fk_plantel_universidad;
+ALTER TABLE planteles RENAME COLUMN id_universidad TO id_institucion;
 ALTER TABLE universidad RENAME TO institucion;
 
-ALTER TABLE plantel
+ALTER TABLE planteles
     ADD CONSTRAINT fk_plantel_institucion
     FOREIGN KEY (id_institucion) REFERENCES institucion (id);
 
