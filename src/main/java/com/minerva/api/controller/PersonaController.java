@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.minerva.api.dto.PersonaDatosCompletosResponseDTO;
 import com.minerva.api.dto.PersonaRequestDTO;
 import com.minerva.api.dto.PersonaResponseDTO;
 import com.minerva.api.User.Roles;
@@ -21,6 +22,11 @@ public class PersonaController {
     @GetMapping
     public ResponseEntity<List<PersonaResponseDTO>> getAll() {
         return ResponseEntity.ok(personaService.findAll());
+    }
+
+    @GetMapping ("/detalles")
+    public ResponseEntity<List<PersonaDatosCompletosResponseDTO>> getAllDatos(){
+        return ResponseEntity.ok(personaService.findAllDatos());
     }
 
     @GetMapping(params = "plantelId")

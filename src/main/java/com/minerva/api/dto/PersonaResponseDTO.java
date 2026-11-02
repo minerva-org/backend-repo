@@ -13,8 +13,15 @@ public class PersonaResponseDTO {
     private String nombre;
     private String apellidoPaterno;
     private String apellidoMaterno;
+    private String calle;
+    private String colonia;
+    private String municipio;
+    private String estado;
+    private String codigoPostal;
+    private String numeroTelefono;
     private String email;
     private Roles rol;
     private Boolean activo;
     private Long plantelId;
+    private String username;
 }

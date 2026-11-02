@@ -8,8 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.minerva.api.User.User;
-import com.minerva.api.dto.AlumnoDTO;
-import com.minerva.api.dto.DocenteDTO;
+import com.minerva.api.dto.PersonaDatosCompletosResponseDTO;
 import com.minerva.api.dto.PersonaRequestDTO;
 import com.minerva.api.dto.PersonaResponseDTO;
 import com.minerva.api.mapper.Mapper;
@@ -18,8 +17,6 @@ import com.minerva.api.model.Docente;
 import com.minerva.api.model.Persona;
 import com.minerva.api.model.Plantel;
 import com.minerva.api.User.Roles;
-import com.minerva.api.repository.AlumnoRepository;
-import com.minerva.api.repository.DocenteRepository;
 import com.minerva.api.repository.PersonaRepository;
 import com.minerva.api.repository.PlantelRepository;
 import com.minerva.api.User.UserRepository;
@@ -32,17 +29,16 @@ import lombok.RequiredArgsConstructor;
 public class PersonaServiceImpl implements PersonaService {
 
     private static final Set<Roles> ROLES_CON_PASSWORD_PERSONAL = Set.of(
-            Roles.DOCENTE,
-            Roles.COORDINADOR,
-            Roles.DIRECTOR_PLANTEL,
-            Roles.ALUMNO);
+        Roles.DOCENTE,
+        Roles.COORDINADOR,
+        Roles.DIRECTOR_PLANTEL,
+        Roles.ALUMNO
+    );
 
     private final PersonaRepository personaRepository;
     private final PlantelRepository plantelRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final DocenteRepository docenteRepository;
-    private final AlumnoRepository alumnoRepository;
 
     @Value("${app.security.default-password:Cambiar123!}")
     private String defaultPassword;
@@ -50,12 +46,6 @@ public class PersonaServiceImpl implements PersonaService {
     @Override
     @Transactional
     public PersonaResponseDTO savePersona(PersonaRequestDTO dto) {
-        Persona persona = new Persona();
-        persona.setRol(dto.getRol()); // aquí sí viene del cliente
-        return Mapper.toResponse(guardarBase(persona, dto));
-    }
-
-    private Persona guardarBase(Persona persona, PersonaRequestDTO dto) {
         if (dto.getId() == null || dto.getId().isBlank())
             throw new IllegalArgumentException("El id es obligatorio");
         String id = dto.getId().trim();
@@ -64,8 +54,27 @@ public class PersonaServiceImpl implements PersonaService {
 
         if (dto.getNombre() == null || dto.getNombre().isBlank())
             throw new IllegalArgumentException("El nombre es obligatorio");
+
         if (dto.getApellidoMaterno() == null || dto.getApellidoMaterno().isBlank())
-            throw new IllegalArgumentException("El apellido Materno es obligatorio");
+            throw new IllegalArgumentException("El apellido materno es obligatorio");
+        
+        if (dto.getCalle() == null || dto.getCalle().isBlank())
+            throw new IllegalArgumentException("La calle donde reside es obligatorio");
+
+        if (dto.getColonia() == null || dto.getColonia().isBlank())
+            throw new IllegalArgumentException("La colonia donde reside es obligatorio");
+
+        if (dto.getMunicipio() == null || dto.getMunicipio().isBlank())
+            throw new IllegalArgumentException("El municipio donde reside es obligatorio");
+
+        if (dto.getEstado() == null || dto.getEstado().isBlank())
+            throw new IllegalArgumentException("El estado donde reside es obligatorio");
+
+        if (dto.getCodigoPostal() == null || dto.getCodigoPostal().isBlank())
+            throw new IllegalArgumentException("El codigo postal de donde reside es obligatorio");
+
+        if (dto.getNumeroTelefono() == null || dto.getNumeroTelefono().isBlank())
+            throw new IllegalArgumentException("El numero telefónico es obligatorio");
 
         if (dto.getEmail() == null || dto.getEmail().isBlank())
             throw new IllegalArgumentException("El email es obligatorio");
@@ -73,150 +82,115 @@ public class PersonaServiceImpl implements PersonaService {
         if (personaRepository.existsByEmailIgnoreCase(email))
             throw new IllegalArgumentException("Ya existe una persona con ese email: " + email);
 
-        // El rol ya lo asignó quien llamó (saveAlumno, saveDocente o savePersona)
-        if (persona.getRol() == null)
+        if (dto.getRol() == null)
             throw new IllegalArgumentException("El rol es obligatorio");
 
         if (dto.getPlantelId() == null)
             throw new IllegalArgumentException("El plantel es obligatorio");
         Plantel plantel = plantelRepository.findById(dto.getPlantelId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Plantel no encontrado con el id: " + dto.getPlantelId()));
+            .orElseThrow(() -> new EntityNotFoundException("Plantel no encontrado con el id: " + dto.getPlantelId()));
 
-        boolean passwordPersonal = ROLES_CON_PASSWORD_PERSONAL.contains(persona.getRol());
-        String rawPassword = passwordPersonal ? dto.getPassword() : defaultPassword;
-        if (passwordPersonal && (rawPassword == null || rawPassword.isBlank()))
-            throw new IllegalArgumentException("La contraseña es obligatoria para este rol");
+        // String requestedUsername = dto.getUsername() == null ? "" : dto.getUsername().trim();
+        // String username = requestedUsername.isBlank() ? generateUniqueUsernameFromEmail(email) : requestedUsername;
+        String username = generateUniqueUsernameFromEmail(email);
+        if (userRepository.existsByUsernameIgnoreCase(username))
+            throw new IllegalArgumentException("Ya existe un usuario con ese username: " + username);
 
-        // OJO: NO hay "new Persona()" aquí, se usa la que llegó por parámetro
+        // Persona persona = new Persona();
+
+        Persona persona = crearInstanciaPorRol(dto);
         persona.setId(id);
         persona.setNombre(dto.getNombre().trim());
+        persona.setApellidoPaterno(dto.getApellidoPaterno().trim() != null ? dto.getApellidoPaterno() : dto.getApellidoMaterno());
         persona.setApellidoMaterno(dto.getApellidoMaterno().trim());
-        if (dto.getApellidoPaterno() != null && !dto.getApellidoPaterno().isBlank())
-            persona.setApellidoPaterno(dto.getApellidoPaterno().trim());
         persona.setEmail(email);
-        persona.setActivo(dto.getActivo() == null ? true : dto.getActivo());
+        persona.setRol(dto.getRol());
+        persona.setActivo(true);
         persona.setPlantel(plantel);
-        persona.setPassword(passwordEncoder.encode(rawPassword)); // requiere campo password en Persona
+        persona = personaRepository.save(persona);
 
-        return personaRepository.save(persona);
-    }
+        User user = new User();
+        user.setUsername(username);
+        String rawPassword = ROLES_CON_PASSWORD_PERSONAL.contains(dto.getRol())
+            ? dto.getPassword()
+            : defaultPassword;
 
-    @Override
-    @Transactional
-    public AlumnoDTO saveAlumno(AlumnoDTO dto) {
-        Alumno alumno = new Alumno();
-        alumno.setRol(Roles.ALUMNO);
-        alumno.setNombreTutor(dto.getNombreTutor());
-        alumno.setNumeroTutor(dto.getNumeroTutor());
-        alumno.setPromedio(dto.getPromedio());
-        if (dto.getFechaIngreso() != null)
-            alumno.setFechaIngreso(dto.getFechaIngreso());
-        return Mapper.toDTO((Alumno) guardarBase(alumno, dto));
-    }
+        if (ROLES_CON_PASSWORD_PERSONAL.contains(dto.getRol())) {
+            if (rawPassword == null || rawPassword.isBlank()) {
+                throw new IllegalArgumentException("La contraseña es obligatoria para este rol");
+            }
+        }
 
-    @Override
-    @Transactional
-    public DocenteDTO saveDocente(DocenteDTO dto) {
-        Docente docente = new Docente();
-        docente.setRol(Roles.DOCENTE);
-        docente.setCarrera(dto.getCarrera());
-        docente.setTituloEdu(dto.getTituloEdu());
-        return Mapper.toDTO((Docente) guardarBase(docente, dto));
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setReestablecimiento(false);
+        user.setPersona(persona);
+        userRepository.save(user);
+
+        PersonaResponseDTO resultado = Mapper.toDTO(persona);
+        resultado.setUsername(username);
+        return resultado;
     }
 
     @Override
     @Transactional
     public PersonaResponseDTO updatePersona(String personaId, PersonaRequestDTO dto) {
         Persona persona = personaRepository.findById(personaId)
-                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
-        actualizarBase(persona, dto);
-        return Mapper.toResponse(persona);
-    }
+            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
 
-    @Override
-    @Transactional
-    public AlumnoDTO updateAlumno(String id, AlumnoDTO dto) {
-        Alumno alumno = alumnoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Alumno no encontrado con el id: " + id));
-        actualizarBase(alumno, dto);
-
-        if (dto.getNombreTutor() != null)
-            alumno.setNombreTutor(dto.getNombreTutor().trim());
-        if (dto.getNumeroTutor() != null)
-            alumno.setNumeroTutor(dto.getNumeroTutor().trim());
-        if (dto.getFechaIngreso() != null)
-            alumno.setFechaIngreso(dto.getFechaIngreso());
-        if (dto.getPromedio() != null)
-            alumno.setPromedio(dto.getPromedio());
-
-        return Mapper.toDTO(alumno);
-    }
-
-    @Override
-    @Transactional
-    public DocenteDTO updateDocente(String id, DocenteDTO dto) {
-        Docente docente = docenteRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Docente no encontrado con el id: " + id));
-        actualizarBase(docente, dto);
-
-        if (dto.getCarrera() != null)
-            docente.setCarrera(dto.getCarrera().trim());
-        if (dto.getTituloEdu() != null)
-            docente.setTituloEdu(dto.getTituloEdu().trim());
-
-        return Mapper.toDTO(docente);
-    }
-
-    private void actualizarBase(Persona persona, PersonaRequestDTO dto) {
-        if (dto.getNombre() != null) {
-            if (dto.getNombre().isBlank())
-                throw new IllegalArgumentException("El nombre no puede estar vacío");
-            persona.setNombre(dto.getNombre().trim());
-        }
-
-        if (dto.getApellidoMaterno() != null) {
-            if (dto.getApellidoMaterno().isBlank())
-                throw new IllegalArgumentException("El apellido materno no puede estar vacío");
-            persona.setApellidoMaterno(dto.getApellidoMaterno().trim());
-        }
-
-        if (dto.getApellidoPaterno() != null) {
-            String paterno = dto.getApellidoPaterno().trim();
-            persona.setApellidoPaterno(paterno.isEmpty() ? null : paterno);
-        }
+        if (dto.getNombre() != null) persona.setNombre(dto.getNombre().trim());
+        if (dto.getApellidoPaterno() != null) persona.setApellidoPaterno(dto.getApellidoPaterno().trim());
 
         if (dto.getEmail() != null) {
             String email = dto.getEmail().trim();
-            if (email.isEmpty())
-                throw new IllegalArgumentException("El email no puede estar vacío");
-            if (personaRepository.existsByEmailIgnoreCaseAndIdNot(email, persona.getId()))
+            if (personaRepository.existsByEmailIgnoreCaseAndIdNot(email, personaId))
                 throw new IllegalArgumentException("Ya existe una persona con ese email: " + email);
             persona.setEmail(email);
         }
 
-        if (dto.getRol() != null && dto.getRol() != persona.getRol()) {
-            if (persona instanceof Alumno || persona instanceof Docente)
-                throw new IllegalArgumentException("No se puede cambiar el rol de un alumno o docente");
-            persona.setRol(dto.getRol());
-        }
-
-        if (dto.getActivo() != null)
-            persona.setActivo(dto.getActivo());
+        if (dto.getRol() != null) persona.setRol(dto.getRol());
+        if (dto.getActivo() != null) persona.setActivo(dto.getActivo());
 
         if (dto.getPlantelId() != null) {
             Plantel plantel = plantelRepository.findById(dto.getPlantelId())
-                    .orElseThrow(() -> new EntityNotFoundException(
-                            "No existe un plantel con el id: " + dto.getPlantelId()));
+                .orElseThrow(() -> new EntityNotFoundException("No existe un plantel con el id: " + dto.getPlantelId()));
             persona.setPlantel(plantel);
         }
+        // username NO se actualiza aquí — es un cambio de cuenta, no de datos de persona
+
+        PersonaResponseDTO resultado = Mapper.toDTO(personaRepository.save(persona));
+        userRepository.findByPersonaId(personaId).ifPresent(u -> resultado.setUsername(u.getUsername()));
+        return resultado;
+    }
+
+    private Persona crearInstanciaPorRol(PersonaRequestDTO dto) {
+    return switch (dto.getRol()) {
+        case Roles.DOCENTE, Roles.COORDINADOR -> {
+            Docente docente = new Docente();
+            docente.setCarrera(limpiar(dto.getCarrera()));
+            docente.setTituloEdu(limpiar(dto.getTituloEdu()));
+            yield docente;
+        }
+        case Roles.ALUMNO -> {
+            Alumno alumno = new Alumno();
+            alumno.setNombreTutor(limpiar(dto.getNombreTutor()));
+            alumno.setNumeroTutor(limpiar(dto.getNumeroTutor()));
+            alumno.setPromedio((float)0);
+            if (dto.getFechaIngreso() != null) alumno.setFechaIngreso(dto.getFechaIngreso());
+            yield alumno;
+        }
+            default -> new Persona(); // DIRECTOR_PLANTEL, etc.
+        };
+    }
+
+    private String limpiar(String s) {
+        return (s == null || s.isBlank()) ? null : s.trim();
     }
 
     @Override
     @Transactional
     public void deletePersona(String personaId) {
         Persona persona = personaRepository.findById(personaId)
-                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
+            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
         userRepository.findByPersonaId(personaId).ifPresent(userRepository::delete);
         personaRepository.delete(persona);
     }
@@ -224,36 +198,43 @@ public class PersonaServiceImpl implements PersonaService {
     @Override
     @Transactional(readOnly = true)
     public List<PersonaResponseDTO> findAll() {
-        return personaRepository.findAll().stream().map(Mapper::toResponse).toList();
+        return personaRepository.findAll().stream().map(this::toDTOConUsername).toList();
     }
 
-    public List<PersonaResponseDTO> findAllByPlantelIdAndRolAndStatus(long plantelid, Roles rol, Boolean activo) {
+    @Override 
+    @Transactional (readOnly = true)
+    public List<PersonaDatosCompletosResponseDTO> findAllDatos(){
+        return personaRepository.findAll().stream().map(Mapper::todoPersonaDTO).toList();
+    }
+
+    public List<PersonaResponseDTO> findAllByPlantelIdAndRolAndStatus(long plantelid, Roles rol, Boolean activo){
         if (activo != null) {
             return personaRepository.findByPlantelIdAndRolAndActivo(plantelid, rol, activo)
-                    .stream()
-                    .map(Mapper::toResponse)
-                    .toList();
-        }
-        return personaRepository.findByPlantelIdAndRol(plantelid, rol)
                 .stream()
-                .map(Mapper::toResponse)
+                .map(this::toDTOConUsername)
                 .toList();
+        }
+        return personaRepository.findByPlantelIdAndRol(plantelid, rol)  
+            .stream()
+            .map(this::toDTOConUsername)
+            .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public PersonaResponseDTO getPersonaById(String personaId) {
         Persona persona = personaRepository.findById(personaId)
-                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
-        return Mapper.toResponse(persona);
+            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
+        return toDTOConUsername(persona);
     }
+
 
     @Override
     @Transactional(readOnly = true)
     public List<PersonaResponseDTO> findAllByPlantelId(Long plantelId) {
         if (!plantelRepository.existsById(plantelId))
             throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
-        return personaRepository.findByPlantelId(plantelId).stream().map(Mapper::toResponse).toList();
+        return personaRepository.findByPlantelId(plantelId).stream().map(this::toDTOConUsername).toList();
     }
 
     @Override
@@ -264,10 +245,10 @@ public class PersonaServiceImpl implements PersonaService {
         }
 
         return personaRepository.findByPlantelId(plantelId)
-                .stream()
-                .filter(persona -> persona.getRol() == Roles.DOCENTE || persona.getRol() == Roles.COORDINADOR)
-                .map(Mapper::toResponse)
-                .toList();
+            .stream()
+            .filter(persona -> persona.getRol() == Roles.DOCENTE || persona.getRol() == Roles.COORDINADOR)
+            .map(this::toDTOConUsername)
+            .toList();
     }
 
     @Override
@@ -277,23 +258,22 @@ public class PersonaServiceImpl implements PersonaService {
             throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
         }
         return personaRepository.findByPlantelIdAndRol(plantelId, rol)
-                .stream()
-                .map(Mapper::toResponse)
-                .toList();
+            .stream()
+            .map(this::toDTOConUsername)
+            .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<PersonaResponseDTO> findAllByRol(Roles rol) {
-        return personaRepository.findByRol(rol).stream().map(Mapper::toResponse).toList();
+        return personaRepository.findByRol(rol).stream().map(this::toDTOConUsername).toList();
     }
 
-    // private PersonaResponseDTO toDTOConUsername(Persona persona) {
-    // PersonaDTO dto = Mapper.toDTO(persona);
-    // userRepository.findByPersonaId(persona.getId()).ifPresent(u ->
-    // dto.setUsername(u.getUsername()));
-    // return dto;
-    // }
+    private PersonaResponseDTO toDTOConUsername(Persona persona) {
+        PersonaResponseDTO dto = Mapper.toDTO(persona);
+        userRepository.findByPersonaId(persona.getId()).ifPresent(u -> dto.setUsername(u.getUsername()));
+        return dto;
+    }
 
     private String generateUniqueUsernameFromEmail(String email) {
         String base = email.split("@")[0].trim().toLowerCase();

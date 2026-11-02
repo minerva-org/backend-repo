@@ -20,8 +20,8 @@ CREATE TABLE personas (
     apellido_paterno  VARCHAR(255),
     apellido_materno  VARCHAR(255) NOT NULL,
     email             VARCHAR(255) NOT NULL,
-    rol               VARCHAR(255) NOT NULL,   -- enum Roles (EnumType.STRING)
-    id_plantel        VARCHAR(255) NOT NULL,
+    rol               VARCHAR(255) NOT NULL,
+    id_plantel        BIGINT NOT NULL,
     activo            BOOLEAN      NOT NULL DEFAULT TRUE,
     calle             VARCHAR(50),
     colonia           VARCHAR(50),
@@ -32,10 +32,10 @@ CREATE TABLE personas (
     password          VARCHAR(255),
     CONSTRAINT pk_persona        PRIMARY KEY (id),
     CONSTRAINT uk_persona_email  UNIQUE (email),
-    CONSTRAINT fk_persona_plantel FOREIGN KEY (id_plantel) REFERENCES plantel (id)
+    CONSTRAINT fk_persona_plantel FOREIGN KEY (id_plantel) REFERENCES planteles (id)
 );
 
-CREATE INDEX idx_persona_plantel ON persona (id_plantel);
+CREATE INDEX idx_persona_plantel ON personas (id_plantel);
 
 CREATE TABLE alumnos (
     id                VARCHAR(255) NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE alumnos (
     fecha_ingreso     TIMESTAMP(6) WITH TIME ZONE,
     promedio_general  REAL,
     CONSTRAINT pk_alumnos         PRIMARY KEY (id),
-    CONSTRAINT fk_alumnos_persona FOREIGN KEY (id) REFERENCES persona (id)
+    CONSTRAINT fk_alumnos_persona FOREIGN KEY (id) REFERENCES personas (id)
 );
 
 CREATE TABLE docentes (
@@ -52,7 +52,7 @@ CREATE TABLE docentes (
     carrera     VARCHAR(50),
     titulo_edu  VARCHAR(255),
     CONSTRAINT pk_docentes         PRIMARY KEY (id),
-    CONSTRAINT fk_docentes_persona FOREIGN KEY (id) REFERENCES persona (id)
+    CONSTRAINT fk_docentes_persona FOREIGN KEY (id) REFERENCES personas (id)
 );
 
 
@@ -63,7 +63,7 @@ CREATE TABLE usuarios (
     reestablecimiento BOOLEAN NOT NULL DEFAULT FALSE,
     id_persona VARCHAR(255) NOT NULL UNIQUE,
     CONSTRAINT fk_usuarios_persona
-        FOREIGN KEY (id_persona) REFERENCES persona (id)
+        FOREIGN KEY (id_persona) REFERENCES personas (id)
 );
 
 CREATE TABLE plan_estudio (
@@ -132,7 +132,7 @@ CREATE TABLE grupo (
     semestre VARCHAR(255) NOT NULL,
     id_docente VARCHAR(255) NOT NULL,
     CONSTRAINT fk_grupo_docente
-        FOREIGN KEY (id_docente) REFERENCES persona (id)
+        FOREIGN KEY (id_docente) REFERENCES personas (id)
 );
 
 CREATE TABLE grupos_alumnos (
@@ -142,7 +142,7 @@ CREATE TABLE grupos_alumnos (
     CONSTRAINT fk_grupos_alumnos_grupo
         FOREIGN KEY (id_grupo) REFERENCES grupo (id),
     CONSTRAINT fk_grupos_alumnos_alumno
-        FOREIGN KEY (id_alumno) REFERENCES persona (id)
+        FOREIGN KEY (id_alumno) REFERENCES personas (id)
 );
 
 CREATE TABLE quiz (
@@ -166,6 +166,39 @@ CREATE TABLE quiz_x_pregunta (
     CONSTRAINT fk_quiz_x_pregunta_pregunta
         FOREIGN KEY (id_pregunta) REFERENCES pregunta (id)
 );
+
+CREATE TABLE intentos (
+    id            VARCHAR(36)  NOT NULL,
+    id_quiz       VARCHAR(255) NOT NULL,
+    id_alumno     VARCHAR(255) NOT NULL,
+    fecha_inicio  TIMESTAMPTZ  NOT NULL,
+    fecha_envio   TIMESTAMPTZ,
+
+    CONSTRAINT pk_intentos PRIMARY KEY (id),
+    CONSTRAINT fk_intentos_quiz   FOREIGN KEY (id_quiz)   REFERENCES quiz (id),
+    CONSTRAINT fk_intentos_alumno FOREIGN KEY (id_alumno) REFERENCES alumnos (id),
+    CONSTRAINT uq_intentos_quiz_alumno UNIQUE (id_quiz, id_alumno)
+);
+
+CREATE INDEX idx_intentos_alumno ON intentos (id_alumno);
+
+CREATE TABLE detalles_intentos (
+    id               VARCHAR(36)  NOT NULL,
+    id_intento       VARCHAR(36)  NOT NULL,
+    id_pregunta      VARCHAR(255) NOT NULL,
+    id_opcion        VARCHAR(255),
+    cambios_pantalla INTEGER      NOT NULL DEFAULT 0,
+    es_correcto      BOOLEAN,
+
+    CONSTRAINT pk_detalles_intentos PRIMARY KEY (id),
+    CONSTRAINT fk_detalles_intento  FOREIGN KEY (id_intento)  REFERENCES intentos (id) ON DELETE CASCADE,
+    CONSTRAINT fk_detalles_pregunta FOREIGN KEY (id_pregunta) REFERENCES pregunta (id),
+    CONSTRAINT fk_detalles_opcion   FOREIGN KEY (id_opcion)   REFERENCES opciones (id),
+    CONSTRAINT uq_detalles_intento_pregunta UNIQUE (id_intento, id_pregunta)
+);
+
+CREATE INDEX idx_detalles_pregunta ON detalles_intentos (id_pregunta);
+CREATE INDEX idx_detalles_opcion   ON detalles_intentos (id_opcion);
 
 CREATE TABLE configuraciones (
     id VARCHAR(255) PRIMARY KEY,

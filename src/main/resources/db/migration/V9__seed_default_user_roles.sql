@@ -1,4 +1,4 @@
-INSERT INTO persona (id, nombre, apellido, email, rol, id_plantel)
+INSERT INTO personas (id, nombre, apellido_materno, email, rol, id_plantel)
 VALUES
     ('DIRECTOR-PLANTEL-DEFAULT', 'Director', 'Plantel', 'director.plantel@minerva.local', 'DIRECTOR_PLANTEL', 1),
     ('DOCENTE-DEFAULT', 'Docente', 'Default', 'docente@minerva.local', 'DOCENTE', 1),

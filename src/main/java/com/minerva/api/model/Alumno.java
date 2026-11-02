@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "alumnos")
-// @PrimaryKeyJoinColumn(name = "id_persona")
+@PrimaryKeyJoinColumn(name = "id")
 @Getter @Setter
 public class Alumno extends Persona {
 
@@ -22,6 +22,6 @@ public class Alumno extends Persona {
     private Instant fechaIngreso = Instant.now();
 
     @Column (name = "promedio_general")
-    public Float promedio;
+    private Float promedio;
     
 }
