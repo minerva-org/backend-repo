@@ -13,6 +13,6 @@ public interface PlantelRepository extends JpaRepository<Plantel, Long>{
 
     boolean existsByNombreIgnoreCaseAndIdNot(String nombre, Long id);
 
-    List<Plantel> findByUniversidadIdAndActivoTrue(Long universidadId);
+    List<Plantel> findByInstitucionIdAndActivoTrue(Long institucionId);
     
 }

@@ -26,7 +26,10 @@ public class Materia {
     @Column (name = "prefijo", nullable = false)
     private String prefijo;
 
-    @JoinColumn (name = "id_planEstudio", nullable = false)
+    @JoinColumn (name = "id_planEstudio", nullable = true)
     @ManyToOne (fetch = FetchType.LAZY)
     private PlanEstudio planEstudio;
+
+    @Column (name = "activo", nullable = false)
+    private Boolean activo = true;
 }

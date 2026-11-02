@@ -8,9 +8,12 @@ public interface MateriaService {
     MateriaDTO saveMateria(MateriaDTO materiaDTO);
 
     MateriaDTO updateMateria(String materiaId, MateriaDTO materiaDTO);
+    
+    void updateEstado(String materialId, Boolean estado);
 
     void deleteMateria(String materiaId);
     
+
     List<MateriaDTO> findAll();
 
     MateriaDTO getMateriaById(String materiaId);

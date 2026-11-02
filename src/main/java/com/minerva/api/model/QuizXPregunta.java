@@ -30,8 +30,4 @@ public class QuizXPregunta {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_pregunta", nullable = false)
     private Pregunta pregunta;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_concepto", nullable = false)
-    private Concepto concepto;
 }

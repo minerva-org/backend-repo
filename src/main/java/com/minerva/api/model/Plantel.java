@@ -13,7 +13,7 @@ import lombok.Data;
 
 @Data 
 @Entity 
-@Table (name = "plantel")
+@Table (name = "planteles")
 public class Plantel {
     @Id 
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -27,8 +27,8 @@ public class Plantel {
     private String direccion;
 
     @ManyToOne (fetch = FetchType.LAZY)
-    @JoinColumn (name = "id_universidad", nullable = false)
-    private Universidad universidad;
+    @JoinColumn (name = "id_institucion", nullable = false)
+    private Institucion institucion;
 
     @Column (name = "activo")
     private Boolean activo = true;

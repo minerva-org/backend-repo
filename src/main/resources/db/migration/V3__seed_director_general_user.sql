@@ -1,0 +1,12 @@
+INSERT INTO personas (id, nombre, apellido_materno, email, rol, id_plantel)
+VALUES ('DIRECTOR-GENERAL-DEFAULT', 'Director', 'General', 'director.general@minerva.local', 'DIRECTOR_GENERAL', 1)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO usuarios (username, password, reestablecimiento, id_persona)
+VALUES (
+    'director_general',
+    '$2a$10$aPgMZCFTKTN0OW07V3LDkubtzo1yzWFk7apCQtHANC91ZJX3RSUEW',
+    FALSE,
+    'DIRECTOR-GENERAL-DEFAULT'
+)
+ON CONFLICT (username) DO NOTHING;

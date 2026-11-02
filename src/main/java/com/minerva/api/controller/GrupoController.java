@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.minerva.api.User.User;
+import com.minerva.api.dto.AlumnoGrupoDTO;
 import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.service.GrupoService;
 
@@ -26,6 +29,17 @@ public class GrupoController {
     @GetMapping(params = "docenteId")
     public ResponseEntity<List<GrupoDTO>> getGruposByDocente(@RequestParam String docenteId) {
         return ResponseEntity.ok(grupoService.findAllByDocenteId(docenteId));
+    }
+
+    @GetMapping(params = "plantelId")
+    public ResponseEntity<List<GrupoDTO>> getGruposByPlantel(@RequestParam Long plantelId) {
+        return ResponseEntity.ok(grupoService.findAllByPlantelId(plantelId));
+    }
+
+    @GetMapping("/mis-grupos")
+    public ResponseEntity<List<GrupoDTO>> getMisGrupos(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(grupoService.findAllByAlumnoId(user.getPersona().getId()));
     }
 
     @GetMapping("/{grupoId}")
@@ -54,6 +68,11 @@ public class GrupoController {
     @GetMapping("/{grupoId}/alumnos")
     public ResponseEntity<List<String>> getAlumnosDeGrupo(@PathVariable String grupoId) {
         return ResponseEntity.ok(grupoService.getAlumnosIdsDeGrupo(grupoId));
+    }
+
+    @GetMapping("/{grupoId}/alumnos-detalle")
+    public ResponseEntity<List<AlumnoGrupoDTO>> getAlumnosDetalleDeGrupo(@PathVariable String grupoId) {
+        return ResponseEntity.ok(grupoService.getAlumnosDetalleDeGrupo(grupoId));
     }
 
     @PostMapping("/{grupoId}/alumnos/{alumnoId}")

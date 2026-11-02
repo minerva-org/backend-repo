@@ -9,6 +9,8 @@ public interface UnidadService {
     UnidadDTO updateUnidad(String unidadId, UnidadDTO unidadDTO);
 
     void deleteUnidad(String unidadId);
+
+    void softDeleteUnidad(String unidadId);
     
     List<UnidadDTO> findAll();
 

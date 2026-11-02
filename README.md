@@ -64,6 +64,29 @@ La configuración vive en `src/main/resources/application.properties` (o `.yml` 
 
 Las migraciones se manejan con Flyway, ubicadas en `src/main/resources/db/migration/`. **No uses `ddl-auto: update`** en ningún ambiente — todo cambio de esquema debe ir en una migración versionada.
 
+## Usuarios por defecto
+
+Al levantar el backend con la carga inicial de datos, se crean usuarios de prueba para desarrollo local. Los más útiles son:
+
+| Usuario | Contraseña | Rol / Uso |
+|---|---|---|
+| `bootstrap` | `Admin123!` | Usuario inicial del sistema para pruebas rápidas y bootstrap |
+| `director_general` | `Admin123!` | Director general |
+| `director_plantel` | `Admin123!` | Director de plantel |
+| `docente` | `Admin123!` | Docente |
+| `coordinador` | `Admin123!` | Coordinador |
+| `alumno` | `Admin123!` | Alumno |
+
+Puedes probar el login con una petición como esta:
+
+```bash
+curl -X POST http://localhost:8080/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"bootstrap","password":"Admin123!"}'
+```
+
+> Si cambias la semilla de usuarios en el backend o la configuración de seguridad, actualiza esta sección para evitar confusión entre el equipo.
+
 ## Troubleshooting común
 
 **La app no conecta a la base de datos**

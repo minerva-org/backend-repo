@@ -8,11 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.dto.QuizXPreguntaDTO;
 import com.minerva.api.mapper.Mapper;
-import com.minerva.api.model.Concepto;
 import com.minerva.api.model.Pregunta;
 import com.minerva.api.model.Quiz;
 import com.minerva.api.model.QuizXPregunta;
-import com.minerva.api.repository.ConceptoRepository;
 import com.minerva.api.repository.PreguntaRepository;
 import com.minerva.api.repository.QuizRepository;
 import com.minerva.api.repository.QuizXPreguntaRepository;
@@ -27,7 +25,6 @@ public class QuizXPreguntaServiceImpl implements QuizXPreguntaService {
     private final QuizXPreguntaRepository quizXPreguntaRepository;
     private final QuizRepository quizRepository;
     private final PreguntaRepository preguntaRepository;
-    private final ConceptoRepository conceptoRepository;
 
     @Override
     @Transactional
@@ -54,26 +51,10 @@ public class QuizXPreguntaServiceImpl implements QuizXPreguntaService {
         Pregunta pregunta = preguntaRepository.findById(preguntaId)
             .orElseThrow(() -> new EntityNotFoundException("Pregunta no encontrada con el id: " + preguntaId));
 
-        if (quizXPreguntaDTO.getConceptoId() == null || quizXPreguntaDTO.getConceptoId().isBlank()) {
-            throw new IllegalArgumentException("El concepto es obligatorio");
-        }
-        
-        String conceptoId = quizXPreguntaDTO.getConceptoId().trim();
-        if (!pregunta.getConcepto().getId().equals(conceptoId)) {
-            throw new IllegalArgumentException("El concepto no coincide con el de la pregunta");
-        }
-        Concepto concepto = conceptoRepository.findById(conceptoId)
-            .orElseThrow(() -> new EntityNotFoundException("Concepto no encontrado con el id: " + conceptoId));
-
-        if (quizXPreguntaRepository.existsByQuizIdAndPreguntaId(quizId, preguntaId)) {
-            throw new IllegalArgumentException("Esta pregunta ya está agregada a este quiz");
-        }
-
         QuizXPregunta quizXPregunta = new QuizXPregunta();
         quizXPregunta.setId(id);
         quizXPregunta.setQuiz(quiz);
         quizXPregunta.setPregunta(pregunta);
-        quizXPregunta.setConcepto(concepto);
 
         return Mapper.toDTO(quizXPreguntaRepository.save(quizXPregunta));
     }
@@ -102,12 +83,6 @@ public class QuizXPreguntaServiceImpl implements QuizXPreguntaService {
             preguntaIdDestino = preguntaId;
         }
 
-        if (quizXPreguntaDTO.getConceptoId() != null) {
-            String conceptoId = quizXPreguntaDTO.getConceptoId().trim();
-            Concepto concepto = conceptoRepository.findById(conceptoId)
-                .orElseThrow(() -> new EntityNotFoundException("Concepto no encontrado con el id: " + conceptoId));
-            quizXPregunta.setConcepto(concepto);
-        }
 
         if (quizXPreguntaRepository.existsByQuizIdAndPreguntaIdAndIdNot(
                 quizIdDestino, preguntaIdDestino, id)) {

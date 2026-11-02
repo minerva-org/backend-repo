@@ -25,4 +25,7 @@ public class Unidad {
     @ManyToOne (fetch = FetchType.LAZY, optional = false)
     @JoinColumn (name = "id_materia", nullable = false)
     private Materia materia;
+
+    @Column (name = "activo")
+    private Boolean activo = true;
 }

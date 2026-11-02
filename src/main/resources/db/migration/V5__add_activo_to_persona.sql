@@ -1,0 +1,6 @@
+ALTER TABLE personas
+    ADD COLUMN IF NOT EXISTS activo BOOLEAN NOT NULL DEFAULT TRUE;
+
+UPDATE personas
+SET activo = TRUE
+WHERE activo IS NULL;

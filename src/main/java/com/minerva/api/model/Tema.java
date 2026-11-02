@@ -25,4 +25,7 @@ public class Tema {
     @ManyToOne (fetch = FetchType.LAZY, optional = false)
     @JoinColumn (name = "id_unidad", nullable = false)
     private Unidad unidad;
+
+    @Column (name = "activo")
+    private Boolean activo = true;
 }
