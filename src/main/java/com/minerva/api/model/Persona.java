@@ -61,7 +61,4 @@ public class Persona {
 
     @Column (name = "numero_telefono", length = 10)
     private String numeroTelefono;
-
-    @Column (name = "password")
-    private String password;
 }

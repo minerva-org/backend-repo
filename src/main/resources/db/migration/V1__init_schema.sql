@@ -29,7 +29,6 @@ CREATE TABLE personas (
     estado            VARCHAR(50),
     codigo_postal     VARCHAR(50),
     numero_telefono   VARCHAR(10),
-    password          VARCHAR(255),
     CONSTRAINT pk_persona        PRIMARY KEY (id),
     CONSTRAINT uk_persona_email  UNIQUE (email),
     CONSTRAINT fk_persona_plantel FOREIGN KEY (id_plantel) REFERENCES planteles (id)
