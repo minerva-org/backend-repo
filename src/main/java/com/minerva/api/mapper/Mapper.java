@@ -32,173 +32,189 @@ import com.minerva.api.model.Institucion;
 
 public class Mapper {
     public static PlantelDTO toDTO(Plantel plantel) {
-        if (plantel == null) return null;
+        if (plantel == null)
+            return null;
 
         return PlantelDTO.builder()
-            .id(plantel.getId())
-            .nombre(plantel.getNombre())
-            .direccion(plantel.getDireccion())
-            .institucionId(plantel.getInstitucion() != null ? plantel.getInstitucion().getId() : null)
-            .activo(plantel.getActivo())
-            .build();
+                .id(plantel.getId())
+                .nombre(plantel.getNombre())
+                .direccion(plantel.getDireccion())
+                .institucionId(plantel.getInstitucion() != null ? plantel.getInstitucion().getId() : null)
+                .activo(plantel.getActivo())
+                .build();
     }
 
     public static InstitucionDTO toDTO(Institucion institucion) {
-        if (institucion == null) return null;
+        if (institucion == null)
+            return null;
 
         return InstitucionDTO.builder()
-            .id(institucion.getId())
-            .nombre(institucion.getNombre())
-            .activo(institucion.getActivo())
-            .build();
+                .id(institucion.getId())
+                .nombre(institucion.getNombre())
+                .activo(institucion.getActivo())
+                .build();
     }
 
-        public static PersonaResponseDTO toDTO(Persona persona) {
-        if (persona == null) return null;
+    public static PersonaResponseDTO toDTO(Persona persona) {
+        if (persona == null)
+            return null;
 
-        return PersonaResponseDTO.builder()
-            .id(persona.getId())
-            .nombre(persona.getNombre())
-            .apellidoPaterno(persona.getApellidoPaterno())
-            .email(persona.getEmail())
-            .rol(persona.getRol())
-            .activo(persona.getActivo())
-            .plantelId(persona.getPlantel() != null ? persona.getPlantel().getId() : null)
-            .build();
+        PersonaResponseDTO.PersonaResponseDTOBuilder builder = PersonaResponseDTO.builder()
+                .id(persona.getId())
+                .nombre(persona.getNombre())
+                .apellidoPaterno(persona.getApellidoPaterno())
+                .apellidoMaterno(persona.getApellidoMaterno())
+                .calle(persona.getCalle())
+                .colonia(persona.getColonia())
+                .municipio(persona.getMunicipio())
+                .estado(persona.getEstado())
+                .codigoPostal(persona.getCodigoPostal())
+                .numeroTelefono(persona.getNumeroTelefono())
+                .email(persona.getEmail())
+                .rol(persona.getRol())
+                .activo(persona.getActivo())
+                .plantelId(persona.getPlantel() != null
+                        ? persona.getPlantel().getId()
+                        : null);
+
+        if (persona instanceof Docente docente) {
+            builder.carrera(docente.getCarrera())
+                    .tituloEdu(docente.getTituloEdu());
+        }
+
+        return builder.build();
     }
 
-        public static PersonaResponseDTO toDTO(Persona persona, String password) {
-        if (persona == null) return null;
-
-        return PersonaResponseDTO.builder()
-            .id(persona.getId())
-            .nombre(persona.getNombre())
-            .apellidoPaterno(persona.getApellidoPaterno())
-            .email(persona.getEmail())
-            .rol(persona.getRol())
-            .activo(persona.getActivo())
-            .plantelId(persona.getPlantel() != null ? persona.getPlantel().getId() : null)
-            .build();
+    public static PersonaResponseDTO toDTO(Persona persona, String password) {
+        return toDTO(persona);
     }
 
-    public static PersonaDatosCompletosResponseDTO todoPersonaDTO(Persona persona){
-        if(persona == null) return null;
+    public static PersonaDatosCompletosResponseDTO todoPersonaDTO(Persona persona) {
+        if (persona == null)
+            return null;
 
         return new PersonaDatosCompletosResponseDTO(
-            persona.getId(),
-            persona.getNombre(),
-            persona.getApellidoPaterno(),
-            persona.getApellidoMaterno(),
-            persona.getEmail(),
-            persona.getRol(),
-            persona.getColonia(),
-            persona.getMunicipio(),
-            persona.getEstado(),
-            persona.getCodigoPostal(),
-            persona.getNumeroTelefono()
-        );
+                persona.getId(),
+                persona.getNombre(),
+                persona.getApellidoPaterno(),
+                persona.getApellidoMaterno(),
+                persona.getEmail(),
+                persona.getRol(),
+                persona.getColonia(),
+                persona.getMunicipio(),
+                persona.getEstado(),
+                persona.getCodigoPostal(),
+                persona.getNumeroTelefono());
     }
 
-    
-
     public static MateriaDTO toDTO(Materia materia) {
-        if (materia == null) return null;
+        if (materia == null)
+            return null;
 
         return MateriaDTO.builder()
-            .id(materia.getId())
-            .nombre(materia.getNombre())
-            .prefijo(materia.getPrefijo())
-            .planEstudioId(materia.getPlanEstudio() != null ? materia.getPlanEstudio().getId() : null)
-            .activo(materia.getActivo())
-            .build();
+                .id(materia.getId())
+                .nombre(materia.getNombre())
+                .prefijo(materia.getPrefijo())
+                .planEstudioId(materia.getPlanEstudio() != null ? materia.getPlanEstudio().getId() : null)
+                .activo(materia.getActivo())
+                .build();
     }
 
     public static UnidadDTO toDTO(Unidad unidad) {
-        if (unidad == null) return null;
+        if (unidad == null)
+            return null;
 
         return UnidadDTO.builder()
-            .id(unidad.getId())
-            .nombre(unidad.getNombre())
-            .idMateria(unidad.getMateria() != null ? unidad.getMateria().getId() : null)
-            .build();
+                .id(unidad.getId())
+                .nombre(unidad.getNombre())
+                .idMateria(unidad.getMateria() != null ? unidad.getMateria().getId() : null)
+                .build();
     }
 
     public static TemaDTO toDTO(Tema tema) {
-        if (tema == null) return null;
+        if (tema == null)
+            return null;
 
         return TemaDTO.builder()
-            .id(tema.getId())
-            .nombre(tema.getNombre())
-            .unidadId(tema.getUnidad() != null ? tema.getUnidad().getId() : null)
-            .build();
+                .id(tema.getId())
+                .nombre(tema.getNombre())
+                .unidadId(tema.getUnidad() != null ? tema.getUnidad().getId() : null)
+                .build();
     }
 
     public static ConceptoDTO toDTO(Concepto concepto) {
-        if (concepto == null) return null;
+        if (concepto == null)
+            return null;
 
         return ConceptoDTO.builder()
-            .id(concepto.getId())
-            .nombre(concepto.getNombre())
-            .temaId(concepto.getTema() != null ? concepto.getTema().getId() : null)
-            .build();
+                .id(concepto.getId())
+                .nombre(concepto.getNombre())
+                .temaId(concepto.getTema() != null ? concepto.getTema().getId() : null)
+                .build();
     }
 
     public static QuizDTO toDTO(Quiz quiz) {
-        if (quiz == null) return null;
+        if (quiz == null)
+            return null;
 
         return QuizDTO.builder()
-            .id(quiz.getId())
-            .nombre(quiz.getNombre())
-            .fechaCreacion(quiz.getFechaCreacion())
-            .fechaInicio(quiz.getFechaInicio())
-            .fechaFinalizacion(quiz.getFechaFinalizacion())
-            .grupoId(quiz.getGrupo() != null ? quiz.getGrupo().getId() : null)
-            .build();
+                .id(quiz.getId())
+                .nombre(quiz.getNombre())
+                .fechaCreacion(quiz.getFechaCreacion())
+                .fechaInicio(quiz.getFechaInicio())
+                .fechaFinalizacion(quiz.getFechaFinalizacion())
+                .grupoId(quiz.getGrupo() != null ? quiz.getGrupo().getId() : null)
+                .build();
     }
 
     public static PreguntaDTO toDTO(Pregunta pregunta) {
-        if (pregunta == null) return null;
+        if (pregunta == null)
+            return null;
 
         return PreguntaDTO.builder()
-            .id(pregunta.getId())
-            .descripcion(pregunta.getDescripcion())
-            .conceptoId(pregunta.getConcepto() != null ? pregunta.getConcepto().getId() : null)
-            .build();
+                .id(pregunta.getId())
+                .descripcion(pregunta.getDescripcion())
+                .conceptoId(pregunta.getConcepto() != null ? pregunta.getConcepto().getId() : null)
+                .build();
     }
 
     public static QuizXPreguntaDTO toDTO(QuizXPregunta quizXPregunta) {
-        if (quizXPregunta == null) return null;
+        if (quizXPregunta == null)
+            return null;
 
         return QuizXPreguntaDTO.builder()
-            .id(quizXPregunta.getId())
-            .quizId(quizXPregunta.getQuiz() != null ? quizXPregunta.getQuiz().getId() : null)
-            .preguntaId(quizXPregunta.getPregunta() != null ? quizXPregunta.getPregunta().getId() : null)
-            .build();
+                .id(quizXPregunta.getId())
+                .quizId(quizXPregunta.getQuiz() != null ? quizXPregunta.getQuiz().getId() : null)
+                .preguntaId(quizXPregunta.getPregunta() != null ? quizXPregunta.getPregunta().getId() : null)
+                .build();
     }
 
     public static OpcionDTO toDTO(Opcion opcion) {
-        if (opcion == null) return null;
+        if (opcion == null)
+            return null;
 
         return OpcionDTO.builder()
-            .id(opcion.getId())
-            .descripcion(opcion.getDescripcion())
-            .esCorrecta(opcion.getEsCorrecta())
-            .preguntaId(opcion.getPregunta() != null ? opcion.getPregunta().getId() : null)
-            .build();
+                .id(opcion.getId())
+                .descripcion(opcion.getDescripcion())
+                .esCorrecta(opcion.getEsCorrecta())
+                .preguntaId(opcion.getPregunta() != null ? opcion.getPregunta().getId() : null)
+                .build();
     }
 
     public static GrupoDTO toDTO(Grupo grupo) {
-        if (grupo == null) return null;
+        if (grupo == null)
+            return null;
 
         return GrupoDTO.builder()
-            .id(grupo.getId())
-            .claveGrupo(grupo.getClaveGrupo())
-            .nombre(grupo.getNombre())
-            .semestre(grupo.getSemestre())
-            .activo(grupo.isActivo())
-            .docenteId(grupo.getDocente() != null ? grupo.getDocente().getId() : null)
-            .plantelId(grupo.getPlantel() != null ? grupo.getPlantel().getId() : null)
-            .alumnosIds(grupo.getAlumnos() == null ? java.util.Collections.emptyList() : grupo.getAlumnos().stream().map(Persona::getId).toList())
-            .build();
+                .id(grupo.getId())
+                .claveGrupo(grupo.getClaveGrupo())
+                .nombre(grupo.getNombre())
+                .semestre(grupo.getSemestre())
+                .activo(grupo.isActivo())
+                .docenteId(grupo.getDocente() != null ? grupo.getDocente().getId() : null)
+                .plantelId(grupo.getPlantel() != null ? grupo.getPlantel().getId() : null)
+                .alumnosIds(grupo.getAlumnos() == null ? java.util.Collections.emptyList()
+                        : grupo.getAlumnos().stream().map(Persona::getId).toList())
+                .build();
     }
 }
