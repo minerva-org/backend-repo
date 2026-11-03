@@ -29,11 +29,10 @@ import lombok.RequiredArgsConstructor;
 public class PersonaServiceImpl implements PersonaService {
 
     private static final Set<Roles> ROLES_CON_PASSWORD_PERSONAL = Set.of(
-        Roles.DOCENTE,
-        Roles.COORDINADOR,
-        Roles.DIRECTOR_PLANTEL,
-        Roles.ALUMNO
-    );
+            Roles.DOCENTE,
+            Roles.COORDINADOR,
+            Roles.DIRECTOR_PLANTEL,
+            Roles.ALUMNO);
 
     private final PersonaRepository personaRepository;
     private final PlantelRepository plantelRepository;
@@ -55,9 +54,9 @@ public class PersonaServiceImpl implements PersonaService {
         if (dto.getNombre() == null || dto.getNombre().isBlank())
             throw new IllegalArgumentException("El nombre es obligatorio");
 
-        if (dto.getApellidoMaterno() == null || dto.getApellidoMaterno().isBlank())
-            throw new IllegalArgumentException("El apellido materno es obligatorio");
-        
+        if (dto.getApellidoPaterno() == null || dto.getApellidoPaterno().isBlank())
+            throw new IllegalArgumentException("El apellido paterno es obligatorio");
+
         if (dto.getCalle() == null || dto.getCalle().isBlank())
             throw new IllegalArgumentException("La calle donde reside es obligatorio");
 
@@ -88,10 +87,13 @@ public class PersonaServiceImpl implements PersonaService {
         if (dto.getPlantelId() == null)
             throw new IllegalArgumentException("El plantel es obligatorio");
         Plantel plantel = plantelRepository.findById(dto.getPlantelId())
-            .orElseThrow(() -> new EntityNotFoundException("Plantel no encontrado con el id: " + dto.getPlantelId()));
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Plantel no encontrado con el id: " + dto.getPlantelId()));
 
-        // String requestedUsername = dto.getUsername() == null ? "" : dto.getUsername().trim();
-        // String username = requestedUsername.isBlank() ? generateUniqueUsernameFromEmail(email) : requestedUsername;
+        // String requestedUsername = dto.getUsername() == null ? "" :
+        // dto.getUsername().trim();
+        // String username = requestedUsername.isBlank() ?
+        // generateUniqueUsernameFromEmail(email) : requestedUsername;
         String username = generateUniqueUsernameFromEmail(email);
         if (userRepository.existsByUsernameIgnoreCase(username))
             throw new IllegalArgumentException("Ya existe un usuario con ese username: " + username);
@@ -101,8 +103,9 @@ public class PersonaServiceImpl implements PersonaService {
         Persona persona = crearInstanciaPorRol(dto);
         persona.setId(id);
         persona.setNombre(dto.getNombre().trim());
-        persona.setApellidoPaterno((dto.getApellidoPaterno() != null || dto.getApellidoPaterno().isBlank())
-                                                                    ? dto.getApellidoPaterno() : dto.getApellidoMaterno());
+        persona.setApellidoPaterno((dto.getApellidoPaterno() != null && !dto.getApellidoPaterno().isBlank())
+                ? dto.getApellidoPaterno()
+                : dto.getApellidoMaterno());
         persona.setApellidoMaterno(dto.getApellidoMaterno().trim());
         persona.setCalle(dto.getCalle().trim());
         persona.setColonia(dto.getColonia().trim());
@@ -114,19 +117,20 @@ public class PersonaServiceImpl implements PersonaService {
         persona.setRol(dto.getRol());
         persona.setActivo(true);
         persona.setPlantel(plantel);
-        persona = personaRepository.save(persona);
-
-        User user = new User();
-        user.setUsername(username);
         String rawPassword = ROLES_CON_PASSWORD_PERSONAL.contains(dto.getRol())
-            ? dto.getPassword()
-            : defaultPassword;
+                ? dto.getPassword()
+                : defaultPassword;
 
         if (ROLES_CON_PASSWORD_PERSONAL.contains(dto.getRol())) {
             if (rawPassword == null || rawPassword.isBlank()) {
                 throw new IllegalArgumentException("La contraseña es obligatoria para este rol");
             }
         }
+
+        persona = personaRepository.save(persona);
+
+        User user = new User();
+        user.setUsername(username);
 
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setReestablecimiento(false);
@@ -142,10 +146,40 @@ public class PersonaServiceImpl implements PersonaService {
     @Transactional
     public PersonaResponseDTO updatePersona(String personaId, PersonaRequestDTO dto) {
         Persona persona = personaRepository.findById(personaId)
-            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
+                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
 
-        if (dto.getNombre() != null) persona.setNombre(dto.getNombre().trim());
-        if (dto.getApellidoPaterno() != null) persona.setApellidoPaterno(dto.getApellidoPaterno().trim());
+        if (dto.getNombre() != null)
+            persona.setNombre(dto.getNombre().trim());
+        if (dto.getApellidoPaterno() != null)
+            persona.setApellidoPaterno(dto.getApellidoPaterno().trim());
+        if (dto.getApellidoMaterno() != null)
+            persona.setApellidoMaterno(limpiar(dto.getApellidoMaterno()));
+
+        if (dto.getCalle() != null)
+            persona.setCalle(limpiar(dto.getCalle()));
+
+        if (dto.getColonia() != null)
+            persona.setColonia(limpiar(dto.getColonia()));
+
+        if (dto.getMunicipio() != null)
+            persona.setMunicipio(limpiar(dto.getMunicipio()));
+
+        if (dto.getEstado() != null)
+            persona.setEstado(limpiar(dto.getEstado()));
+
+        if (dto.getCodigoPostal() != null)
+            persona.setCodigoPostal(limpiar(dto.getCodigoPostal()));
+
+        if (dto.getNumeroTelefono() != null)
+            persona.setNumeroTelefono(limpiar(dto.getNumeroTelefono()));
+
+        if (persona instanceof Docente docente) {
+            if (dto.getCarrera() != null)
+                docente.setCarrera(limpiar(dto.getCarrera()));
+
+            if (dto.getTituloEdu() != null)
+                docente.setTituloEdu(limpiar(dto.getTituloEdu()));
+        }
 
         if (dto.getEmail() != null) {
             String email = dto.getEmail().trim();
@@ -154,15 +188,19 @@ public class PersonaServiceImpl implements PersonaService {
             persona.setEmail(email);
         }
 
-        if (dto.getRol() != null) persona.setRol(dto.getRol());
-        if (dto.getActivo() != null) persona.setActivo(dto.getActivo());
+        if (dto.getRol() != null)
+            persona.setRol(dto.getRol());
+        if (dto.getActivo() != null)
+            persona.setActivo(dto.getActivo());
 
         if (dto.getPlantelId() != null) {
             Plantel plantel = plantelRepository.findById(dto.getPlantelId())
-                .orElseThrow(() -> new EntityNotFoundException("No existe un plantel con el id: " + dto.getPlantelId()));
+                    .orElseThrow(
+                            () -> new EntityNotFoundException("No existe un plantel con el id: " + dto.getPlantelId()));
             persona.setPlantel(plantel);
         }
-        // username NO se actualiza aquí — es un cambio de cuenta, no de datos de persona
+        // username NO se actualiza aquí — es un cambio de cuenta, no de datos de
+        // persona
 
         PersonaResponseDTO resultado = Mapper.toDTO(personaRepository.save(persona));
         userRepository.findByPersonaId(personaId).ifPresent(u -> resultado.setUsername(u.getUsername()));
@@ -170,21 +208,22 @@ public class PersonaServiceImpl implements PersonaService {
     }
 
     private Persona crearInstanciaPorRol(PersonaRequestDTO dto) {
-    return switch (dto.getRol()) {
-        case Roles.DOCENTE, Roles.COORDINADOR -> {
-            Docente docente = new Docente();
-            docente.setCarrera(limpiar(dto.getCarrera()));
-            docente.setTituloEdu(limpiar(dto.getTituloEdu()));
-            yield docente;
-        }
-        case Roles.ALUMNO -> {
-            Alumno alumno = new Alumno();
-            alumno.setNombreTutor(limpiar(dto.getNombreTutor()));
-            alumno.setNumeroTutor(limpiar(dto.getNumeroTutor()));
-            alumno.setPromedio((float)0);
-            if (dto.getFechaIngreso() != null) alumno.setFechaIngreso(dto.getFechaIngreso());
-            yield alumno;
-        }
+        return switch (dto.getRol()) {
+            case Roles.DOCENTE, Roles.COORDINADOR -> {
+                Docente docente = new Docente();
+                docente.setCarrera(limpiar(dto.getCarrera()));
+                docente.setTituloEdu(limpiar(dto.getTituloEdu()));
+                yield docente;
+            }
+            case Roles.ALUMNO -> {
+                Alumno alumno = new Alumno();
+                alumno.setNombreTutor(limpiar(dto.getNombreTutor()));
+                alumno.setNumeroTutor(limpiar(dto.getNumeroTutor()));
+                alumno.setPromedio((float) 0);
+                if (dto.getFechaIngreso() != null)
+                    alumno.setFechaIngreso(dto.getFechaIngreso());
+                yield alumno;
+            }
             default -> new Persona(); // DIRECTOR_PLANTEL, etc.
         };
     }
@@ -197,7 +236,7 @@ public class PersonaServiceImpl implements PersonaService {
     @Transactional
     public void deletePersona(String personaId) {
         Persona persona = personaRepository.findById(personaId)
-            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
+                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
         userRepository.findByPersonaId(personaId).ifPresent(userRepository::delete);
         personaRepository.delete(persona);
     }
@@ -208,33 +247,32 @@ public class PersonaServiceImpl implements PersonaService {
         return personaRepository.findAll().stream().map(this::toDTOConUsername).toList();
     }
 
-    @Override 
-    @Transactional (readOnly = true)
-    public List<PersonaDatosCompletosResponseDTO> findAllDatos(){
+    @Override
+    @Transactional(readOnly = true)
+    public List<PersonaDatosCompletosResponseDTO> findAllDatos() {
         return personaRepository.findAll().stream().map(Mapper::todoPersonaDTO).toList();
     }
 
-    public List<PersonaResponseDTO> findAllByPlantelIdAndRolAndStatus(long plantelid, Roles rol, Boolean activo){
+    public List<PersonaResponseDTO> findAllByPlantelIdAndRolAndStatus(long plantelid, Roles rol, Boolean activo) {
         if (activo != null) {
             return personaRepository.findByPlantelIdAndRolAndActivo(plantelid, rol, activo)
+                    .stream()
+                    .map(this::toDTOConUsername)
+                    .toList();
+        }
+        return personaRepository.findByPlantelIdAndRol(plantelid, rol)
                 .stream()
                 .map(this::toDTOConUsername)
                 .toList();
-        }
-        return personaRepository.findByPlantelIdAndRol(plantelid, rol)  
-            .stream()
-            .map(this::toDTOConUsername)
-            .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public PersonaResponseDTO getPersonaById(String personaId) {
         Persona persona = personaRepository.findById(personaId)
-            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
+                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));
         return toDTOConUsername(persona);
     }
-
 
     @Override
     @Transactional(readOnly = true)
@@ -252,10 +290,10 @@ public class PersonaServiceImpl implements PersonaService {
         }
 
         return personaRepository.findByPlantelId(plantelId)
-            .stream()
-            .filter(persona -> persona.getRol() == Roles.DOCENTE || persona.getRol() == Roles.COORDINADOR)
-            .map(this::toDTOConUsername)
-            .toList();
+                .stream()
+                .filter(persona -> persona.getRol() == Roles.DOCENTE || persona.getRol() == Roles.COORDINADOR)
+                .map(this::toDTOConUsername)
+                .toList();
     }
 
     @Override
@@ -265,9 +303,9 @@ public class PersonaServiceImpl implements PersonaService {
             throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
         }
         return personaRepository.findByPlantelIdAndRol(plantelId, rol)
-            .stream()
-            .map(this::toDTOConUsername)
-            .toList();
+                .stream()
+                .map(this::toDTOConUsername)
+                .toList();
     }
 
     @Override

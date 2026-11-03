@@ -3,9 +3,9 @@ package com.minerva.api.dto;
 import com.minerva.api.User.Roles;
 import lombok.*;
 
-@Data 
+@Data
 @Builder
-@AllArgsConstructor 
+@AllArgsConstructor
 @NoArgsConstructor
 
 public class PersonaResponseDTO {
@@ -24,4 +24,8 @@ public class PersonaResponseDTO {
     private Boolean activo;
     private Long plantelId;
     private String username;
+
+    // Cositas del docente
+    private String carrera;
+    private String tituloEdu;
 }
