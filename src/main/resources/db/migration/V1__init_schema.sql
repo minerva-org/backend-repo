@@ -129,7 +129,7 @@ CREATE TABLE grupo (
     clave_grupo VARCHAR(255) NOT NULL UNIQUE,
     nombre VARCHAR(255) NOT NULL,
     semestre VARCHAR(255) NOT NULL,
-    id_docente VARCHAR(255) NOT NULL,
+    id_docente VARCHAR(255),
     CONSTRAINT fk_grupo_docente
         FOREIGN KEY (id_docente) REFERENCES personas (id)
 );

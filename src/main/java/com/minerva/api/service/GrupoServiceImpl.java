@@ -39,6 +39,7 @@ public class GrupoServiceImpl implements GrupoService {
     @Override
     @Transactional
     public GrupoDTO saveGrupo(GrupoDTO grupoDTO) {
+        Grupo grupo = new Grupo();
         if (grupoDTO.getId() == null || grupoDTO.getId().isBlank()) {
             throw new IllegalArgumentException("El id es obligatorio");
         }
@@ -64,16 +65,17 @@ public class GrupoServiceImpl implements GrupoService {
             throw new IllegalArgumentException("El semestre es obligatorio");
         }
         String semestre = grupoDTO.getSemestre().trim();
-
-        if (grupoDTO.getDocenteId() == null || grupoDTO.getDocenteId().isBlank()) {
-            throw new IllegalArgumentException("El docente es obligatorio");
-        }
-        String docenteId = grupoDTO.getDocenteId().trim();
-        Persona docente = personaRepository.findById(docenteId)
-                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + docenteId));
-        if (!esDocenteValido(docente)) {
-            throw new IllegalArgumentException("La persona indicada no tiene un rol de docente o coordinador");
-        }
+        
+        if (grupoDTO.getDocenteId() != null || !grupoDTO.getDocenteId().isBlank()) {
+            // throw new IllegalArgumentException("El docente es obligatorio");
+            String docenteId = grupoDTO.getDocenteId().trim();
+            Persona docente = personaRepository.findById(docenteId)
+            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + docenteId));
+            if (!esDocenteValido(docente)) {
+                throw new IllegalArgumentException("La persona indicada no tiene un rol de docente o coordinador");
+            }
+            grupo.setDocente(docente);
+        } 
 
         if (grupoDTO.getPlantelId() == null) {
             throw new IllegalArgumentException("El plantel es obligatorio");
@@ -82,13 +84,12 @@ public class GrupoServiceImpl implements GrupoService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Plantel no encontrado con el id: " + grupoDTO.getPlantelId()));
 
-        Grupo grupo = new Grupo();
+        
         grupo.setId(id);
         grupo.setClaveGrupo(claveGrupo);
         grupo.setNombre(nombre);
         grupo.setSemestre(semestre);
         grupo.setActivo(grupoDTO.getActivo() != null ? grupoDTO.getActivo() : true);
-        grupo.setDocente(docente);
         grupo.setPlantel(plantel);
 
         if (grupoDTO.getAlumnosIds() != null) {
