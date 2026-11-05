@@ -44,7 +44,8 @@ public class IntentoService {
     private final QuizXPreguntaRepository quizXPreguntaRepository;
     private final OpcionRepository opcionRepository;
 
-    public record Resultado(long correctas, long enBlanco, long total) {}
+    public record Resultado(long correctas, long enBlanco, long total) {
+    }
 
     @Transactional
     public IntentoResponse iniciarOReanudar(String quizId, String alumnoId) {
@@ -86,7 +87,7 @@ public class IntentoService {
 
     @Transactional
     public IntentoResponse responder(String quizId, String intentoId, String alumnoId,
-                                    RespuestaRequestDTO body) {
+            RespuestaRequestDTO body) {
         Intento intento = cargarIntento(quizId, intentoId, alumnoId);
         Quiz quiz = intento.getQuiz();
 
@@ -161,8 +162,7 @@ public class IntentoService {
                 .map(d -> d.getPregunta().getId())
                 .collect(Collectors.toSet());
 
-        List<QuizXPregunta> preguntas =
-                quizXPreguntaRepository.findByQuizIdOrderByIdAsc(intento.getQuiz().getId());
+        List<QuizXPregunta> preguntas = quizXPreguntaRepository.findByQuizIdOrderByIdAsc(intento.getQuiz().getId());
 
         for (QuizXPregunta qp : preguntas) {
             if (!respondidas.contains(qp.getPregunta().getId())) {
