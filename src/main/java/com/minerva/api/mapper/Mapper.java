@@ -38,7 +38,11 @@ public class Mapper {
         return PlantelDTO.builder()
                 .id(plantel.getId())
                 .nombre(plantel.getNombre())
-                .direccion(plantel.getDireccion())
+                .calle(plantel.getCalle())
+                .colonia(plantel.getColonia())
+                .municipio(plantel.getMunicipio())
+                .estado(plantel.getEstado())
+                .codigoPostal(plantel.getCodigoPostal())
                 .institucionId(plantel.getInstitucion() != null ? plantel.getInstitucion().getId() : null)
                 .activo(plantel.getActivo())
                 .build();
