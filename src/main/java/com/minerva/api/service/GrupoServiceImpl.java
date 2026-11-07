@@ -39,6 +39,7 @@ public class GrupoServiceImpl implements GrupoService {
     @Override
     @Transactional
     public GrupoDTO saveGrupo(GrupoDTO grupoDTO) {
+        Grupo grupo = new Grupo();
         if (grupoDTO.getId() == null || grupoDTO.getId().isBlank()) {
             throw new IllegalArgumentException("El id es obligatorio");
         }
@@ -65,14 +66,15 @@ public class GrupoServiceImpl implements GrupoService {
         }
         String semestre = grupoDTO.getSemestre().trim();
 
-        if (grupoDTO.getDocenteId() == null || grupoDTO.getDocenteId().isBlank()) {
-            throw new IllegalArgumentException("El docente es obligatorio");
-        }
-        String docenteId = grupoDTO.getDocenteId().trim();
-        Persona docente = personaRepository.findById(docenteId)
-                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + docenteId));
-        if (!esDocenteValido(docente)) {
-            throw new IllegalArgumentException("La persona indicada no tiene un rol de docente o coordinador");
+        if (grupoDTO.getDocenteId() != null && !grupoDTO.getDocenteId().isBlank()) {
+            // throw new IllegalArgumentException("El docente es obligatorio");
+            String docenteId = grupoDTO.getDocenteId().trim();
+            Persona docente = personaRepository.findById(docenteId)
+                    .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + docenteId));
+            if (!esDocenteValido(docente)) {
+                throw new IllegalArgumentException("La persona indicada no tiene un rol de docente o coordinador");
+            }
+            grupo.setDocente(docente);
         }
 
         if (grupoDTO.getPlantelId() == null) {
@@ -82,13 +84,11 @@ public class GrupoServiceImpl implements GrupoService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Plantel no encontrado con el id: " + grupoDTO.getPlantelId()));
 
-        Grupo grupo = new Grupo();
         grupo.setId(id);
         grupo.setClaveGrupo(claveGrupo);
         grupo.setNombre(nombre);
         grupo.setSemestre(semestre);
         grupo.setActivo(grupoDTO.getActivo() != null ? grupoDTO.getActivo() : true);
-        grupo.setDocente(docente);
         grupo.setPlantel(plantel);
 
         if (grupoDTO.getAlumnosIds() != null) {
@@ -229,16 +229,16 @@ public class GrupoServiceImpl implements GrupoService {
     @Transactional(readOnly = true)
     public List<GrupoDTO> findAllByAlumnoId(String alumnoId) {
         Persona alumno = personaRepository.findById(alumnoId)
-            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
+                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
 
         if (alumno.getRol() != Roles.ALUMNO) {
             throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
         }
 
         return grupoRepository.findByAlumnos_Id(alumnoId)
-            .stream()
-            .map(Mapper::toDTO)
-            .toList();
+                .stream()
+                .map(Mapper::toDTO)
+                .toList();
     }
 
     @Override
@@ -247,8 +247,8 @@ public class GrupoServiceImpl implements GrupoService {
         Grupo grupo = buscarGrupoPorIdOClave(grupoId);
 
         return grupo.getAlumnos().stream()
-            .map(alumno -> alumno.getId())
-            .toList();
+                .map(alumno -> alumno.getId())
+                .toList();
     }
 
     @Override
@@ -257,8 +257,8 @@ public class GrupoServiceImpl implements GrupoService {
         Grupo grupo = buscarGrupoPorIdOClave(grupoId);
 
         return grupo.getAlumnos().stream()
-            .sorted(Comparator.comparing((Persona alumno) -> alumno.getApellidoPaterno())
-                .thenComparing(alumno -> alumno.getNombre()))
+                .sorted(Comparator.comparing((Persona alumno) -> alumno.getApellidoPaterno())
+                        .thenComparing(alumno -> alumno.getNombre()))
                 .map(alumno -> new AlumnoGrupoDTO(alumno.getId(), alumno.getNombre(), alumno.getApellidoPaterno()))
                 .toList();
     }

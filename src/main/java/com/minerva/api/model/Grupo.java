@@ -43,7 +43,7 @@ public class Grupo {
     private boolean activo = true;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_docente", nullable = false)
+    @JoinColumn(name = "id_docente", nullable = true)
     private Persona docente;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
