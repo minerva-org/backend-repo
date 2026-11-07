@@ -13,7 +13,6 @@ public interface MateriaService {
 
     void deleteMateria(String materiaId);
     
-
     List<MateriaDTO> findAll();
 
     MateriaDTO getMateriaById(String materiaId);

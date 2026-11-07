@@ -2,13 +2,14 @@ package com.minerva.api.service;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.minerva.api.User.Roles;
 import com.minerva.api.User.User;
 import com.minerva.api.User.UserRepository;
 import com.minerva.api.controller.AuthResponse;
+import com.minerva.api.excepciones.CuentaDeshabilitadaException;
 import com.minerva.api.jwt.JwtService;
 import com.minerva.api.request.LoginRequest;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +30,16 @@ public class AuthService {
                 String username = resolveUsername(identifier)
                                 .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
 
+                User user = userRespository.findByUsername(username)
+                                .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
+
+                if (!user.isEnabled()) {
+                        throw new CuentaDeshabilitadaException(
+                                        "CUENTA_DESHABILITADA",
+                                        formatDisabledMessage(user.getPersona().getRol()));
+                }
+
                 authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-                User user = userRespository.findByUsername(username).orElseThrow();
 
                 String role = user.getAuthorities().stream()
                                 .findFirst()
@@ -54,6 +63,16 @@ public class AuthService {
                                 .map(User::getUsername)
                                 .or(() -> userRespository.findByPersonaEmailIgnoreCase(identifier)
                                                 .map(User::getUsername));
+        }
+
+        private String formatDisabledMessage(Roles rol) {
+                if (rol == null) {
+                        return "Cuenta deshabilitada";
+                }
+
+                String nombreRol = rol.name().toLowerCase().replace('_', ' ');
+                nombreRol = Character.toUpperCase(nombreRol.charAt(0)) + nombreRol.substring(1);
+                return nombreRol + " deshabilitado";
         }
 
         // public AuthResponse register(RegisterRequest request){
