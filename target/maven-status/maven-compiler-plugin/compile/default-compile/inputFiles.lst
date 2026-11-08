@@ -1,5 +1,6 @@
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\ApiApplication.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\config\CorsConfig.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\config\GlobalExceptionHandler.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\AuthController.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\AuthResponse.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\controller\ConceptoController.java
@@ -24,16 +25,20 @@ C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\InstitucionDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\IntentoResponse.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\MateriaDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\OpcionAlumnoDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\OpcionDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\PersonaDatosCompletosResponseDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\PersonaRequestDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\PersonaResponseDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\PlantelDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\PreguntaAlumnoDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\PreguntaDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\QuizDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\QuizXPreguntaDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\RespuestaRequestDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\TemaDTO.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\dto\UnidadDTO.java
+C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\excepciones\CuentaDeshabilitadaException.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\jwt\JwtAuthenticationFilter.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\jwt\JwtService.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\mapper\Mapper.java
@@ -81,7 +86,6 @@ C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\ConceptoServiceImpl.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\ConfiguracionService.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\ConfiguracionServiceImpl.java
-C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\GlobalExceptionHandler.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\GrupoService.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\GrupoServiceImpl.java
 C:\Users\josue\OneDrive\Desktop\Combo\backend-repo\src\main\java\com\minerva\api\service\InstitucionService.java
