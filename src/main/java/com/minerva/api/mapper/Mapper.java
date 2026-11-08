@@ -215,6 +215,7 @@ public class Mapper {
                 .nombre(grupo.getNombre())
                 .semestre(grupo.getSemestre())
                 .activo(grupo.isActivo())
+                .materiaId(grupo.getMateria().getId())
                 .docenteId(grupo.getDocente() != null ? grupo.getDocente().getId() : null)
                 .plantelId(grupo.getPlantel() != null ? grupo.getPlantel().getId() : null)
                 .alumnosIds(grupo.getAlumnos() == null ? java.util.Collections.emptyList()
