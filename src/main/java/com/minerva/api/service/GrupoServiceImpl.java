@@ -9,10 +9,12 @@ import com.minerva.api.dto.AlumnoGrupoDTO;
 import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Grupo;
+import com.minerva.api.model.Materia;
 import com.minerva.api.model.Persona;
 import com.minerva.api.model.Plantel;
 import com.minerva.api.User.Roles;
 import com.minerva.api.repository.GrupoRepository;
+import com.minerva.api.repository.MateriaRepository;
 import com.minerva.api.repository.PersonaRepository;
 import com.minerva.api.repository.PlantelRepository;
 
@@ -26,6 +28,7 @@ public class GrupoServiceImpl implements GrupoService {
     private final GrupoRepository grupoRepository;
     private final PersonaRepository personaRepository;
     private final PlantelRepository plantelRepository;
+    private final MateriaRepository materiaRepository;
 
     private boolean esDocenteValido(Persona persona) {
         return persona.getRol() == Roles.DOCENTE || persona.getRol() == Roles.COORDINADOR;
@@ -65,6 +68,13 @@ public class GrupoServiceImpl implements GrupoService {
             throw new IllegalArgumentException("El semestre es obligatorio");
         }
         String semestre = grupoDTO.getSemestre().trim();
+
+        if(grupoDTO.getMateriaId() == null || grupoDTO.getMateriaId().isBlank()){
+            throw new IllegalArgumentException("La materia es obligatoria");
+        }
+        Materia materia = materiaRepository.findById(grupoDTO.getMateriaId())
+            .orElseThrow(() -> new EntityNotFoundException("La materia no fue encontrada con el id: " + grupoDTO.getMateriaId()));
+        grupo.setMateria(materia);
 
         if (grupoDTO.getDocenteId() != null && !grupoDTO.getDocenteId().isBlank()) {
             // throw new IllegalArgumentException("El docente es obligatorio");

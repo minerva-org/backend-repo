@@ -19,5 +19,6 @@ public class GrupoDTO {
     private Boolean activo;
     private String docenteId;
     private Long plantelId;
+    private String materiaId;
     private List<String> alumnosIds;
 }

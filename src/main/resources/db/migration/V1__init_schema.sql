@@ -134,8 +134,11 @@ CREATE TABLE grupo (
     nombre VARCHAR(255) NOT NULL,
     semestre VARCHAR(255) NOT NULL,
     id_docente VARCHAR(255),
+    id_materia VARCHAR(255),
     CONSTRAINT fk_grupo_docente
         FOREIGN KEY (id_docente) REFERENCES personas (id)
+    CONSTRAINT fk_grupo_materia
+        FOREIGN KEY (id_materia) REFERENCES materia (id)
 );
 
 CREATE TABLE grupos_alumnos (
