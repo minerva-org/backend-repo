@@ -136,7 +136,7 @@ CREATE TABLE grupo (
     id_docente VARCHAR(255),
     id_materia VARCHAR(255),
     CONSTRAINT fk_grupo_docente
-        FOREIGN KEY (id_docente) REFERENCES personas (id)
+        FOREIGN KEY (id_docente) REFERENCES personas (id),
     CONSTRAINT fk_grupo_materia
         FOREIGN KEY (id_materia) REFERENCES materia (id)
 );
