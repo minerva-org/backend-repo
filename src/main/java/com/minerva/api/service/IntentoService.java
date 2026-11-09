@@ -78,6 +78,7 @@ public class IntentoService {
 
             intento = new Intento();
             intento.setQuiz(quiz);
+            intento.setFechaInicio(ahora);
             intento.setAlumno(alumnoRepository.getReferenceById(alumnoId));
             intento = intentoRepository.save(intento);
         }
