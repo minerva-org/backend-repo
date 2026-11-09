@@ -34,6 +34,12 @@ public class GrupoServiceImpl implements GrupoService {
         return persona.getRol() == Roles.DOCENTE || persona.getRol() == Roles.COORDINADOR;
     }
 
+    private void validarAlumnoActivo(Persona alumno) {
+        if (!Boolean.TRUE.equals(alumno.getActivo())) {
+            throw new IllegalArgumentException("No se puede agregar un alumno desactivado al grupo.");
+        }
+    }
+
     private Grupo buscarGrupoPorIdOClave(String identificador) {
         return grupoRepository.findByIdOrClaveGrupo(identificador)
                 .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + identificador));
@@ -69,11 +75,12 @@ public class GrupoServiceImpl implements GrupoService {
         }
         String semestre = grupoDTO.getSemestre().trim();
 
-        if(grupoDTO.getMateriaId() == null || grupoDTO.getMateriaId().isBlank()){
+        if (grupoDTO.getMateriaId() == null || grupoDTO.getMateriaId().isBlank()) {
             throw new IllegalArgumentException("La materia es obligatoria");
         }
         Materia materia = materiaRepository.findById(grupoDTO.getMateriaId())
-            .orElseThrow(() -> new EntityNotFoundException("La materia no fue encontrada con el id: " + grupoDTO.getMateriaId()));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "La materia no fue encontrada con el id: " + grupoDTO.getMateriaId()));
         grupo.setMateria(materia);
 
         if (grupoDTO.getDocenteId() != null && !grupoDTO.getDocenteId().isBlank()) {
@@ -180,6 +187,7 @@ public class GrupoServiceImpl implements GrupoService {
                 if (alumno.getRol() != Roles.ALUMNO) {
                     throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
                 }
+                validarAlumnoActivo(alumno);
                 grupo.addAlumno(alumno);
             }
         }
