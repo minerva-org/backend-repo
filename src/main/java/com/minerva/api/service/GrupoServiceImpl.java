@@ -117,6 +117,7 @@ public class GrupoServiceImpl implements GrupoService {
                 if (alumno.getRol() != Roles.ALUMNO) {
                     throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
                 }
+                validarAlumnoActivo(alumno);
                 grupo.addAlumno(alumno);
             }
         }
