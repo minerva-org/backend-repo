@@ -85,6 +85,11 @@ public class Mapper {
             builder.carrera(docente.getCarrera())
                     .tituloEdu(docente.getTituloEdu());
         }
+        if (persona instanceof Alumno alumno) {
+            builder.nombreTutor(alumno.getNombreTutor())
+                    .numeroTutor(alumno.getNumeroTutor())
+                    .fechaIngreso(alumno.getFechaIngreso());
+        }
 
         return builder.build();
     }
