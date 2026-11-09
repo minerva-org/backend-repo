@@ -40,7 +40,7 @@ class QuizServiceImplTest {
     private QuizXPreguntaRepository quizXPreguntaRepository;
 
     @Mock
-    private com.minerva.api.repository.PreguntaRepository preguntaRepository;
+    private PreguntaService preguntaService;
 
     @InjectMocks
     private QuizServiceImpl quizService;
@@ -94,8 +94,8 @@ class QuizServiceImplTest {
 
         quizService.deleteQuiz("Q-1");
 
+        verify(preguntaService).deletePregunta("P-1");
         verify(quizXPreguntaRepository).deleteAll(java.util.List.of(relacion));
-        verify(preguntaRepository).delete(relacion.getPregunta());
         verify(quizRepository).delete(quiz);
     }
 }

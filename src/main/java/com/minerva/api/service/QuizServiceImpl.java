@@ -11,12 +11,10 @@ import com.minerva.api.dto.QuizDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Persona;
-import com.minerva.api.model.Pregunta;
 import com.minerva.api.model.Quiz;
 import com.minerva.api.model.QuizXPregunta;
 import com.minerva.api.repository.GrupoRepository;
 import com.minerva.api.repository.PersonaRepository;
-import com.minerva.api.repository.PreguntaRepository;
 import com.minerva.api.repository.QuizRepository;
 import com.minerva.api.repository.QuizXPreguntaRepository;
 
@@ -31,7 +29,7 @@ public class QuizServiceImpl implements QuizService {
     private final GrupoRepository grupoRepository;
     private final PersonaRepository personaRepository;
     private final QuizXPreguntaRepository quizXPreguntaRepository;
-    private final PreguntaRepository preguntaRepository;
+    private final PreguntaService preguntaService;
 
     @Override
     @Transactional
@@ -130,13 +128,12 @@ public class QuizServiceImpl implements QuizService {
 
         List<QuizXPregunta> relacionesQuiz = quizXPreguntaRepository.findByQuizId(quizId);
         if (!relacionesQuiz.isEmpty()) {
-            List<Pregunta> preguntas = relacionesQuiz.stream()
-                .map(QuizXPregunta::getPregunta)
-                .filter(java.util.Objects::nonNull)
-                .toList();
-
+            for (QuizXPregunta relacion : relacionesQuiz) {
+                if (relacion.getPregunta() != null && relacion.getPregunta().getId() != null) {
+                    preguntaService.deletePregunta(relacion.getPregunta().getId());
+                }
+            }
             quizXPreguntaRepository.deleteAll(relacionesQuiz);
-            preguntas.forEach(preguntaRepository::delete);
         }
 
         quizRepository.delete(quiz);
