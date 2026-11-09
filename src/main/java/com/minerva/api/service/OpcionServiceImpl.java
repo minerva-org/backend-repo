@@ -43,12 +43,12 @@ public class OpcionServiceImpl implements OpcionService {
         }
         String preguntaId = opcionDTO.getPreguntaId().trim();
         Pregunta pregunta = preguntaRepository.findById(preguntaId)
-            .orElseThrow(() -> new EntityNotFoundException("Pregunta no encontrada con el id: " + preguntaId));
+                .orElseThrow(() -> new EntityNotFoundException("Pregunta no encontrada con el id: " + preguntaId));
 
         boolean esCorrecta = Boolean.TRUE.equals(opcionDTO.getEsCorrecta());
         if (esCorrecta && opcionRepository.existsByPreguntaIdAndEsCorrectaTrue(preguntaId)) {
             throw new IllegalArgumentException(
-                "Esta pregunta ya tiene una opción marcada como correcta");
+                    "Esta pregunta ya tiene una opción marcada como correcta");
         }
 
         Opcion opcion = new Opcion();
@@ -64,7 +64,7 @@ public class OpcionServiceImpl implements OpcionService {
     @Transactional
     public OpcionDTO updateOpcion(String opcionId, OpcionDTO opcionDTO) {
         Opcion opcion = opcionRepository.findById(opcionId)
-            .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con el id: " + opcionId));
+                .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con el id: " + opcionId));
 
         if (opcionDTO.getDescripcion() != null) {
             String descripcion = opcionDTO.getDescripcion().trim();
@@ -77,8 +77,8 @@ public class OpcionServiceImpl implements OpcionService {
         if (opcionDTO.getPreguntaId() != null) {
             String preguntaId = opcionDTO.getPreguntaId().trim();
             Pregunta pregunta = preguntaRepository.findById(preguntaId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                    "No existe una pregunta con el id: " + preguntaId));
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "No existe una pregunta con el id: " + preguntaId));
             opcion.setPregunta(pregunta);
         }
 
@@ -87,17 +87,11 @@ public class OpcionServiceImpl implements OpcionService {
             String preguntaId = opcion.getPregunta().getId();
 
             if (esCorrecta) {
-                if (opcionRepository.existsByPreguntaIdAndEsCorrectaTrueAndIdNot(preguntaId, opcionId)) {
-                    throw new IllegalArgumentException(
-                        "Esta pregunta ya tiene otra opción marcada como correcta");
-                }
+                List<Opcion> otras = opcionRepository.findByPreguntaIdAndEsCorrectaTrueAndIdNot(preguntaId, opcionId);
+                otras.forEach(o -> o.setEsCorrecta(false));
+                opcionRepository.saveAllAndFlush(otras);
             } else if (Boolean.TRUE.equals(opcion.getEsCorrecta())) {
-                boolean quedaAlgunaOtraCorrecta = opcionRepository
-                    .existsByPreguntaIdAndEsCorrectaTrueAndIdNot(preguntaId, opcionId);
-                if (!quedaAlgunaOtraCorrecta) {
-                    throw new IllegalArgumentException(
-                        "La pregunta debe conservar al menos una opción correcta");
-                }
+                throw new IllegalArgumentException("Para cambiar la respuesta correcta, marca la nueva opción como correcta");
             }
             opcion.setEsCorrecta(esCorrecta);
         }
@@ -109,11 +103,11 @@ public class OpcionServiceImpl implements OpcionService {
     @Transactional
     public void deleteOpcion(String opcionId) {
         Opcion opcion = opcionRepository.findById(opcionId)
-            .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con el id: " + opcionId));
+                .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con el id: " + opcionId));
 
         if (Boolean.TRUE.equals(opcion.getEsCorrecta())) {
             throw new IllegalArgumentException(
-                "No se puede eliminar la opción correcta de una pregunta. Marca otra opción como correcta primero.");
+                    "No se puede eliminar la opción correcta de una pregunta. Marca otra opción como correcta primero.");
         }
 
         opcionRepository.delete(opcion);
@@ -123,16 +117,16 @@ public class OpcionServiceImpl implements OpcionService {
     @Transactional(readOnly = true)
     public List<OpcionDTO> findAll() {
         return opcionRepository.findAll()
-            .stream()
-            .map(Mapper::toDTO)
-            .toList();
+                .stream()
+                .map(Mapper::toDTO)
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public OpcionDTO getOpcionById(String opcionId) {
         Opcion opcion = opcionRepository.findById(opcionId)
-            .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con el id: " + opcionId));
+                .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con el id: " + opcionId));
 
         return Mapper.toDTO(opcion);
     }
@@ -144,8 +138,8 @@ public class OpcionServiceImpl implements OpcionService {
             throw new EntityNotFoundException("Pregunta no encontrada con el id: " + preguntaId);
         }
         return opcionRepository.findByPreguntaId(preguntaId)
-            .stream()
-            .map(Mapper::toDTO)
-            .toList();
+                .stream()
+                .map(Mapper::toDTO)
+                .toList();
     }
 }
