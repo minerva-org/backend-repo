@@ -268,6 +268,22 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
+    public PersonaDatosCompletosResponseDTO getDirectorPlantelByPlantelId(Long plantelId) {
+        if (!plantelRepository.existsById(plantelId)) {
+            throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
+        }
+
+        Persona persona = personaRepository.findByPlantelIdAndRol(plantelId, Roles.DIRECTOR_PLANTEL)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "No existe un director de plantel para el plantel con id: " + plantelId));
+
+        return Mapper.todoPersonaDTO(persona);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public PersonaResponseDTO getPersonaById(String personaId) {
         Persona persona = personaRepository.findById(personaId)
                 .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + personaId));

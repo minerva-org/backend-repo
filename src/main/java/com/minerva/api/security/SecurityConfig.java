@@ -109,6 +109,12 @@ public class SecurityConfig {
                                 "COORDINADOR", "ROLE_COORDINADOR",
                                 "DOCENTE", "ROLE_DOCENTE")
 
+                        .requestMatchers(HttpMethod.GET, "/api/personas/plantel/*/director")
+                        .hasAnyAuthority(
+                                "DEV", "ROLE_DEV",
+                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL")
+
                         .requestMatchers("/api/**").hasAnyAuthority("DEV", "ROLE_DEV")
                         .anyRequest().authenticated())
                 .sessionManagement(

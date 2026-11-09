@@ -22,6 +22,8 @@ public interface PersonaService {
 
     List<PersonaResponseDTO> findAllByRol(Roles rol);
 
+    PersonaDatosCompletosResponseDTO getDirectorPlantelByPlantelId(Long plantelId);
+
     PersonaResponseDTO getPersonaById(String personaId);
 
     PersonaResponseDTO savePersona(PersonaRequestDTO dto);
