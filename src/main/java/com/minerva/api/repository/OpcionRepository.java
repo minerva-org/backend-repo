@@ -15,6 +15,8 @@ public interface OpcionRepository extends JpaRepository<Opcion, String> {
 
     boolean existsByPreguntaIdAndEsCorrectaTrueAndIdNot(String preguntaId, String id);
 
+    List<Opcion> findByPreguntaIdAndEsCorrectaTrueAndIdNot(String preguntaId, String id);
+
     Optional<Opcion> findByIdAndPreguntaId(String id, String preguntaId);
 
     List<Opcion> findByPreguntaIdOrderByIdAsc(String preguntaId);

@@ -3,6 +3,7 @@ package com.minerva.api.repository;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.minerva.api.model.Persona;
+import com.minerva.api.model.Plantel;
 import com.minerva.api.User.Roles;
 
 public interface PersonaRepository extends JpaRepository<Persona, String> {
@@ -17,4 +18,6 @@ public interface PersonaRepository extends JpaRepository<Persona, String> {
     List<Persona> findByPlantelIdAndRol(Long plantelId, Roles rol);
 
     List<Persona> findByPlantelIdAndRolAndActivo(Long plantelId,Roles rol, Boolean status);
+
+    Plantel findByPlantelIdAndId(Long plantelId, String personaId);
 }

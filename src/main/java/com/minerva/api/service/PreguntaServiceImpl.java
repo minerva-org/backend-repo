@@ -8,9 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Concepto;
+import com.minerva.api.model.Opcion;
 import com.minerva.api.model.Pregunta;
+import com.minerva.api.model.QuizXPregunta;
 import com.minerva.api.repository.ConceptoRepository;
+import com.minerva.api.repository.OpcionRepository;
 import com.minerva.api.repository.PreguntaRepository;
+import com.minerva.api.repository.QuizXPreguntaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,8 @@ public class PreguntaServiceImpl implements PreguntaService {
 
     private final PreguntaRepository preguntaRepository;
     private final ConceptoRepository conceptoRepository;
+    private final OpcionRepository opcionRepository;
+    private final QuizXPreguntaRepository quizXPreguntaRepository;
 
     @Override
     @Transactional
@@ -82,6 +88,16 @@ public class PreguntaServiceImpl implements PreguntaService {
     public void deletePregunta(String preguntaId) {
         Pregunta pregunta = preguntaRepository.findById(preguntaId)
             .orElseThrow(() -> new EntityNotFoundException("Pregunta no encontrada con el id: " + preguntaId));
+
+        List<Opcion> opciones = opcionRepository.findByPreguntaId(preguntaId);
+        if (!opciones.isEmpty()) {
+            opcionRepository.deleteAll(opciones);
+        }
+
+        List<QuizXPregunta> relacionesQuiz = quizXPreguntaRepository.findByPreguntaId(preguntaId);
+        if (!relacionesQuiz.isEmpty()) {
+            quizXPreguntaRepository.deleteAll(relacionesQuiz);
+        }
 
         preguntaRepository.delete(pregunta);
     }

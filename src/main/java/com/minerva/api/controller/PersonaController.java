@@ -55,6 +55,11 @@ public class PersonaController {
         return ResponseEntity.ok(personaService.findAllByRol(rol));
     }
 
+    @GetMapping("/plantel/{plantelId}/director")
+    public ResponseEntity<PersonaDatosCompletosResponseDTO> getDirectorByPlantel(@PathVariable Long plantelId) {
+        return ResponseEntity.ok(personaService.getDirectorPlantelByPlantelId(plantelId));
+    }
+
     @GetMapping("/{personaId}")
     public ResponseEntity<PersonaResponseDTO> getById(@PathVariable String personaId) {
         return ResponseEntity.ok(personaService.getPersonaById(personaId));

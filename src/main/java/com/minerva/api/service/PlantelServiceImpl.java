@@ -29,10 +29,30 @@ public class PlantelServiceImpl implements PlantelService {
 
         if (plantelRepository.existsByNombreIgnoreCase(planteldto.getNombre())) {
         throw new IllegalArgumentException("Ya existe un plantel con ese nombre");
-    }
+        }
+
+        if (planteldto.getCalle() == null || planteldto.getCalle().isBlank())
+            throw new IllegalArgumentException("La calle donde reside es obligatorio");
+
+        if (planteldto.getColonia() == null || planteldto.getColonia().isBlank())
+            throw new IllegalArgumentException("La colonia donde reside es obligatorio");
+
+        if (planteldto.getMunicipio() == null || planteldto.getMunicipio().isBlank())
+            throw new IllegalArgumentException("El municipio donde reside es obligatorio");
+
+        if (planteldto.getEstado() == null || planteldto.getEstado().isBlank())
+            throw new IllegalArgumentException("El estado donde reside es obligatorio");
+
+        if (planteldto.getCodigoPostal() == null || planteldto.getCodigoPostal().isBlank())
+            throw new IllegalArgumentException("El codigo postal de donde reside es obligatorio");
+
             Plantel plan = new Plantel();
             plan.setNombre(planteldto.getNombre());
-            plan.setDireccion(planteldto.getDireccion());
+            plan.setCalle(planteldto.getCalle());
+            plan.setColonia(planteldto.getColonia());
+            plan.setMunicipio(planteldto.getMunicipio());
+            plan.setEstado(planteldto.getEstado());
+            plan.setCodigoPostal(planteldto.getCodigoPostal());
             plan.setInstitucion(u);
             plan.setActivo(planteldto.getActivo() != null ? planteldto.getActivo() : true);
 
@@ -63,8 +83,20 @@ public class PlantelServiceImpl implements PlantelService {
             plan.setInstitucion(institucion);
         }
 
-        if (planteldto.getDireccion() != null) {
-            plan.setDireccion(planteldto.getDireccion());
+        if (planteldto.getCalle() != null) {
+            plan.setCalle(planteldto.getCalle());
+        }
+        if (planteldto.getColonia() != null) {
+            plan.setColonia(planteldto.getColonia());
+        }
+        if (planteldto.getMunicipio() != null) {
+            plan.setMunicipio(planteldto.getMunicipio());
+        }
+        if (planteldto.getEstado() != null) {
+            plan.setEstado(planteldto.getEstado());
+        }
+        if (planteldto.getCodigoPostal() != null) {
+            plan.setCodigoPostal(planteldto.getCodigoPostal());
         }
         if (planteldto.getActivo() != null) {
             plan.setActivo(planteldto.getActivo());

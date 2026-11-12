@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -43,12 +44,16 @@ public class Grupo {
     private boolean activo = true;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_docente", nullable = false)
+    @JoinColumn(name = "id_docente", nullable = true)
     private Persona docente;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_plantel", nullable = false)
     private Plantel plantel;
+
+    @OneToOne (fetch = FetchType.LAZY, optional = false)
+    @JoinColumn (name = "id_materia", nullable = false)
+    private Materia materia;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

@@ -180,6 +180,16 @@ public class PersonaServiceImpl implements PersonaService {
             if (dto.getTituloEdu() != null)
                 docente.setTituloEdu(limpiar(dto.getTituloEdu()));
         }
+        if (persona instanceof Alumno alumno) {
+            if (dto.getNombreTutor() != null)
+                alumno.setNombreTutor(limpiar(dto.getNombreTutor()));
+
+            if (dto.getNumeroTutor() != null)
+                alumno.setNumeroTutor(limpiar(dto.getNumeroTutor()));
+
+            if (dto.getFechaIngreso() != null)
+                alumno.setFechaIngreso(dto.getFechaIngreso());
+        }
 
         if (dto.getEmail() != null) {
             String email = dto.getEmail().trim();
@@ -264,6 +274,22 @@ public class PersonaServiceImpl implements PersonaService {
                 .stream()
                 .map(this::toDTOConUsername)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PersonaDatosCompletosResponseDTO getDirectorPlantelByPlantelId(Long plantelId) {
+        if (!plantelRepository.existsById(plantelId)) {
+            throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
+        }
+
+        Persona persona = personaRepository.findByPlantelIdAndRol(plantelId, Roles.DIRECTOR_PLANTEL)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "No existe un director de plantel para el plantel con id: " + plantelId));
+
+        return Mapper.todoPersonaDTO(persona);
     }
 
     @Override

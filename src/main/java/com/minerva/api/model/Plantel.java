@@ -23,8 +23,20 @@ public class Plantel {
     @Column (name = "detalles", nullable = false)
     private String nombre;
 
-    @Column (name = "direccion", nullable = false)
-    private String direccion;
+    @Column (name = "calle", nullable = false)
+    private String calle;
+
+    @Column (name = "colonia", nullable = false)
+    private String colonia;
+
+    @Column (name = "municipio", nullable = false)
+    private String municipio;
+
+    @Column (name = "estado", nullable = false)
+    private String estado;
+
+    @Column (name = "codigo_postal", nullable = false)
+    private String codigoPostal;
 
     @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn (name = "id_institucion", nullable = false)

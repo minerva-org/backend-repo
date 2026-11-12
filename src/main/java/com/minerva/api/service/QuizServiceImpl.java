@@ -12,9 +12,11 @@ import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Persona;
 import com.minerva.api.model.Quiz;
+import com.minerva.api.model.QuizXPregunta;
 import com.minerva.api.repository.GrupoRepository;
 import com.minerva.api.repository.PersonaRepository;
 import com.minerva.api.repository.QuizRepository;
+import com.minerva.api.repository.QuizXPreguntaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,8 @@ public class QuizServiceImpl implements QuizService {
     private final QuizRepository quizRepository;
     private final GrupoRepository grupoRepository;
     private final PersonaRepository personaRepository;
+    private final QuizXPreguntaRepository quizXPreguntaRepository;
+    private final PreguntaService preguntaService;
 
     @Override
     @Transactional
@@ -121,6 +125,16 @@ public class QuizServiceImpl implements QuizService {
     public void deleteQuiz(String quizId) {
         Quiz quiz = quizRepository.findById(quizId)
             .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
+
+        List<QuizXPregunta> relacionesQuiz = quizXPreguntaRepository.findByQuizId(quizId);
+        if (!relacionesQuiz.isEmpty()) {
+            for (QuizXPregunta relacion : relacionesQuiz) {
+                if (relacion.getPregunta() != null && relacion.getPregunta().getId() != null) {
+                    preguntaService.deletePregunta(relacion.getPregunta().getId());
+                }
+            }
+            quizXPreguntaRepository.deleteAll(relacionesQuiz);
+        }
 
         quizRepository.delete(quiz);
     }

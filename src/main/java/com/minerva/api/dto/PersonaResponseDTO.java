@@ -2,10 +2,11 @@ package com.minerva.api.dto;
 
 import com.minerva.api.User.Roles;
 import lombok.*;
+import java.time.Instant;
 
-@Data 
+@Data
 @Builder
-@AllArgsConstructor 
+@AllArgsConstructor
 @NoArgsConstructor
 
 public class PersonaResponseDTO {
@@ -24,4 +25,13 @@ public class PersonaResponseDTO {
     private Boolean activo;
     private Long plantelId;
     private String username;
+
+    // Cositas del docente
+    private String carrera;
+    private String tituloEdu;
+
+    // No se que me da mas risa, que se te olvidara a ti o que se me olvidara a mi
+    private String nombreTutor;
+    private String numeroTutor;
+    private Instant fechaIngreso;
 }
