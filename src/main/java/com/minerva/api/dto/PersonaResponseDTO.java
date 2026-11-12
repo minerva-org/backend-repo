@@ -2,6 +2,7 @@ package com.minerva.api.dto;
 
 import com.minerva.api.User.Roles;
 import lombok.*;
+import java.time.Instant;
 
 @Data
 @Builder
@@ -28,4 +29,9 @@ public class PersonaResponseDTO {
     // Cositas del docente
     private String carrera;
     private String tituloEdu;
+
+    // No se que me da mas risa, que se te olvidara a ti o que se me olvidara a mi
+    private String nombreTutor;
+    private String numeroTutor;
+    private Instant fechaIngreso;
 }

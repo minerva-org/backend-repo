@@ -180,6 +180,16 @@ public class PersonaServiceImpl implements PersonaService {
             if (dto.getTituloEdu() != null)
                 docente.setTituloEdu(limpiar(dto.getTituloEdu()));
         }
+        if (persona instanceof Alumno alumno) {
+            if (dto.getNombreTutor() != null)
+                alumno.setNombreTutor(limpiar(dto.getNombreTutor()));
+
+            if (dto.getNumeroTutor() != null)
+                alumno.setNumeroTutor(limpiar(dto.getNumeroTutor()));
+
+            if (dto.getFechaIngreso() != null)
+                alumno.setFechaIngreso(dto.getFechaIngreso());
+        }
 
         if (dto.getEmail() != null) {
             String email = dto.getEmail().trim();
