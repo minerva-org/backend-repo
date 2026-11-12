@@ -1,4 +1,5 @@
-name: Deploy
+name: Deploy backend
+
 on:
   push:
     branches: [main]
@@ -12,20 +13,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - name: Build frontend
-        run: |
-          cd frontend
-          npm ci && npm run build
-          mkdir -p ../backend/src/main/resources/static
-          cp -r dist/* ../backend/src/main/resources/static/
+
       - uses: actions/setup-java@v4
-        with: { java-version: '21', distribution: 'temurin' }
-      - name: Build backend
-        run: cd backend && mvn -B clean package -DskipTests
-      - uses: azure/webapps-deploy@v3
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build
+        run: mvn -B clean package -DskipTests
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
         with:
           app-name: seigeTec
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: backend/target/*.jar
+          package: target/*.jar
