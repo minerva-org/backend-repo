@@ -8,7 +8,7 @@ services:
       - 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD}'
       - 'POSTGRES_USER=${POSTGRES_USER}'
     ports:
-      - "5433:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -29,10 +29,21 @@ services:
       - 'JWT_SECRET=${JWT_SECRET}'
       - 'SPRING_PROFILES_ACTIVE=dev'
     ports:
-      - "8080:8080"
+      - "127.0.0.1:${API_PORT:-8080}:8080"
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
+  
+  caddy:
+    image: caddy:2
+    ports:
+    - "127.0.0.1:${CADDY_PORT:-8090}:80"
+    volumes:
+    - "./Caddyfile:/etc/caddy/Caddyfile:ro"
+    - "../frontend-repo/apps/web/dist:/srv:ro"
+    depends_on:
+    - api
     restart: unless-stopped
  
 volumes:
