@@ -31,6 +31,17 @@ import com.minerva.api.model.Unidad;
 import com.minerva.api.model.Institucion;
 
 public class Mapper {
+
+    // private static Long toLongOrNull(String value) {
+    //     if (value == null || value.isBlank()) {
+    //         return null;
+    //     }
+    //     try {
+    //         return Long.valueOf(value.trim());
+    //     } catch (NumberFormatException ex) {
+    //         return null;
+    //     }
+    // }
     public static PlantelDTO toDTO(Plantel plantel) {
         if (plantel == null)
             return null;
@@ -125,6 +136,8 @@ public class Mapper {
                 .nombre(materia.getNombre())
                 .prefijo(materia.getPrefijo())
                 .planEstudioId(materia.getPlanEstudio() != null ? materia.getPlanEstudio().getId() : null)
+            .plantelId((materia.getPlantelId()))
+            .materiaBaseId(materia.getMateriaBaseId())
                 .activo(materia.getActivo())
                 .build();
     }

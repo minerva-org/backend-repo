@@ -31,6 +31,11 @@ public class MateriaController {
         return ResponseEntity.ok(materiaService.findAll());
     }
 
+    @GetMapping(params = "plantelId")
+    public ResponseEntity<List<MateriaDTO>> getAllMateriasByPlantelId(@RequestParam Long plantelId){
+        return ResponseEntity.ok(materiaService.findAllByIdplantel(plantelId));
+    }
+
     @GetMapping("/{materiaId}")
     public ResponseEntity<MateriaDTO> getMateriaById(@PathVariable String materiaId){
         return ResponseEntity.ok(materiaService.getMateriaById(materiaId));
@@ -43,8 +48,11 @@ public class MateriaController {
     }
 
     @PatchMapping("/{materiaId}")
-    public ResponseEntity<MateriaDTO> updateMateria(@PathVariable String materiaId, @RequestBody MateriaDTO materiaDTO){
-        return ResponseEntity.ok(materiaService.updateMateria(materiaId, materiaDTO));
+    public ResponseEntity<MateriaDTO> updateMateria(
+            @PathVariable String materiaId,
+            @RequestBody MateriaDTO materiaDTO,
+            @RequestParam(required = false) Long plantelId){
+        return ResponseEntity.ok(materiaService.updateMateria(materiaId, materiaDTO, plantelId));
     }
 
     @PatchMapping("/{materiaId}/estado")

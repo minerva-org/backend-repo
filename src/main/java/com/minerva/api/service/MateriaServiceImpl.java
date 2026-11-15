@@ -1,5 +1,8 @@
 package com.minerva.api.service;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,7 @@ import com.minerva.api.model.Unidad;
 import com.minerva.api.repository.ConceptoRepository;
 import com.minerva.api.repository.MateriaRepository;
 import com.minerva.api.repository.PlanEstudioRepository;
+import com.minerva.api.repository.PlantelRepository;
 import com.minerva.api.repository.TemaRepository;
 import com.minerva.api.repository.UnidadRepository;
 
@@ -29,9 +33,82 @@ public class MateriaServiceImpl implements MateriaService{
 
     private final MateriaRepository materiaRepository;
     private final PlanEstudioRepository planEstudioRepository;
+    private final PlantelRepository plantelRepository;
     private final UnidadRepository unidadRepository;
     private final TemaRepository temaRepository;
     private final ConceptoRepository conceptoRepository;
+
+    private String nextId() {
+        return UUID.randomUUID().toString();
+    }
+
+    private String toPlantelValue(Long plantelId) {
+        return plantelId == null ? null : plantelId.toString();
+    }
+
+    private boolean existsByNombreInScope(String nombre, String plantelId) {
+        if (plantelId == null) {
+            return materiaRepository.existsByNombreIgnoreCaseAndPlantelIdIsNull(nombre);
+        }
+        return materiaRepository.existsByNombreIgnoreCaseAndPlantelId(nombre, plantelId);
+    }
+
+    private boolean existsByNombreInScopeAndIdNot(String nombre, Long plantelId, String materiaId) {
+        if (plantelId == null) {
+            return materiaRepository.existsByNombreIgnoreCaseAndPlantelIdIsNullAndIdNot(nombre, materiaId);
+        }
+        return materiaRepository.existsByNombreIgnoreCaseAndPlantelIdAndIdNot(nombre, plantelId, materiaId);
+    }
+
+    private void copyNestedHierarchy(Materia sourceMateria, Materia targetMateria) {
+        List<Unidad> unidadesBase = unidadRepository.findByMateriaId(sourceMateria.getId());
+        for (Unidad unidadBase : unidadesBase) {
+            Unidad unidadCopia = new Unidad();
+            unidadCopia.setId(nextId());
+            unidadCopia.setNombre(unidadBase.getNombre());
+            unidadCopia.setActivo(unidadBase.getActivo());
+            unidadCopia.setMateria(targetMateria);
+            Unidad unidadGuardada = unidadRepository.save(unidadCopia);
+
+            List<Tema> temasBase = temaRepository.findByUnidadId(unidadBase.getId());
+            for (Tema temaBase : temasBase) {
+                Tema temaCopia = new Tema();
+                temaCopia.setId(nextId());
+                temaCopia.setNombre(temaBase.getNombre());
+                temaCopia.setActivo(temaBase.getActivo());
+                temaCopia.setUnidad(unidadGuardada);
+                Tema temaGuardado = temaRepository.save(temaCopia);
+
+                List<Concepto> conceptosBase = conceptoRepository.findByTemaId(temaBase.getId());
+                for (Concepto conceptoBase : conceptosBase) {
+                    Concepto conceptoCopia = new Concepto();
+                    conceptoCopia.setId(nextId());
+                    conceptoCopia.setNombre(conceptoBase.getNombre());
+                    conceptoCopia.setActivo(conceptoBase.getActivo());
+                    conceptoCopia.setTema(temaGuardado);
+                    conceptoRepository.save(conceptoCopia);
+                }
+            }
+        }
+    }
+
+    private Materia createPlantelOverrideIfNeeded(Materia materiaBase, Long plantelId) {
+        return materiaRepository.findByPlantelIdAndMateriaBaseId(plantelId, materiaBase.getId())
+            .orElseGet(() -> {
+                Materia copia = new Materia();
+                copia.setId(nextId());
+                copia.setNombre(materiaBase.getNombre());
+                copia.setPrefijo(materiaBase.getPrefijo());
+                copia.setPlanEstudio(materiaBase.getPlanEstudio());
+                copia.setPlantelId(plantelId);
+                copia.setMateriaBaseId(materiaBase.getId());
+                copia.setActivo(materiaBase.getActivo());
+
+                Materia copiaGuardada = materiaRepository.save(copia);
+                copyNestedHierarchy(materiaBase, copiaGuardada);
+                return copiaGuardada;
+            });
+    }
 
     private MateriaDTO toMateriaDetailDto(Materia materia) {
         MateriaDTO dto = Mapper.toDTO(materia);
@@ -135,8 +212,12 @@ public class MateriaServiceImpl implements MateriaService{
             throw new IllegalArgumentException("El nombre es obligatorio");
         }
         String nombre = materiaDTO.getNombre().trim();
-        if (materiaRepository.existsByNombreIgnoreCase(nombre)) {
+        String plantelId = toPlantelValue(materiaDTO.getPlantelId());
+        if (existsByNombreInScope(nombre, plantelId)) {
             throw new IllegalArgumentException("Ya existe una materia con ese nombre");
+        }
+        if (materiaDTO.getPlantelId() != null && !plantelRepository.existsById(materiaDTO.getPlantelId())) {
+            throw new EntityNotFoundException("Plantel no encontrado con el id: " + materiaDTO.getPlantelId());
         }
 
         String planEstudioId = materiaDTO.getPlanEstudioId();
@@ -152,6 +233,8 @@ public class MateriaServiceImpl implements MateriaService{
         materia.setNombre(nombre);
         materia.setPrefijo(materiaDTO.getPrefijo());
         materia.setPlanEstudio(planEstudio);
+        materia.setPlantelId(materiaDTO.getPlantelId());
+        materia.setMateriaBaseId(materiaDTO.getMateriaBaseId());
         materia.setActivo(materiaDTO.getActivo() != null ? materiaDTO.getActivo() : true);
 
         Materia materiaGuardada = materiaRepository.save(materia);
@@ -162,19 +245,38 @@ public class MateriaServiceImpl implements MateriaService{
     @Override
     @Transactional
     public MateriaDTO updateMateria(String materiaId, MateriaDTO materiaDTO) {
+        return updateMateria(materiaId, materiaDTO, null);
+    }
+
+    @Override
+    @Transactional
+    public MateriaDTO updateMateria(String materiaId, MateriaDTO materiaDTO, Long plantelId) {
         Materia materia = materiaRepository.findById(materiaId)
             .orElseThrow(() -> new EntityNotFoundException(
                 "Materia no encontrada con el Id: " + materiaId));
+
+        Materia materiaObjetivo = materia;
+        if (plantelId != null) {
+            if (!plantelRepository.existsById(plantelId)) {
+                throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
+            }
+            String plantelValue = toPlantelValue(plantelId);
+            if (materia.getPlantelId() == null) {
+                materiaObjetivo = createPlantelOverrideIfNeeded(materia, plantelId);
+            } else if (!materia.getPlantelId().equals(plantelValue)) {
+                throw new IllegalArgumentException("La materia no pertenece al plantel indicado");
+            }
+        }
 
         if (materiaDTO.getNombre() != null) {
             String nombre = materiaDTO.getNombre().trim();
             if (nombre.isEmpty()) {
                 throw new IllegalArgumentException("El nombre no puede estar vacío");
             }
-            if (materiaRepository.existsByNombreIgnoreCaseAndIdNot(nombre, materiaId)) {
+            if (existsByNombreInScopeAndIdNot(nombre, materiaObjetivo.getPlantelId(), materiaObjetivo.getId())) {
                 throw new IllegalArgumentException("Ya existe una materia con ese nombre");
             }
-            materia.setNombre(nombre);
+            materiaObjetivo.setNombre(nombre);
         }
 
         if (materiaDTO.getPrefijo() != null) {
@@ -182,23 +284,23 @@ public class MateriaServiceImpl implements MateriaService{
             if (prefijo.isEmpty()) {
                 throw new IllegalArgumentException("El prefijo no puede estar vacío");
             }
-            materia.setPrefijo(prefijo);
+            materiaObjetivo.setPrefijo(prefijo);
         }
 
         if (materiaDTO.getPlanEstudioId() != null && !materiaDTO.getPlanEstudioId().isBlank()) {
             PlanEstudio planEstudio = planEstudioRepository.findById(materiaDTO.getPlanEstudioId())
                 .orElseThrow(() -> new EntityNotFoundException(
                     "Plan de estudio no encontrado con el Id: " + materiaDTO.getPlanEstudioId()));
-            materia.setPlanEstudio(planEstudio);
+            materiaObjetivo.setPlanEstudio(planEstudio);
         } else if (materiaDTO.getPlanEstudioId() != null && materiaDTO.getPlanEstudioId().isBlank()) {
-            materia.setPlanEstudio(null);
+            materiaObjetivo.setPlanEstudio(null);
         }
 
         if(materiaDTO.getActivo() != null){
-            materia.setActivo(materiaDTO.getActivo());
+            materiaObjetivo.setActivo(materiaDTO.getActivo());
         }
 
-        Materia materiaActualizada = materiaRepository.save(materia);
+        Materia materiaActualizada = materiaRepository.save(materiaObjetivo);
         persistNestedHierarchy(materiaActualizada, materiaDTO.getUnidades());
         return toMateriaDetailDto(materiaActualizada);
     }
@@ -230,6 +332,36 @@ public class MateriaServiceImpl implements MateriaService{
             .stream()
             .map(this::toMateriaDetailDto)
             .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MateriaDTO> findAllByIdplantel(Long plantelId) {
+        List<Materia> materiasBase = materiaRepository.findByPlantelIdIsNull();
+        List<Materia> materiasDePlantel = materiaRepository.findByPlantelId(plantelId);
+
+        // Mapeamos las materias base por su ID
+        Map<String, Materia> resultadoPorId = new LinkedHashMap<>();
+        for (Materia base : materiasBase) {
+            if (base.getId() != null) {
+                resultadoPorId.put(base.getId(), base);
+            }
+        }
+
+        // reemplazamos y agregamos materias
+        for (Materia materiaPlantel : materiasDePlantel) {
+            String materiaBaseId = materiaPlantel.getMateriaBaseId();
+            if (materiaBaseId != null) {
+                resultadoPorId.remove(materiaBaseId);
+            }
+            if (materiaPlantel.getId() != null) {
+                resultadoPorId.put(materiaPlantel.getId(), materiaPlantel);
+            }
+        }
+
+        return resultadoPorId.values().stream()
+                .map(this::toMateriaDetailDto)
+                .toList();
     }
 
     @Override

@@ -30,6 +30,12 @@ public class Materia {
     @ManyToOne (fetch = FetchType.LAZY)
     private PlanEstudio planEstudio;
 
+    @Column(name = "id_plantel")
+    private Long plantelId;
+
+    @Column(name = "id_materia_base")
+    private String materiaBaseId;
+
     @Column (name = "activo", nullable = false)
     private Boolean activo = true;
 }

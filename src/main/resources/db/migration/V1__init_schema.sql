@@ -78,9 +78,12 @@ CREATE TABLE materia (
     detalles VARCHAR(255) NOT NULL,
     prefijo VARCHAR(255) NOT NULL,
     id_plan_estudio VARCHAR(255) NOT NULL,
+    id_plantel BIGINT,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_materia_plan_estudio
-        FOREIGN KEY (id_plan_estudio) REFERENCES plan_estudio (detalles)
+        FOREIGN KEY (id_plan_estudio) REFERENCES plan_estudio (detalles),
+    CONSTRAINT fk_materia_plantel
+        FOREIGN KEY (id_plantel) REFERENCES planteles (id)
 );
 
 CREATE TABLE unidad (
