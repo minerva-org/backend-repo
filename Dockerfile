@@ -4,7 +4,7 @@ WORKDIR /workspace
 COPY . .
 RUN sed -i 's/\r$//' mvnw && chmod +x mvnw && ./mvnw -DskipTests package
 
-FROM eclipse-temurin:26-jre
+FROM eclipse-temurin:25-jre
 WORKDIR /app
 
 COPY --from=build /workspace/target/*.jar /app/app.jar

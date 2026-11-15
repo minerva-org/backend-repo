@@ -29,6 +29,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(authRequest -> authRequest
                                                 .requestMatchers("/auth/**").permitAll()
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
 
                                                 .requestMatchers("/api/planteles/**")
                                                 .hasAnyAuthority(

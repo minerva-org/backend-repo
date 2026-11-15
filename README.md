@@ -58,6 +58,16 @@ La API debería quedar corriendo en `http://localhost:8080` (ajustar si el puert
 
 La configuración vive en `src/main/resources/application.properties` (o `.yml` si se migra más adelante). Variables sensibles (credenciales de base de datos, secrets de JWT, etc.) no deben commitearse — usar variables de entorno o un `application-local.properties` ignorado por git.
 
+Los puertos publicados por Docker Compose se pueden configurar en el `.env` local:
+
+| Variable | Valor predeterminado | Servicio |
+|---|---:|---|
+| `POSTGRES_PORT` | 5433 | PostgreSQL |
+| `API_PORT` | 8080 | API |
+| `CADDY_PORT` | 8090 | Caddy |
+
+Los puertos se publican solo en `127.0.0.1`; los puertos internos de los contenedores no cambian. Si cambias `API_PORT` y usas el servidor de desarrollo web, configura `VITE_API_URL` en el entorno de Vite para apuntar a `http://localhost:<API_PORT>`. Si cambias `CADDY_PORT` y usas Tailscale Funnel, actualiza el puerto de destino de Funnel.
+
 <!-- TODO: documentar las variables de entorno reales una vez definidas -->
 
 ## Migraciones de base de datos
