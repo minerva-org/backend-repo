@@ -1,11 +1,11 @@
 package com.minerva.api.mapper;
 
-import com.minerva.api.dto.AlumnoDTO;
 import com.minerva.api.dto.ConceptoDTO;
-import com.minerva.api.dto.DocenteDTO;
+import com.minerva.api.dto.ConfiguracionDTO;
 import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.dto.MateriaDTO;
 import com.minerva.api.dto.OpcionDTO;
+import com.minerva.api.dto.PeriodoDTO;
 import com.minerva.api.dto.PersonaDatosCompletosResponseDTO;
 import com.minerva.api.dto.PersonaResponseDTO;
 import com.minerva.api.dto.PlantelDTO;
@@ -17,10 +17,12 @@ import com.minerva.api.dto.UnidadDTO;
 import com.minerva.api.dto.InstitucionDTO;
 import com.minerva.api.model.Alumno;
 import com.minerva.api.model.Concepto;
+import com.minerva.api.model.Configuracion;
 import com.minerva.api.model.Docente;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Materia;
 import com.minerva.api.model.Opcion;
+import com.minerva.api.model.Periodo;
 import com.minerva.api.model.Persona;
 import com.minerva.api.model.Plantel;
 import com.minerva.api.model.Pregunta;
@@ -31,6 +33,17 @@ import com.minerva.api.model.Unidad;
 import com.minerva.api.model.Institucion;
 
 public class Mapper {
+
+    // private static Long toLongOrNull(String value) {
+    //     if (value == null || value.isBlank()) {
+    //         return null;
+    //     }
+    //     try {
+    //         return Long.valueOf(value.trim());
+    //     } catch (NumberFormatException ex) {
+    //         return null;
+    //     }
+    // }
     public static PlantelDTO toDTO(Plantel plantel) {
         if (plantel == null)
             return null;
@@ -125,6 +138,8 @@ public class Mapper {
                 .nombre(materia.getNombre())
                 .prefijo(materia.getPrefijo())
                 .planEstudioId(materia.getPlanEstudio() != null ? materia.getPlanEstudio().getId() : null)
+            .plantelId((materia.getPlantelId()))
+            .materiaBaseId(materia.getMateriaBaseId())
                 .activo(materia.getActivo())
                 .build();
     }
@@ -226,5 +241,27 @@ public class Mapper {
                 .alumnosIds(grupo.getAlumnos() == null ? java.util.Collections.emptyList()
                         : grupo.getAlumnos().stream().map(Persona::getId).toList())
                 .build();
+    }
+
+    public static PeriodoDTO toDTO(Periodo periodo){
+        if(periodo == null) return null;
+
+        return new PeriodoDTO(
+            periodo.getId(),
+            periodo.getDescripcion(),
+            periodo.getCurso(),
+            periodo.getFechaCreacion()
+        );
+    }
+
+    public static ConfiguracionDTO toDTO(Configuracion configuracion){
+        if(configuracion == null) return null;
+
+        return new ConfiguracionDTO(
+            configuracion.getId(),
+            configuracion.getValor(),
+            configuracion.getDescripcion(),
+            configuracion.getFechaActualizacion()
+        );
     }
 }

@@ -2,7 +2,6 @@ package com.minerva.api.service;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.minerva.api.User.Roles;
@@ -20,7 +19,6 @@ public class AuthService {
 
         private final UserRepository userRespository;
         private final JwtService jwtService;
-        private final PasswordEncoder passwordEncoder;
         private final AuthenticationManager authenticationManager;
 
         public AuthResponse login(LoginRequest request) {
