@@ -28,6 +28,8 @@ services:
       - 'SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}'
       - 'JWT_SECRET=${JWT_SECRET}'
       - 'SPRING_PROFILES_ACTIVE=dev'
+      - 'AI_SERVICE_BASE_URL=${AI_SERVICE_BASE_URL:-http://host.docker.internal:8000}'
+      - 'AI_SERVICE_API_KEY=${AI_SERVICE_API_KEY:?Configura AI_SERVICE_API_KEY en backend-repo/.env}'
     ports:
       - "127.0.0.1:${API_PORT:-8080}:8080"
     depends_on:
