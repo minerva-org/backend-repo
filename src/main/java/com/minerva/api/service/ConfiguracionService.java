@@ -11,6 +11,8 @@ public interface ConfiguracionService {
     
     List<ConfiguracionDTO> findAll();
 
+    ConfiguracionDTO findConfiguracionById(String configId);
+
     ConfiguracionDTO getConfiguracionById(String ConfiguracionId);
 
     ConfiguracionDTO cambiarPeriodoActual(String periodoId);

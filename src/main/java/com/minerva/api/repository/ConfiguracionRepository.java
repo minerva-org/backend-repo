@@ -10,4 +10,5 @@ public interface ConfiguracionRepository extends JpaRepository<Configuracion, St
     List<Configuracion> findAll();
 
     Configuracion findByValor(String valor);
+
 }

@@ -44,6 +44,14 @@ public class ConfiguracionServiceImpl implements ConfiguracionService{
     }
 
     @Override
+    public ConfiguracionDTO findConfiguracionById(String configId){
+        Configuracion config = configuracionRepository.findById(configId)
+            .orElseThrow(() -> new EntityNotFoundException("No se encontró la configuración con el siguiente ID: " + configId));
+
+        return Mapper.toDTO(config);
+    }
+
+    @Override
     public ConfiguracionDTO cambiarPeriodoActual(String periodoId){
         if(periodoId == null)
             throw new IllegalArgumentException("El periodo es obligatorio para el cambio");

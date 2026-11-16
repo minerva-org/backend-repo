@@ -19,6 +19,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping ("api/config")
 public class ConfiguracionController{
     private final ConfiguracionService configuracionService;
+    private final String configuracionPeriodoId = "PERIODO";
+    
+    @GetMapping("/periodo-actual")
+    public ResponseEntity<ConfiguracionDTO> findPeriodoActual(){
+        return ResponseEntity.ok(configuracionService.findConfiguracionById(configuracionPeriodoId));
+    }
 
     @PatchMapping("/cambiar-periodo/{periodoId}")
     public ResponseEntity<ConfiguracionDTO> cambiarPeriodoActual(@PathVariable String periodoId){
@@ -30,5 +36,6 @@ public class ConfiguracionController{
     public ResponseEntity<List<ConfiguracionDTO>> findAllConfiguraciones(){
         return ResponseEntity.ok(configuracionService.findAll());
     }
+
 
 }
