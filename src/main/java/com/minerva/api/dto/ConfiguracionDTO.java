@@ -1,5 +1,5 @@
 package com.minerva.api.dto;
 
-public class ConfiguracionDTO {
-    
-}
+import java.time.Instant;
+
+public record ConfiguracionDTO (String id, String valor, String descripcion, Instant fechaModificacion){}
