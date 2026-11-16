@@ -1,6 +1,9 @@
 package com.minerva.api.controller;
 
 import java.util.List;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +14,8 @@ import com.minerva.api.dto.PersonaResponseDTO;
 import com.minerva.api.User.Roles;
 import com.minerva.api.service.PersonaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/api/personas")
@@ -24,8 +29,8 @@ public class PersonaController {
         return ResponseEntity.ok(personaService.findAll());
     }
 
-    @GetMapping ("/detalles")
-    public ResponseEntity<List<PersonaDatosCompletosResponseDTO>> getAllDatos(){
+    @GetMapping("/detalles")
+    public ResponseEntity<List<PersonaDatosCompletosResponseDTO>> getAllDatos() {
         return ResponseEntity.ok(personaService.findAllDatos());
     }
 
@@ -35,18 +40,22 @@ public class PersonaController {
     }
 
     // @GetMapping(params = {"plantelId", "rol=DOCENTE"})
-    // public ResponseEntity<List<PersonaDTO>> getDocentesByPlantel(@RequestParam Long plantelId) {
-    //     return ResponseEntity.ok(personaService.findAllDocentesByPlantelId(plantelId));
+    // public ResponseEntity<List<PersonaDTO>> getDocentesByPlantel(@RequestParam
+    // Long plantelId) {
+    // return
+    // ResponseEntity.ok(personaService.findAllDocentesByPlantelId(plantelId));
     // }
 
     // @GetMapping(params = {"plantelId", "rol=ALUMNO"})
-    // public ResponseEntity<List<PersonaDTO>> getAlumnosByPlantel(@RequestParam Long plantelId) {
-    //     return ResponseEntity.ok(personaService.findAllByPlantelIdAndRol(plantelId, Roles.ALUMNO));
+    // public ResponseEntity<List<PersonaDTO>> getAlumnosByPlantel(@RequestParam
+    // Long plantelId) {
+    // return ResponseEntity.ok(personaService.findAllByPlantelIdAndRol(plantelId,
+    // Roles.ALUMNO));
     // }
 
-    @GetMapping(params = {"plantelId", "rol"})
+    @GetMapping(params = { "plantelId", "rol" })
     public ResponseEntity<List<PersonaResponseDTO>> getAlumnosActivosByPlantel(
-        @RequestParam Long plantelId, @RequestParam Roles rol, @RequestParam (required = false) Boolean activo) {
+            @RequestParam Long plantelId, @RequestParam Roles rol, @RequestParam(required = false) Boolean activo) {
         return ResponseEntity.ok(personaService.findAllByPlantelIdAndRolAndStatus(plantelId, rol, activo));
     }
 
@@ -65,13 +74,27 @@ public class PersonaController {
         return ResponseEntity.ok(personaService.getPersonaById(personaId));
     }
 
+    @GetMapping(value = "/paginados", params = { "plantelId", "rol" })
+    public ResponseEntity<Page<PersonaResponseDTO>> getPersonasPaginadas(@RequestParam Long plantelId,
+            @RequestParam Roles rol, @RequestParam(required = false) Boolean activo,
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        if (page < 0 || size < 1 || size > 100) {
+            throw new IllegalArgumentException("Parametros de paginacion invalidos");
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
+
+        return ResponseEntity.ok(personaService.findAllByPlantelIdAndRolAndStatus(plantelId, rol, activo, pageable));
+    }
+
     @PostMapping
     public ResponseEntity<PersonaResponseDTO> save(@RequestBody PersonaRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(personaService.savePersona(dto));
     }
 
     @PatchMapping("/{personaId}")
-    public ResponseEntity<PersonaResponseDTO> update(@PathVariable String personaId, @RequestBody PersonaRequestDTO dto) {
+    public ResponseEntity<PersonaResponseDTO> update(@PathVariable String personaId,
+            @RequestBody PersonaRequestDTO dto) {
         return ResponseEntity.ok(personaService.updatePersona(personaId, dto));
     }
 

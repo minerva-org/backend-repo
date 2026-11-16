@@ -19,36 +19,35 @@ public class PeriodoServiceImpl implements PeriodoService {
     private final PeriodoRepository periodoRepository;
 
     @Override
-    public List<PeriodoDTO> findAll(){
+    public List<PeriodoDTO> findAll() {
         return periodoRepository.findAll()
-            .stream()
-            .map(Mapper::toDTO)
-            .toList();
+                .stream()
+                .map(Mapper::toDTO)
+                .toList();
     }
-    
+
     @Override
-    public PeriodoDTO nuevoPeriodo(){
+    public PeriodoDTO nuevoPeriodo() {
         Periodo periodo = periodoRepository.findFirstByOrderByFechaCreacionDesc();
-        
+
         String curso;
         String descripcion;
-        if(periodo.getDescripcion().equals("ENE-JUN")){
+        if (periodo.getDescripcion().equals("ENE-JUN")) {
             descripcion = ("AGO-DIC");
             curso = (periodo.getCurso());
         } else {
             descripcion = ("ENE-JUN");
-            int anio = Integer.parseInt(periodo.getCurso())+1;
+            int anio = Integer.parseInt(periodo.getCurso()) + 1;
             curso = (String.valueOf(anio));
         }
-        
+
         Periodo nuevoPeriodo = new Periodo();
         nuevoPeriodo.setDescripcion(descripcion);
         nuevoPeriodo.setCurso(curso);
         nuevoPeriodo.setFechaCreacion(Instant.now());
-        
 
         periodoRepository.save(nuevoPeriodo);
         return Mapper.toDTO(nuevoPeriodo);
     }
-    
+
 }
