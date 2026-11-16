@@ -20,7 +20,6 @@ public class AuthService {
 
         private final UserRepository userRespository;
         private final JwtService jwtService;
-        private final PasswordEncoder passwordEncoder;
         private final AuthenticationManager authenticationManager;
 
         public AuthResponse login(LoginRequest request) {
