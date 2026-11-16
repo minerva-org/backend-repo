@@ -24,6 +24,9 @@ import com.minerva.api.User.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 @Service
 @RequiredArgsConstructor
 public class PersonaServiceImpl implements PersonaService {
@@ -358,5 +361,20 @@ public class PersonaServiceImpl implements PersonaService {
         }
 
         return candidate;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PersonaResponseDTO> findAllByPlantelIdAndRolAndStatus(Long plantelId, Roles rol, Boolean activo,
+            Pageable pageable) {
+        Page<Persona> personas;
+
+        if (activo != null) {
+            personas = personaRepository.findByPlantelIdAndRolAndActivo(plantelId, rol, activo, pageable);
+        } else {
+            personas = personaRepository.findByPlantelIdAndRol(plantelId, rol, pageable);
+        }
+
+        return personas.map(this::toDTOConUsername);
     }
 }
