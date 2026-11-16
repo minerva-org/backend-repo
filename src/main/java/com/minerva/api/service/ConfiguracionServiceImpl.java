@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.minerva.api.dto.ConfiguracionDTO;
-import com.minerva.api.dto.PeriodoDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Configuracion;
 import com.minerva.api.model.Periodo;

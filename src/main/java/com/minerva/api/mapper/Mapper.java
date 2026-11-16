@@ -1,9 +1,7 @@
 package com.minerva.api.mapper;
 
-import com.minerva.api.dto.AlumnoDTO;
 import com.minerva.api.dto.ConceptoDTO;
 import com.minerva.api.dto.ConfiguracionDTO;
-import com.minerva.api.dto.DocenteDTO;
 import com.minerva.api.dto.GrupoDTO;
 import com.minerva.api.dto.MateriaDTO;
 import com.minerva.api.dto.OpcionDTO;
