@@ -1,7 +1,10 @@
 package com.minerva.api.service;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.Base64;
+import java.util.HexFormat;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -14,11 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.minerva.api.dto.DocumentoDTO;
 import com.minerva.api.dto.FileDTO;
 
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
@@ -36,19 +41,22 @@ public class FileStorageService {
     private static final String DEFAULT_DOCUMENTS_PREFIX = "documentos/";
 
     private final S3Client s3Client;
+    private final DocumentoService documentoService;   // NUEVO
     private final String bucket;
     private final String documentsPrefix;
 
     public FileStorageService(
             S3Client s3Client,
+            DocumentoService documentoService,
             @Value("${app.storage.s3.bucket}") String bucket,
             @Value("${app.storage.s3.documents-prefix:documentos/}") String documentsPrefix) {
         this.s3Client = s3Client;
+        this.documentoService = documentoService;
         this.bucket = bucket;
         this.documentsPrefix = normalizePrefix(documentsPrefix);
     }
 
-    public FileDTO upload(MultipartFile file) {
+    public FileDTO upload(MultipartFile file, String uploadedBy) {
         if (file == null || file.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selecciona un archivo PDF.");
         }
@@ -88,6 +96,25 @@ public class FileStorageService {
         } catch (S3Exception exception) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                     "No se pudo guardar el archivo en el almacenamiento S3.");
+        }
+
+        try {
+            documentoService.saveDocumento(new DocumentoDTO(
+                    null,
+                    objectKey,
+                    originalName,
+                    "application/pdf",
+                    content.length,
+                    sha256Hex(content),
+                    uploadedBy,
+                    null));
+        } catch (RuntimeException exception) {
+            // por si falla la BD, no dejamos el archivo huérfano en S3
+            try {
+                s3Client.deleteObject(DeleteObjectRequest.builder().bucket(bucket).key(objectKey).build());
+            } catch (S3Exception ignored) {
+            }
+            throw exception;
         }
 
         return new FileDTO(fileId, originalName, "application/pdf", content.length);
@@ -130,6 +157,14 @@ public class FileStorageService {
             }
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                     "No se pudo recuperar el archivo del almacenamiento S3.");
+        }
+    }
+
+        private static String sha256Hex(byte[] content) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 no disponible", e);
         }
     }
 
