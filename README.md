@@ -76,6 +76,33 @@ Los puertos se publican solo en `127.0.0.1`; los puertos internos de los contene
 
 <!-- TODO: documentar las variables de entorno reales una vez definidas -->
 
+## Laboratorio de agente (solo DEV)
+
+El frontend usa estos endpoints con su JWT habitual:
+
+| Metodo | Ruta | Funcion |
+|---|---|---|
+| GET | `/api/ai/laboratory/documents/prompts` | Cargar las tres capas iniciales desde AI-Service |
+| POST | `/api/ai/laboratory/documents/extract` | Reenviar PDF y configuracion de una prueba |
+
+Ambos requieren autoridad `DEV` o `ROLE_DEV`. El POST recibe multipart con
+`file` y una parte `request` de tipo `application/json` que contiene
+`sourceType` (`STUDY_PLAN` o `SOURCE_MATERIAL`) y `prompts`
+(`role`, `instructions`, `outputContract`).
+
+Se utilizan `AI_SERVICE_BASE_URL` y `AI_SERVICE_API_KEY`, igual que para el
+health. La clave interna se agrega en el backend y nunca se envia al navegador.
+No se necesita configurar el modelo en la API: lo elige AI-Service.
+El cliente del laboratorio tiene 10 s de conexion y 240 s de espera de respuesta;
+el tiempo de Ollama debe mantenerse por debajo de ese presupuesto.
+
+La API conserva HTTP 422 y los diagnosticos del modelo, asi como errores de
+entrada/disponibilidad del servicio. Errores internos de autenticacion de
+AI-Service o respuestas incompatibles se presentan como HTTP 502.
+Las respuestas reenviadas usan `Cache-Control: no-store`.
+Los limites multipart existentes son 10 MiB por archivo y 11 MiB por solicitud.
+No se guarda ningun documento ni arbol y no se requieren migraciones.
+
 ## Migraciones de base de datos
 
 Las migraciones se manejan con Flyway, ubicadas en `src/main/resources/db/migration/`. **No uses `ddl-auto: update`** en ningún ambiente — todo cambio de esquema debe ir en una migración versionada.

@@ -31,6 +31,9 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
 
+                                                .requestMatchers("/api/ai/laboratory/**")
+                                                .hasAnyAuthority("DEV", "ROLE_DEV")
+
                                                 .requestMatchers("/api/config/**")
                                                 .hasAnyAuthority(
                                                                 "DEV", "ROLE_DEV",
