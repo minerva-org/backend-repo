@@ -1,7 +1,10 @@
 package com.minerva.api.service;
 
+import java.text.Normalizer;
 import java.util.Base64;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +21,10 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Service
@@ -27,15 +33,19 @@ public class FileStorageService {
     private static final long MAX_FILE_SIZE = 10L * 1024 * 1024;
     private static final byte[] PDF_SIGNATURE = "%PDF-".getBytes(java.nio.charset.StandardCharsets.US_ASCII);
     private static final String ORIGINAL_FILENAME_METADATA = "original-filename-b64";
+    private static final String DEFAULT_DOCUMENTS_PREFIX = "documentos/";
 
     private final S3Client s3Client;
     private final String bucket;
+    private final String documentsPrefix;
 
     public FileStorageService(
             S3Client s3Client,
-            @Value("${app.storage.s3.bucket}") String bucket) {
+            @Value("${app.storage.s3.bucket}") String bucket,
+            @Value("${app.storage.s3.documents-prefix:documentos/}") String documentsPrefix) {
         this.s3Client = s3Client;
         this.bucket = bucket;
+        this.documentsPrefix = normalizePrefix(documentsPrefix);
     }
 
     public FileDTO upload(MultipartFile file) {
@@ -84,15 +94,35 @@ public class FileStorageService {
     }
 
     public StoredFile download(UUID fileId) {
+        return downloadByObjectKey(objectKey(fileId), fileId + ".pdf");
+    }
+
+    public StoredFile downloadByReference(String planEstudio, String fuente) {
+        String planToken = toComparableToken(planEstudio);
+        String fuenteToken = toComparableToken(fuente);
+        if (planToken == null && fuenteToken == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Debes enviar planEstudio o fuente para buscar el documento.");
+        }
+
+        String objectKey = findLatestObjectKeyByReference(planToken, fuenteToken)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No se encontró un documento para los criterios enviados."));
+
+        String fallbackName = fileNameFromObjectKey(objectKey);
+        return downloadByObjectKey(objectKey, fallbackName);
+    }
+
+    private StoredFile downloadByObjectKey(String objectKey, String fallbackFileName) {
         try {
             ResponseBytes<GetObjectResponse> response = s3Client.getObjectAsBytes(
                     GetObjectRequest.builder()
                             .bucket(bucket)
-                            .key(objectKey(fileId))
+                            .key(objectKey)
                             .build());
 
             String encodedName = response.response().metadata().get(ORIGINAL_FILENAME_METADATA);
-            String fileName = decodeFileName(encodedName, fileId);
+            String fileName = decodeFileName(encodedName, fallbackFileName);
             return new StoredFile(fileName, response.asByteArray());
         } catch (S3Exception exception) {
             if (exception.statusCode() == 404) {
@@ -103,8 +133,79 @@ public class FileStorageService {
         }
     }
 
+    private Optional<String> findLatestObjectKeyByReference(String planToken, String fuenteToken) {
+        S3Object latestMatch = null;
+        String continuationToken = null;
+
+        do {
+            ListObjectsV2Request.Builder requestBuilder = ListObjectsV2Request.builder()
+                    .bucket(bucket)
+                    .prefix(documentsPrefix)
+                    .maxKeys(1000);
+            if (continuationToken != null) {
+                requestBuilder.continuationToken(continuationToken);
+            }
+
+            ListObjectsV2Response response;
+            try {
+                response = s3Client.listObjectsV2(requestBuilder.build());
+            } catch (S3Exception exception) {
+                throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                        "No se pudo consultar el almacenamiento S3.");
+            }
+
+            for (S3Object current : response.contents()) {
+                if (!matchesReference(current.key(), planToken, fuenteToken)) {
+                    continue;
+                }
+                if (latestMatch == null || current.lastModified().isAfter(latestMatch.lastModified())) {
+                    latestMatch = current;
+                }
+            }
+
+            continuationToken = response.nextContinuationToken();
+            if (!Boolean.TRUE.equals(response.isTruncated())) {
+                continuationToken = null;
+            }
+        } while (continuationToken != null);
+
+        return Optional.ofNullable(latestMatch).map(S3Object::key);
+    }
+
     private static String objectKey(UUID fileId) {
         return "test/" + fileId + ".pdf";
+    }
+
+    private static boolean matchesReference(String objectKey, String planToken, String fuenteToken) {
+        if (objectKey == null || !objectKey.toLowerCase(Locale.ROOT).endsWith(".pdf")) {
+            return false;
+        }
+
+        String keyToken = toComparableToken(objectKey);
+        if (keyToken == null) {
+            return false;
+        }
+        if (planToken != null && !keyToken.contains(planToken)) {
+            return false;
+        }
+        if (fuenteToken != null && !keyToken.contains(fuenteToken)) {
+            return false;
+        }
+        return true;
+    }
+
+    private static String normalizePrefix(String prefix) {
+        String value = prefix == null || prefix.isBlank() ? DEFAULT_DOCUMENTS_PREFIX : prefix.trim();
+        return value.endsWith("/") ? value : value + "/";
+    }
+
+    private static String fileNameFromObjectKey(String objectKey) {
+        if (objectKey == null || objectKey.isBlank()) {
+            return "document.pdf";
+        }
+        int separatorIndex = objectKey.lastIndexOf('/');
+        String filename = separatorIndex >= 0 ? objectKey.substring(separatorIndex + 1) : objectKey;
+        return filename.isBlank() ? "document.pdf" : filename;
     }
 
     private static boolean hasPdfSignature(byte[] content) {
@@ -119,15 +220,27 @@ public class FileStorageService {
         return true;
     }
 
-    private static String decodeFileName(String encodedName, UUID fileId) {
+    private static String decodeFileName(String encodedName, String fallbackName) {
         if (encodedName == null) {
-            return fileId + ".pdf";
+            return fallbackName;
         }
         try {
             return new String(Base64.getUrlDecoder().decode(encodedName), java.nio.charset.StandardCharsets.UTF_8);
         } catch (IllegalArgumentException exception) {
-            return fileId + ".pdf";
+            return fallbackName;
         }
+    }
+
+    private static String toComparableToken(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        String normalized = Normalizer.normalize(value, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9]", "");
+        return normalized.isBlank() ? null : normalized;
     }
 
     public record StoredFile(String fileName, byte[] content) {
