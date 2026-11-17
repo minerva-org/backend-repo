@@ -35,14 +35,20 @@ API REST del proyecto Minerva, construida con Spring Boot.
 git clone <url-del-repo>
 cd backend-repo
 
-# Levanta Postgres en Docker
-docker compose up -d
+# Levanta Postgres y MinIO en Docker
+docker compose up -d postgres minio
+
+# Crea el bucket privado de MinIO (requiere tener instalado MinIO Client, `mc`)
+set -a; . ./.env; set +a
+mc alias set minerva http://localhost:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
+mc mb --ignore-existing "minerva/${S3_BUCKET:-minerva-documents-dev}"
 
 # Corre la app (descarga dependencias la primera vez)
 ./mvnw spring-boot:run
 ```
 
 La API debería quedar corriendo en `http://localhost:8080` (ajustar si el puerto está configurado distinto).
+El bucket se crea privado; si no defines `S3_BUCKET`, se usa `minerva-documents-dev`.
 
 ## Comandos útiles
 
