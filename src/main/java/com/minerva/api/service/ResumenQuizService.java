@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.minerva.api.dto.ResumenQuizDTO;
+import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Quiz;
 import com.minerva.api.model.ResumenQuiz;
 import com.minerva.api.repository.IntentoRepository;
@@ -35,18 +36,19 @@ public class ResumenQuizService {
     public void crearVacio(Quiz quiz) {
         ResumenQuiz r = new ResumenQuiz();
         r.setQuiz(quiz);
+        r.setTipoQuiz(quiz.getTipoQuiz());
         resumenRepository.save(r);
     }
 
     @Transactional(readOnly = true)
     public ResumenQuizDTO obtener(String quizId) {
         return resumenRepository.findByQuizId(quizId)
-                .map(this::toDTO)
+                .map(Mapper::toDTO)
                 .orElseGet(() -> {
                     if (!quizRepository.existsById(quizId)) {
                         throw new EntityNotFoundException("Quiz no encontrado con el id: " + quizId);
                     }
-                    return new ResumenQuizDTO(quizId, 0, 0, 0);
+                    return new ResumenQuizDTO(quizId, null, 0, 0, 0);
                 });
     }
 
@@ -79,11 +81,7 @@ public class ResumenQuizService {
         resumen.setNumAprobados(aprobados);
         resumen.setPromedio(respondieron == 0 ? 0 : Math.round(suma / respondieron * 100.0) / 100.0);
 
-        return toDTO(resumenRepository.save(resumen));
+        return Mapper.toDTO(resumenRepository.save(resumen));
     }
 
-    private ResumenQuizDTO toDTO(ResumenQuiz r) {
-        return new ResumenQuizDTO(r.getQuiz().getId(), r.getNumRespondieron(),
-                r.getPromedio(), r.getNumAprobados());
-    }
 }

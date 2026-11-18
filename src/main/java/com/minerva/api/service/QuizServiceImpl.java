@@ -59,6 +59,10 @@ public class QuizServiceImpl implements QuizService {
             throw new IllegalArgumentException("Ya existe un quiz con ese nombre en este grupo");
         }
 
+        if(quizDTO.getTipoQuiz() == null || quizDTO.getTipoQuiz().isEmpty()){
+            throw new IllegalArgumentException("El tipo del quiz es obligatorio");
+        }
+
         Instant fechaInicio = quizDTO.getFechaInicio();
         Instant fechaFinalizacion = quizDTO.getFechaFinalizacion();
         validarFechas(fechaInicio, fechaFinalizacion);
@@ -70,6 +74,7 @@ public class QuizServiceImpl implements QuizService {
         quiz.setFechaInicio(fechaInicio);
         quiz.setFechaFinalizacion(fechaFinalizacion);
         quiz.setGrupo(grupo);
+        quiz.setTipoQuiz(quizDTO.getTipoQuiz());
 
         Quiz guardado = quizRepository.save(quiz);
         resumenQuizService.crearVacio(guardado);

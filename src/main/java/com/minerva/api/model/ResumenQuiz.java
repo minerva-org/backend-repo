@@ -29,6 +29,9 @@ public class ResumenQuiz {
     @JoinColumn(name = "id_quiz", nullable = false, unique = true)
     private Quiz quiz;
 
+    @Column(name = "tipo_quiz")
+    private String tipoQuiz;
+
     @Column(name = "num_respondieron", nullable = false)
     private int numRespondieron;
 
