@@ -1,5 +1,6 @@
 package com.minerva.api.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
@@ -365,12 +366,13 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PersonaResponseDTO> findPaginatedPeople(Long plantelId, Roles rol, Boolean activo, String search,
+    public Page<PersonaResponseDTO> findPaginatedPeople(Long plantelId, Collection<Roles> roles, Boolean activo,
+            String search,
             Pageable pageable) {
         Page<Persona> personas;
 
         String searchNormalizado = search == null ? "" : search.trim();
-        personas = personaRepository.findPaginatedPeople(plantelId, rol, activo, searchNormalizado, pageable);
+        personas = personaRepository.findPaginatedPeople(plantelId, roles, activo, searchNormalizado, pageable);
 
         return personas.map(this::toDTOConUsername);
     }
