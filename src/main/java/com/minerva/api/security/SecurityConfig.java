@@ -64,7 +64,9 @@ public class SecurityConfig {
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                                                                 "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL")
 
-                                                .requestMatchers("/api/personas/**")
+                                                .requestMatchers("/api/personas/**",
+                                                                "/api/files/**"
+                                                )
                                                 .hasAnyAuthority(
                                                                 "DEV", "ROLE_DEV",
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
