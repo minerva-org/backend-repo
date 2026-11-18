@@ -365,16 +365,14 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PersonaResponseDTO> findAllByPlantelIdAndRolAndStatus(Long plantelId, Roles rol, Boolean activo,
+    public Page<PersonaResponseDTO> findPaginatedPeople(Long plantelId, Roles rol, Boolean activo, String search,
             Pageable pageable) {
         Page<Persona> personas;
 
-        if (activo != null) {
-            personas = personaRepository.findByPlantelIdAndRolAndActivo(plantelId, rol, activo, pageable);
-        } else {
-            personas = personaRepository.findByPlantelIdAndRol(plantelId, rol, pageable);
-        }
+        String searchNormalizado = search == null ? "" : search.trim();
+        personas = personaRepository.findPaginatedPeople(plantelId, rol, activo, searchNormalizado, pageable);
 
         return personas.map(this::toDTOConUsername);
     }
+
 }

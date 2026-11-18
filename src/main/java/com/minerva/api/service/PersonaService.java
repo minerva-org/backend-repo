@@ -24,7 +24,7 @@ public interface PersonaService {
 
     List<PersonaResponseDTO> findAllByRol(Roles rol);
 
-    Page<PersonaResponseDTO> findAllByPlantelIdAndRolAndStatus(Long plantelId, Roles rol, Boolean activo,
+    Page<PersonaResponseDTO> findPaginatedPeople(Long plantelId, Roles rol, Boolean activo, String search,
             Pageable pageable);
 
     PersonaDatosCompletosResponseDTO getDirectorPlantelByPlantelId(Long plantelId);
