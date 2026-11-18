@@ -30,6 +30,7 @@ public class QuizServiceImpl implements QuizService {
     private final PersonaRepository personaRepository;
     private final QuizXPreguntaRepository quizXPreguntaRepository;
     private final PreguntaService preguntaService;
+    private final ResumenQuizService resumenQuizService;
 
     @Override
     @Transactional
@@ -70,7 +71,9 @@ public class QuizServiceImpl implements QuizService {
         quiz.setFechaFinalizacion(fechaFinalizacion);
         quiz.setGrupo(grupo);
 
-        return Mapper.toDTO(quizRepository.save(quiz));
+        Quiz guardado = quizRepository.save(quiz);
+        resumenQuizService.crearVacio(guardado);
+        return Mapper.toDTO(guardado);
     }
 
     @Override

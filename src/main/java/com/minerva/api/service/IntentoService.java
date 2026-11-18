@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import com.minerva.api.dto.IntentoResponse;
 import com.minerva.api.dto.OpcionAlumnoDTO;
 import com.minerva.api.dto.PreguntaAlumnoDTO;
 import com.minerva.api.dto.RespuestaRequestDTO;
+import com.minerva.api.excepciones.IntentoFinalizadoEvent;
 import com.minerva.api.model.Intento;
 import com.minerva.api.model.IntentoDetalle;
 import com.minerva.api.model.Opcion;
@@ -43,6 +45,7 @@ public class IntentoService {
     private final AlumnoRepository alumnoRepository;
     private final QuizXPreguntaRepository quizXPreguntaRepository;
     private final OpcionRepository opcionRepository;
+    private final ApplicationEventPublisher eventos;
 
     public record Resultado(long correctas, long enBlanco, long total) {
     }
@@ -179,6 +182,7 @@ public class IntentoService {
         Instant ahora = Instant.now();
         intento.setFechaEnvio(ahora.isAfter(limite) ? limite : ahora);
         intentoRepository.save(intento);
+        eventos.publishEvent(new IntentoFinalizadoEvent(intento.getQuiz().getId()));
     }
 
     private Pregunta preguntaEnPosicion(String quizId, int posicion) {
