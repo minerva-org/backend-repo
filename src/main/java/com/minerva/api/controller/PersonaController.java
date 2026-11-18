@@ -77,14 +77,16 @@ public class PersonaController {
     @GetMapping(value = "/paginados", params = { "plantelId", "rol" })
     public ResponseEntity<Page<PersonaResponseDTO>> getPersonasPaginadas(@RequestParam Long plantelId,
             @RequestParam Roles rol, @RequestParam(required = false) Boolean activo,
-            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(required = false) String search, @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         if (page < 0 || size < 1 || size > 100) {
             throw new IllegalArgumentException("Parametros de paginacion invalidos");
         }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
 
-        return ResponseEntity.ok(personaService.findAllByPlantelIdAndRolAndStatus(plantelId, rol, activo, pageable));
+        return ResponseEntity
+                .ok(personaService.findPaginatedPeople(plantelId, rol, activo, search, pageable));
     }
 
     @PostMapping
