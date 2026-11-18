@@ -10,10 +10,3 @@ VALUES ('PRIMERO', 'AGO-DIC', 2026);
 
 INSERT INTO configuraciones (id, valor, descripcion)
     VALUES ('PERIODO', 'PRIMERO', 'AGO-DIC 2026')
-
--- CREATE TABLE configuraciones (
---     id VARCHAR(255) PRIMARY KEY,
---     valor VARCHAR(255) NOT NULL,
---     descripcion VARCHAR(255) NOT NULL,
---     fecha_actualizacion TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
--- );

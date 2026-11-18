@@ -74,7 +74,7 @@ public class QuizServiceImpl implements QuizService {
         quiz.setFechaInicio(fechaInicio);
         quiz.setFechaFinalizacion(fechaFinalizacion);
         quiz.setGrupo(grupo);
-        quiz.setTipoQuiz(quizDTO.getTipoQuiz());
+        quiz.setTipoQuiz(quizDTO.getTipoQuiz().trim().toUpperCase());
 
         Quiz guardado = quizRepository.save(quiz);
         resumenQuizService.crearVacio(guardado);

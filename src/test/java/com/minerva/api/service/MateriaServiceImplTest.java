@@ -58,7 +58,7 @@ class MateriaServiceImplTest {
             .build();
 
         when(materiaRepository.existsById("MAT-001")).thenReturn(false);
-        when(materiaRepository.existsByNombreIgnoreCase("Matemáticas")).thenReturn(false);
+        when(materiaRepository.existsByNombreIgnoreCaseAndPlantelIdIsNull("Matemáticas")).thenReturn(false);
         when(unidadRepository.findByMateriaId("MAT-001")).thenReturn(java.util.Collections.emptyList());
         when(materiaRepository.save(any(Materia.class))).thenAnswer(invocation -> {
             Materia materia = invocation.getArgument(0);
@@ -98,7 +98,7 @@ class MateriaServiceImplTest {
             .build();
 
         when(materiaRepository.existsById("MAT-002")).thenReturn(false);
-        when(materiaRepository.existsByNombreIgnoreCase("Historia")).thenReturn(false);
+        when(materiaRepository.existsByNombreIgnoreCaseAndPlantelIdIsNull("Historia")).thenReturn(false);
         when(unidadRepository.save(any(Unidad.class))).thenAnswer(invocation -> {
             Unidad unidad = invocation.getArgument(0);
             unidad.setId("UNI-1");

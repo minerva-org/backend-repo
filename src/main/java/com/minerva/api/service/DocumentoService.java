@@ -7,11 +7,8 @@ import org.springframework.stereotype.Service;
 import com.minerva.api.dto.DocumentoDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Documento;
-import com.minerva.api.model.Persona;
 import com.minerva.api.repository.DocumentoRepository;
 import com.minerva.api.repository.PersonaRepository;
-
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service

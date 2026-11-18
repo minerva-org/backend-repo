@@ -83,6 +83,11 @@ public class GrupoServiceImpl implements GrupoService {
                         "La materia no fue encontrada con el id: " + grupoDTO.getMateriaId()));
         grupo.setMateria(materia);
 
+        // Global (plantelId null) sirve para cualquier plantel; una propia solo para el suyo
+        if (materia.getPlantelId() != null && !materia.getPlantelId().equals(grupoDTO.getPlantelId())) {
+            throw new IllegalArgumentException("La materia no pertenece al plantel del grupo");
+        }
+
         if (grupoDTO.getDocenteId() != null && !grupoDTO.getDocenteId().isBlank()) {
             // throw new IllegalArgumentException("El docente es obligatorio");
             String docenteId = grupoDTO.getDocenteId().trim();

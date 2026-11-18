@@ -15,4 +15,3 @@ CREATE TABLE documentos (
 
 CREATE INDEX idx_documentos_uploaded_by ON documentos (uploaded_by);
 CREATE INDEX idx_documentos_checksum    ON documentos (checksum_sha256);
--- id, object_keys, original_filename, content_type, size_bytes, checksum_sha256, uploaded_by, created_ats

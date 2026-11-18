@@ -1,7 +1,7 @@
 CREATE TABLE resumen_quiz (
     id               VARCHAR(36)      NOT NULL,
     id_quiz          VARCHAR(255)     NOT NULL,
-    tipo_quiz        VARCHAR(30)      NOT NULL,
+    tipo_quiz        VARCHAR(30)              ,
     num_respondieron INTEGER          NOT NULL DEFAULT 0,
     promedio         DOUBLE PRECISION NOT NULL DEFAULT 0,
     num_aprobados    INTEGER          NOT NULL DEFAULT 0,
@@ -11,9 +11,13 @@ CREATE TABLE resumen_quiz (
     CONSTRAINT uq_resumen_quiz_quiz UNIQUE (id_quiz)
 );
 
-INSERT INTO resumen_quiz (id, id_quiz)
-SELECT gen_random_uuid()::text, id FROM quiz;
-
 --modificaciones
-ALTER TABLE quiz 
-ADD tipo_quiz VARCHAR(30), NOT NULL;
+ALTER TABLE quiz
+ADD tipo_quiz VARCHAR(30);
+
+UPDATE quiz
+SET tipo_quiz = 'DIAGNOSTICO'
+WHERE tipo_quiz IS NULL;
+
+ALTER TABLE quiz
+ALTER COLUMN tipo_quiz SET NOT NULL;
