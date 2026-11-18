@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import java.util.Collection;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.minerva.api.model.Persona;
@@ -32,16 +33,23 @@ public interface PersonaRepository extends JpaRepository<Persona, String> {
     @Query("""
             SELECT p FROM Persona p
             WHERE p.plantel.id = :plantelId
-            And p.rol = :rol
+            And p.rol IN :roles
             AND (:activo IS NULL OR p.activo = :activo)
             AND (
-            LOWER(p.nombre) LIKE LOWER(CONCAT('%', :search, '%'))
+            LOWER(CONCAT(
+                CONCAT(COALESCE(p.nombre, ''), ' '),
+                CONCAT(COALESCE(p.apellidoPaterno, ''),
+                CONCAT(' ', COALESCE(p.apellidoMaterno, ''))
+                )
+            ))
+                 LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :search, '%'))
             OR LOWER(p.apellidoPaterno) LIKE LOWER(CONCAT('%', :search, '%'))
             OR LOWER(p.apellidoMaterno) LIKE LOWER(CONCAT('%', :search, '%'))
             OR LOWER(p.email) LIKE LOWER(CONCAT('%', :search, '%'))
             ) """)
 
-    Page<Persona> findPaginatedPeople(@Param("plantelId") Long plantelId, @Param("rol") Roles rol,
+    Page<Persona> findPaginatedPeople(@Param("plantelId") Long plantelId, @Param("roles") Collection<Roles> roles,
             @Param("activo") Boolean activo, @Param("search") String search, Pageable pageable);
 
     Plantel findByPlantelIdAndId(Long plantelId, String personaId);

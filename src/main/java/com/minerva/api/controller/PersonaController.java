@@ -1,5 +1,6 @@
 package com.minerva.api.controller;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
@@ -74,9 +75,9 @@ public class PersonaController {
         return ResponseEntity.ok(personaService.getPersonaById(personaId));
     }
 
-    @GetMapping(value = "/paginados", params = { "plantelId", "rol" })
+    @GetMapping(value = "/paginados", params = { "plantelId", "roles" })
     public ResponseEntity<Page<PersonaResponseDTO>> getPersonasPaginadas(@RequestParam Long plantelId,
-            @RequestParam Roles rol, @RequestParam(required = false) Boolean activo,
+            @RequestParam Collection<Roles> roles, @RequestParam(required = false) Boolean activo,
             @RequestParam(required = false) String search, @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         if (page < 0 || size < 1 || size > 100) {
@@ -86,7 +87,7 @@ public class PersonaController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
 
         return ResponseEntity
-                .ok(personaService.findPaginatedPeople(plantelId, rol, activo, search, pageable));
+                .ok(personaService.findPaginatedPeople(plantelId, roles, activo, search, pageable));
     }
 
     @PostMapping

@@ -1,5 +1,6 @@
 package com.minerva.api.service;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.minerva.api.dto.PersonaDatosCompletosResponseDTO;
@@ -24,7 +25,7 @@ public interface PersonaService {
 
     List<PersonaResponseDTO> findAllByRol(Roles rol);
 
-    Page<PersonaResponseDTO> findPaginatedPeople(Long plantelId, Roles rol, Boolean activo, String search,
+    Page<PersonaResponseDTO> findPaginatedPeople(Long plantelId, Collection<Roles> roles, Boolean activo, String search,
             Pageable pageable);
 
     PersonaDatosCompletosResponseDTO getDirectorPlantelByPlantelId(Long plantelId);
