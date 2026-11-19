@@ -13,7 +13,6 @@ import com.minerva.api.dto.PlantelDTO;
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.dto.QuizDTO;
 import com.minerva.api.dto.QuizXPreguntaDTO;
-import com.minerva.api.dto.ResumenQuizDTO;
 import com.minerva.api.dto.TemaDTO;
 import com.minerva.api.dto.UnidadDTO;
 import com.minerva.api.dto.InstitucionDTO;
@@ -31,7 +30,6 @@ import com.minerva.api.model.Plantel;
 import com.minerva.api.model.Pregunta;
 import com.minerva.api.model.Quiz;
 import com.minerva.api.model.QuizXPregunta;
-import com.minerva.api.model.ResumenQuiz;
 import com.minerva.api.model.Tema;
 import com.minerva.api.model.Unidad;
 import com.minerva.api.model.Institucion;
@@ -270,18 +268,6 @@ public class Mapper {
             documento.getChecksumSha256(),
             documento.getUploadedBy(),
             documento.getCreatedAt()
-        );
-    }
-
-    public static ResumenQuizDTO toDTO(ResumenQuiz resumenQuiz){
-        if(resumenQuiz == null) return null;
-
-        return new ResumenQuizDTO(
-            resumenQuiz.getQuiz().getId(), 
-            resumenQuiz.getTipoQuiz(),
-            resumenQuiz.getNumRespondieron(),
-            resumenQuiz.getPromedio(), 
-            resumenQuiz.getNumAprobados()
         );
     }
 }

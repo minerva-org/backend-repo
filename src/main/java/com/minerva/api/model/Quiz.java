@@ -37,9 +37,6 @@ public class Quiz {
     @Column(name = "fecha_finalizacion", nullable = false)
     private Instant fechaFinalizacion;
 
-    @Column(name = "tipo_quiz", nullable = false)
-    private String tipoQuiz;
-
     @ManyToOne (fetch = FetchType.LAZY, optional = false)
     @JoinColumn (name = "id_grupo", nullable = false)
     private Grupo grupo;

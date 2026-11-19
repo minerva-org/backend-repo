@@ -10,14 +10,3 @@ CREATE TABLE resumen_quiz (
     CONSTRAINT fk_resumen_quiz_quiz FOREIGN KEY (id_quiz) REFERENCES quiz (id) ON DELETE CASCADE,
     CONSTRAINT uq_resumen_quiz_quiz UNIQUE (id_quiz)
 );
-
---modificaciones
-ALTER TABLE quiz
-ADD tipo_quiz VARCHAR(30);
-
-UPDATE quiz
-SET tipo_quiz = 'DIAGNOSTICO'
-WHERE tipo_quiz IS NULL;
-
-ALTER TABLE quiz
-ALTER COLUMN tipo_quiz SET NOT NULL;

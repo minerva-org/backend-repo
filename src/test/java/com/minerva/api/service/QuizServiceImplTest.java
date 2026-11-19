@@ -62,7 +62,6 @@ class QuizServiceImplTest {
         quiz.setFechaInicio(Instant.parse("2026-01-02T00:00:00Z"));
         quiz.setFechaFinalizacion(Instant.parse("2026-01-03T00:00:00Z"));
         quiz.setGrupo(grupo);
-        quiz.setTipoQuiz("Diagnóstico");
 
         when(personaRepository.findById("A-1")).thenReturn(java.util.Optional.of(alumno));
         when(grupoRepository.findByAlumnos_Id("A-1")).thenReturn(java.util.List.of(grupo));

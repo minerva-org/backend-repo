@@ -30,7 +30,6 @@ public class QuizServiceImpl implements QuizService {
     private final PersonaRepository personaRepository;
     private final QuizXPreguntaRepository quizXPreguntaRepository;
     private final PreguntaService preguntaService;
-    private final ResumenQuizService resumenQuizService;
 
     @Override
     @Transactional
@@ -59,10 +58,6 @@ public class QuizServiceImpl implements QuizService {
             throw new IllegalArgumentException("Ya existe un quiz con ese nombre en este grupo");
         }
 
-        if(quizDTO.getTipoQuiz() == null || quizDTO.getTipoQuiz().isEmpty()){
-            throw new IllegalArgumentException("El tipo del quiz es obligatorio");
-        }
-
         Instant fechaInicio = quizDTO.getFechaInicio();
         Instant fechaFinalizacion = quizDTO.getFechaFinalizacion();
         validarFechas(fechaInicio, fechaFinalizacion);
@@ -74,10 +69,8 @@ public class QuizServiceImpl implements QuizService {
         quiz.setFechaInicio(fechaInicio);
         quiz.setFechaFinalizacion(fechaFinalizacion);
         quiz.setGrupo(grupo);
-        quiz.setTipoQuiz(quizDTO.getTipoQuiz().trim().toUpperCase());
 
         Quiz guardado = quizRepository.save(quiz);
-        resumenQuizService.crearVacio(guardado);
         return Mapper.toDTO(guardado);
     }
 

@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 public class QuizDTO {
     private String id;
     private String nombre;
-    private String tipoQuiz;
     private Instant fechaCreacion;
     private Instant fechaInicio;
     private Instant fechaFinalizacion;
