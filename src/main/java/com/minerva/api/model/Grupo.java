@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.OneToMany;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -62,6 +63,17 @@ public class Grupo {
         inverseJoinColumns = @JoinColumn(name = "id_alumno")
     )
     private Set<Persona> alumnos = new HashSet<>();
+
+    @OneToMany(mappedBy = "grupo", fetch = FetchType.LAZY)
+    private Set<UnidadGrupo> unidadesGrupo = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "fuentes_grupo",
+        joinColumns = @JoinColumn(name = "id_grupo"),
+        inverseJoinColumns = @JoinColumn(name = "id_documento")
+    )
+    private Set<Documento> fuentes = new HashSet<>();
 
     public void addAlumno(Persona alumno) {
         alumnos.add(alumno);
