@@ -1,12 +1,6 @@
 package com.minerva.api.repository;
 
 import java.util.List;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
-import java.util.Collection;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.minerva.api.model.Persona;
 import com.minerva.api.model.Plantel;
@@ -18,39 +12,12 @@ public interface PersonaRepository extends JpaRepository<Persona, String> {
     boolean existsByEmailIgnoreCaseAndIdNot(String email, String id);
 
     List<Persona> findByPlantelId(Long plantelId);
-
+    
     List<Persona> findByRol(Roles rol);
 
     List<Persona> findByPlantelIdAndRol(Long plantelId, Roles rol);
 
-    List<Persona> findByPlantelIdAndRolAndActivo(Long plantelId, Roles rol, Boolean status);
-
-    // los siguientes dos son una prueba para el paginado
-    Page<Persona> findByPlantelIdAndRol(long plantelId, Roles rol, Pageable pageable);
-
-    Page<Persona> findByPlantelIdAndRolAndActivo(long plantelId, Roles rol, Boolean status, Pageable pageable);
-
-    @Query("""
-            SELECT p FROM Persona p
-            WHERE p.plantel.id = :plantelId
-            And p.rol IN :roles
-            AND (:activo IS NULL OR p.activo = :activo)
-            AND (
-            LOWER(CONCAT(
-                CONCAT(COALESCE(p.nombre, ''), ' '),
-                CONCAT(COALESCE(p.apellidoPaterno, ''),
-                CONCAT(' ', COALESCE(p.apellidoMaterno, ''))
-                )
-            ))
-                 LIKE LOWER(CONCAT('%', :search, '%'))
-            OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :search, '%'))
-            OR LOWER(p.apellidoPaterno) LIKE LOWER(CONCAT('%', :search, '%'))
-            OR LOWER(p.apellidoMaterno) LIKE LOWER(CONCAT('%', :search, '%'))
-            OR LOWER(p.email) LIKE LOWER(CONCAT('%', :search, '%'))
-            ) """)
-
-    Page<Persona> findPaginatedPeople(@Param("plantelId") Long plantelId, @Param("roles") Collection<Roles> roles,
-            @Param("activo") Boolean activo, @Param("search") String search, Pageable pageable);
+    List<Persona> findByPlantelIdAndRolAndActivo(Long plantelId,Roles rol, Boolean status);
 
     Plantel findByPlantelIdAndId(Long plantelId, String personaId);
 }

@@ -4,7 +4,6 @@
 .env.*.local
 *.pem
 *.key
-*.license
 
 ### Spring Boot y compilación Maven
 target/

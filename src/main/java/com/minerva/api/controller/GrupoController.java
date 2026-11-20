@@ -5,17 +5,12 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.minerva.api.User.User;
 import com.minerva.api.dto.AlumnoGrupoDTO;
 import com.minerva.api.dto.GrupoDTO;
-import com.minerva.api.dto.DocumentoDTO;
 import com.minerva.api.service.GrupoService;
-import com.minerva.api.service.GrupoFuenteService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 public class GrupoController {
 
     private final GrupoService grupoService;
-    private final GrupoFuenteService grupoFuenteService;
 
     @GetMapping
     public ResponseEntity<List<GrupoDTO>> getAllGrupos() {
@@ -92,39 +86,6 @@ public class GrupoController {
     public ResponseEntity<Void> quitarAlumno(
             @PathVariable String grupoId, @PathVariable String alumnoId) {
         grupoService.quitarAlumno(grupoId, alumnoId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping(value = "/{grupoId}/fuentes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<DocumentoDTO> uploadFuente(
-            @PathVariable String grupoId,
-            @RequestPart("file") MultipartFile file,
-            @AuthenticationPrincipal User usuario) {
-        DocumentoDTO documento = grupoFuenteService.uploadFuente(
-                grupoId,
-                file,
-                usuario.getPersona().getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(documento);
-    }
-
-    @GetMapping("/{grupoId}/fuentes")
-    public ResponseEntity<List<DocumentoDTO>> getFuentes(
-            @PathVariable String grupoId,
-            @AuthenticationPrincipal User usuario) {
-        return ResponseEntity.ok(grupoFuenteService.findFuentes(
-                grupoId,
-                usuario.getPersona().getId()));
-    }
-
-    @DeleteMapping("/{grupoId}/fuentes/{documentoId}")
-    public ResponseEntity<Void> removeFuente(
-            @PathVariable String grupoId,
-            @PathVariable String documentoId,
-            @AuthenticationPrincipal User usuario) {
-        grupoFuenteService.removeFuente(
-                grupoId,
-                documentoId,
-                usuario.getPersona().getId());
         return ResponseEntity.noContent().build();
     }
 }

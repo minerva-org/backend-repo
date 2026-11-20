@@ -37,10 +37,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String roleName = persona.getRol().name();
-        return List.of(
-                new SimpleGrantedAuthority(roleName),
-                new SimpleGrantedAuthority("ROLE_" + roleName));
+        return List.of(new SimpleGrantedAuthority(persona.getRol().name()));
     }
 
     @Override

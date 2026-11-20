@@ -6,7 +6,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,16 +29,6 @@ public class Materia {
     @JoinColumn (name = "id_planEstudio", nullable = true)
     @ManyToOne (fetch = FetchType.LAZY)
     private PlanEstudio planEstudio;
-
-    @Column(name = "id_plantel")
-    private Long plantelId;
-
-    @Column(name = "id_materia_base")
-    private String materiaBaseId;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_documento_materia")
-    private Documento documentoMateria;
 
     @Column (name = "activo", nullable = false)
     private Boolean activo = true;

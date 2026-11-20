@@ -1,6 +1,5 @@
 package com.minerva.api.service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,9 +23,6 @@ import com.minerva.api.User.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -363,18 +359,4 @@ public class PersonaServiceImpl implements PersonaService {
 
         return candidate;
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<PersonaResponseDTO> findPaginatedPeople(Long plantelId, Collection<Roles> roles, Boolean activo,
-            String search,
-            Pageable pageable) {
-        Page<Persona> personas;
-
-        String searchNormalizado = search == null ? "" : search.trim();
-        personas = personaRepository.findPaginatedPeople(plantelId, roles, activo, searchNormalizado, pageable);
-
-        return personas.map(this::toDTOConUsername);
-    }
-
 }
