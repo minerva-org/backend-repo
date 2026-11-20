@@ -57,7 +57,13 @@ public class SecurityConfig {
                                                                 "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
                                                                 "COORDINADOR", "ROLE_COORDINADOR",
                                                                 "DOCENTE", "ROLE_DOCENTE")
-
+                                                .requestMatchers(HttpMethod.GET,"/api/quizzes/*/resumen/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE")
                                                 .requestMatchers("/api/instituciones/**")
                                                 .hasAnyAuthority(
                                                                 "DEV", "ROLE_DEV",
