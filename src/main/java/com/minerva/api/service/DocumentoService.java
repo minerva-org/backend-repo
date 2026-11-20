@@ -3,6 +3,7 @@ package com.minerva.api.service;
 import java.time.Instant;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.minerva.api.dto.DocumentoDTO;
 import com.minerva.api.mapper.Mapper;
@@ -20,6 +21,7 @@ public class DocumentoService {
     private final PersonaRepository personaRepository;
     private final DocumentoRepository documentoRepository;
 
+    @Transactional
     public DocumentoDTO saveDocumento(DocumentoDTO documento){
         
         if(documento.objectKey() == null || documento.objectKey().isBlank()){
@@ -47,6 +49,9 @@ public class DocumentoService {
         }
 
         Documento nvoDocumento = new Documento();
+        nvoDocumento.setId(documento.id() == null || documento.id().isBlank()
+                ? null
+                : documento.id().trim());
         nvoDocumento.setObjectKey(documento.objectKey());
         nvoDocumento.setOriginalFilename(documento.originalFilename());
         nvoDocumento.setContentType(documento.contentType());
@@ -54,7 +59,7 @@ public class DocumentoService {
         nvoDocumento.setChecksumSha256(documento.checksumSha256());
         nvoDocumento.setUploadedBy(documento.uploadedBy().trim());
         nvoDocumento.setCreatedAt(Instant.now());
-        documentoRepository.save(nvoDocumento);
+        documentoRepository.saveAndFlush(nvoDocumento);
         
         return Mapper.toDTO(nvoDocumento);
     }

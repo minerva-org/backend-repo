@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import com.minerva.api.model.Documento;
 import com.minerva.api.dto.ConceptoDTO;
 import com.minerva.api.dto.MateriaDTO;
 import com.minerva.api.dto.TemaDTO;
@@ -16,7 +18,10 @@ import com.minerva.api.model.Materia;
 import com.minerva.api.model.PlanEstudio;
 import com.minerva.api.model.Tema;
 import com.minerva.api.model.Unidad;
+import com.minerva.api.User.Roles;
+import com.minerva.api.User.User;
 import com.minerva.api.repository.ConceptoRepository;
+import com.minerva.api.repository.DocumentoRepository;
 import com.minerva.api.repository.MateriaRepository;
 import com.minerva.api.repository.PlanEstudioRepository;
 import com.minerva.api.repository.PlantelRepository;
@@ -37,9 +42,77 @@ public class MateriaServiceImpl implements MateriaService{
     private final UnidadRepository unidadRepository;
     private final TemaRepository temaRepository;
     private final ConceptoRepository conceptoRepository;
+    private final DocumentoRepository documentoRepository;
 
     private String nextId() {
         return UUID.randomUUID().toString();
+    }
+
+    private void validarRolCatalogo(User usuario) {
+        Roles rol = usuario.getPersona().getRol();
+        if (rol != Roles.ADMIN
+                && rol != Roles.DEV
+                && rol != Roles.DIRECTOR_GENERAL
+                && rol != Roles.DIRECTOR_PLANTEL
+                && rol != Roles.COORDINADOR) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No tienes permiso para administrar materias.");
+        }
+    }
+
+    private Long obtenerPlantelUsuario(User usuario) {
+        validarRolCatalogo(usuario);
+        if (usuario.getPersona().getPlantel() == null) {
+            return null;
+        }
+        return usuario.getPersona().getPlantel().getId();
+    }
+
+    private void validarDatosMateria(MateriaDTO materiaDTO) {
+        if (materiaDTO == null) {
+            throw new IllegalArgumentException("Los datos de la materia son obligatorios.");
+        }
+        if (materiaDTO.getId() == null || materiaDTO.getId().isBlank()) {
+            throw new IllegalArgumentException("El id es obligatorio.");
+        }
+        if (materiaDTO.getId().trim().length() > 255) {
+            throw new IllegalArgumentException("El id no puede superar 255 caracteres.");
+        }
+        if (materiaDTO.getNombre() == null || materiaDTO.getNombre().isBlank()) {
+            throw new IllegalArgumentException("El nombre es obligatorio.");
+        }
+        if (materiaDTO.getNombre().trim().length() > 255) {
+            throw new IllegalArgumentException("El nombre no puede superar 255 caracteres.");
+        }
+        if (materiaDTO.getPrefijo() == null || materiaDTO.getPrefijo().isBlank()) {
+            throw new IllegalArgumentException("El prefijo es obligatorio.");
+        }
+        if (materiaDTO.getPrefijo().trim().length() > 255) {
+            throw new IllegalArgumentException("El prefijo no puede superar 255 caracteres.");
+        }
+    }
+
+    private void validarCamposActualizacion(MateriaDTO materiaDTO) {
+        if (materiaDTO == null) {
+            throw new IllegalArgumentException("Los datos de la materia son obligatorios.");
+        }
+        if (materiaDTO.getNombre() != null) {
+            if (materiaDTO.getNombre().isBlank()) {
+                throw new IllegalArgumentException("El nombre no puede estar vacío.");
+            }
+            if (materiaDTO.getNombre().trim().length() > 255) {
+                throw new IllegalArgumentException("El nombre no puede superar 255 caracteres.");
+            }
+        }
+        if (materiaDTO.getPrefijo() != null) {
+            if (materiaDTO.getPrefijo().isBlank()) {
+                throw new IllegalArgumentException("El prefijo no puede estar vacío.");
+            }
+            if (materiaDTO.getPrefijo().trim().length() > 255) {
+                throw new IllegalArgumentException("El prefijo no puede superar 255 caracteres.");
+            }
+        }
     }
 
     private String toPlantelValue(Long plantelId) {
@@ -58,6 +131,15 @@ public class MateriaServiceImpl implements MateriaService{
             return materiaRepository.existsByNombreIgnoreCaseAndPlantelIdIsNullAndIdNot(nombre, materiaId);
         }
         return materiaRepository.existsByNombreIgnoreCaseAndPlantelIdAndIdNot(nombre, plantelId, materiaId);
+    }
+
+    private Documento resolverDocumentoMateria(String documentoMateriaId) {
+        if (documentoMateriaId == null || documentoMateriaId.isBlank()) {
+            return null;
+        }
+        return documentoRepository.findById(documentoMateriaId.trim())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Documento no encontrado con el id: " + documentoMateriaId));
     }
 
     private void copyNestedHierarchy(Materia sourceMateria, Materia targetMateria) {
@@ -151,7 +233,7 @@ public class MateriaServiceImpl implements MateriaService{
             }
 
             Unidad unidad = new Unidad();
-            unidad.setId(unidadDTO.getId() == null || unidadDTO.getId().isBlank() ? java.util.UUID.randomUUID().toString() : unidadDTO.getId().trim());
+            unidad.setId(unidadDTO.getId() == null || unidadDTO.getId().isBlank() ? UUID.randomUUID().toString() : unidadDTO.getId().trim());
             unidad.setNombre(nombreUnidad);
             unidad.setMateria(materia);
             Unidad unidadGuardada = unidadRepository.save(unidad);
@@ -170,7 +252,7 @@ public class MateriaServiceImpl implements MateriaService{
                 }
 
                 Tema tema = new Tema();
-                tema.setId(temaDTO.getId() == null || temaDTO.getId().isBlank() ? java.util.UUID.randomUUID().toString() : temaDTO.getId().trim());
+                tema.setId(temaDTO.getId() == null || temaDTO.getId().isBlank() ? UUID.randomUUID().toString() : temaDTO.getId().trim());
                 tema.setNombre(nombreTema);
                 tema.setUnidad(unidadGuardada);
                 Tema temaGuardado = temaRepository.save(tema);
@@ -189,7 +271,7 @@ public class MateriaServiceImpl implements MateriaService{
                     }
 
                     Concepto concepto = new Concepto();
-                    concepto.setId(conceptoDTO.getId() == null || conceptoDTO.getId().isBlank() ? java.util.UUID.randomUUID().toString() : conceptoDTO.getId().trim());
+                    concepto.setId(conceptoDTO.getId() == null || conceptoDTO.getId().isBlank() ? UUID.randomUUID().toString() : conceptoDTO.getId().trim());
                     concepto.setNombre(nombreConcepto);
                     concepto.setTema(temaGuardado);
                     conceptoRepository.save(concepto);
@@ -199,11 +281,12 @@ public class MateriaServiceImpl implements MateriaService{
     }
 
     @Override
-    @Transactional 
-    public MateriaDTO saveMateria(MateriaDTO materiaDTO) {
-        if (materiaDTO.getId() == null) {
-            throw new IllegalArgumentException("El id es obligatorio");
+    @Transactional
+    public MateriaDTO saveMateria(MateriaDTO materiaDTO, User usuario) {
+        if (usuario != null) {
+            validarRolCatalogo(usuario);
         }
+        validarDatosMateria(materiaDTO);
         if (materiaRepository.existsById(materiaDTO.getId())) {
             throw new IllegalArgumentException("Ya existe una materia con ese Id: " + materiaDTO.getId());
         }
@@ -212,6 +295,28 @@ public class MateriaServiceImpl implements MateriaService{
             throw new IllegalArgumentException("El nombre es obligatorio");
         }
         String nombre = materiaDTO.getNombre().trim();
+
+        if (usuario != null) {
+            Roles rol = usuario.getPersona().getRol();
+            if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR) {
+                Long plantelUsuario = usuario.getPersona().getPlantel() != null
+                        ? usuario.getPersona().getPlantel().getId()
+                        : null;
+                if (plantelUsuario == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "No tienes un plantel asignado.");
+                }
+                if (materiaDTO.getPlantelId() != null
+                        && !materiaDTO.getPlantelId().equals(plantelUsuario)) {
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "Solo puedes crear materias para tu plantel.");
+                }
+                materiaDTO.setPlantelId(plantelUsuario);
+            }
+        }
+
         String plantelId = toPlantelValue(materiaDTO.getPlantelId());
         if (existsByNombreInScope(nombre, plantelId)) {
             throw new IllegalArgumentException("Ya existe una materia con ese nombre");
@@ -235,6 +340,7 @@ public class MateriaServiceImpl implements MateriaService{
         materia.setPlanEstudio(planEstudio);
         materia.setPlantelId(materiaDTO.getPlantelId());
         materia.setMateriaBaseId(materiaDTO.getMateriaBaseId());
+        materia.setDocumentoMateria(resolverDocumentoMateria(materiaDTO.getDocumentoMateriaId()));
         materia.setActivo(materiaDTO.getActivo() != null ? materiaDTO.getActivo() : true);
 
         Materia materiaGuardada = materiaRepository.save(materia);
@@ -244,16 +350,40 @@ public class MateriaServiceImpl implements MateriaService{
 
     @Override
     @Transactional
-    public MateriaDTO updateMateria(String materiaId, MateriaDTO materiaDTO) {
-        return updateMateria(materiaId, materiaDTO, null);
-    }
-
-    @Override
-    @Transactional
-    public MateriaDTO updateMateria(String materiaId, MateriaDTO materiaDTO, Long plantelId) {
+    public MateriaDTO updateMateria(String materiaId, MateriaDTO materiaDTO, Long plantelId, User usuario) {
+        if (usuario != null) {
+            validarRolCatalogo(usuario);
+        }
+        validarCamposActualizacion(materiaDTO);
         Materia materia = materiaRepository.findById(materiaId)
             .orElseThrow(() -> new EntityNotFoundException(
                 "Materia no encontrada con el Id: " + materiaId));
+
+        if (usuario != null) {
+            Roles rol = usuario.getPersona().getRol();
+            if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR) {
+                Long plantelUsuario = usuario.getPersona().getPlantel() != null
+                        ? usuario.getPersona().getPlantel().getId()
+                        : null;
+                if (plantelUsuario == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "No tienes un plantel asignado.");
+                }
+                if (materia.getPlantelId() == null
+                        && (materiaDTO.getActivo() != null || plantelId == null)) {
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "No puedes modificar directamente una materia de tronco común.");
+                }
+                if (materia.getPlantelId() != null
+                        && !materia.getPlantelId().equals(plantelUsuario)) {
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "No puedes modificar materias de otro plantel.");
+                }
+            }
+        }
 
         Materia materiaObjetivo = materia;
         if (plantelId != null) {
@@ -296,6 +426,13 @@ public class MateriaServiceImpl implements MateriaService{
             materiaObjetivo.setPlanEstudio(null);
         }
 
+        if (materiaDTO.getDocumentoMateriaId() != null) {
+            materiaObjetivo.setDocumentoMateria(
+                    materiaDTO.getDocumentoMateriaId().isBlank()
+                            ? null
+                            : resolverDocumentoMateria(materiaDTO.getDocumentoMateriaId()));
+        }
+
         if(materiaDTO.getActivo() != null){
             materiaObjetivo.setActivo(materiaDTO.getActivo());
         }
@@ -306,24 +443,75 @@ public class MateriaServiceImpl implements MateriaService{
     }
 
     @Override
-    public void deleteMateria(String materiaId) {
+    public void deleteMateria(String materiaId, User usuario) {
+        if (usuario != null) {
+            validarRolCatalogo(usuario);
+        }
         Materia materia = materiaRepository.findById(materiaId)
-            .orElseThrow(() -> new RuntimeException("Materia no encontrado con el Id: " + materiaId));
+            .orElseThrow(() -> new EntityNotFoundException("Materia no encontrada con el id: " + materiaId));
+
+        if (usuario != null) {
+            Roles rol = usuario.getPersona().getRol();
+            if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR) {
+                Long plantelUsuario = usuario.getPersona().getPlantel() != null
+                        ? usuario.getPersona().getPlantel().getId()
+                        : null;
+                if (plantelUsuario == null) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "No tienes un plantel asignado.");
+                }
+                if (materia.getPlantelId() == null) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "No puedes eliminar una materia de tronco común.");
+                }
+                if (!materia.getPlantelId().equals(plantelUsuario)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "No puedes eliminar materias de otro plantel.");
+                }
+            }
+        }
 
         materiaRepository.delete(materia);
     }
 
     @Override
-    @Transactional 
-    public void updateEstado(String materialId, Boolean estado) {
+    @Transactional
+    public void updateEstado(String materialId, Boolean estado, User usuario) {
+        if (usuario != null) {
+            validarRolCatalogo(usuario);
+        }
         Materia materia = materiaRepository.findById(materialId)
-            .orElseThrow(() -> new RuntimeException("Materia no encontrado con el Id: " + materialId));
+            .orElseThrow(() -> new EntityNotFoundException("Materia no encontrada con el id: " + materialId));
 
-                materia.setActivo(estado);
-                unidadRepository.cambiarEstadoPorMateria(materialId, estado);
-                temaRepository.cambiarEstadoPorMateria(materialId, estado);
-                conceptoRepository.cambiarEstadoPorMateria(materialId, estado);
-                materiaRepository.save(materia);
+        if (usuario != null) {
+            Roles rol = usuario.getPersona().getRol();
+            if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR) {
+                Long plantelUsuario = usuario.getPersona().getPlantel() != null
+                        ? usuario.getPersona().getPlantel().getId()
+                        : null;
+                if (plantelUsuario == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "No tienes un plantel asignado.");
+                }
+                if (materia.getPlantelId() == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "No puedes activar ni desactivar una materia de tronco común.");
+                }
+                if (!materia.getPlantelId().equals(plantelUsuario)) {
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "No puedes modificar materias de otro plantel.");
+                }
+            }
+        }
+
+        materia.setActivo(estado);
+        unidadRepository.cambiarEstadoPorMateria(materialId, estado);
+        temaRepository.cambiarEstadoPorMateria(materialId, estado);
+        conceptoRepository.cambiarEstadoPorMateria(materialId, estado);
+        materiaRepository.save(materia);
     }
 
     @Override
@@ -362,6 +550,68 @@ public class MateriaServiceImpl implements MateriaService{
         return resultadoPorId.values().stream()
                 .map(this::toMateriaDetailDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MateriaDTO> findAllByIdplantel(Long plantelId, User usuario) {
+        Roles rol = usuario.getPersona().getRol();
+        if (rol == Roles.ADMIN || rol == Roles.DEV || rol == Roles.DIRECTOR_GENERAL) {
+            return findAllByIdplantel(plantelId);
+        }
+
+        Long plantelUsuario = usuario.getPersona().getPlantel() != null
+                ? usuario.getPersona().getPlantel().getId()
+                : null;
+        if (plantelUsuario == null
+                || !plantelUsuario.equals(plantelId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No tienes permiso para consultar materias de este plantel.");
+        }
+
+        return findAllByIdplantel(plantelId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MateriaDTO> findMateriasVisibles(Long plantelId, User usuario) {
+        Roles rol = usuario.getPersona().getRol();
+
+        if (rol == Roles.DIRECTOR_GENERAL) {
+            return plantelId == null
+                    ? materiaRepository.findByPlantelIdIsNull().stream()
+                            .map(this::toMateriaDetailDto)
+                            .toList()
+                    : findAllByIdplantel(plantelId);
+        }
+
+        if (rol == Roles.ADMIN || rol == Roles.DEV) {
+            return plantelId == null
+                    ? findAll()
+                    : findAllByIdplantel(plantelId);
+        }
+
+        if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR) {
+            Long plantelUsuario = usuario.getPersona().getPlantel() != null
+                    ? usuario.getPersona().getPlantel().getId()
+                    : null;
+            if (plantelUsuario == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes un plantel asignado.");
+            }
+            if (plantelId != null && !plantelUsuario.equals(plantelId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes permiso para consultar materias de este plantel.");
+            }
+            return findAllByIdplantel(plantelUsuario);
+        }
+
+        throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "No tienes permiso para consultar materias.");
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.minerva.api.mapper;
 
+import java.util.Collections;
+
 import com.minerva.api.dto.ConceptoDTO;
 import com.minerva.api.dto.ConfiguracionDTO;
 import com.minerva.api.dto.DocumentoDTO;
@@ -131,6 +133,12 @@ public class Mapper {
                 .planEstudioId(materia.getPlanEstudio() != null ? materia.getPlanEstudio().getId() : null)
             .plantelId((materia.getPlantelId()))
             .materiaBaseId(materia.getMateriaBaseId())
+                .documentoMateriaId(materia.getDocumentoMateria() != null
+                        ? materia.getDocumentoMateria().getId()
+                        : null)
+                .documentoMateriaNombre(materia.getDocumentoMateria() != null
+                        ? materia.getDocumentoMateria().getOriginalFilename()
+                        : null)
                 .activo(materia.getActivo())
                 .build();
     }
@@ -229,7 +237,7 @@ public class Mapper {
                 .materiaId(grupo.getMateria().getId())
                 .docenteId(grupo.getDocente() != null ? grupo.getDocente().getId() : null)
                 .plantelId(grupo.getPlantel() != null ? grupo.getPlantel().getId() : null)
-                .alumnosIds(grupo.getAlumnos() == null ? java.util.Collections.emptyList()
+                .alumnosIds(grupo.getAlumnos() == null ? Collections.emptyList()
                         : grupo.getAlumnos().stream().map(Persona::getId).toList())
                 .build();
     }

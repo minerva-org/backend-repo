@@ -18,6 +18,8 @@ public class MateriaDTO {
     private String planEstudioId;
     private Long plantelId;
     private String materiaBaseId;
+    private String documentoMateriaId;
+    private String documentoMateriaNombre;
     private List<UnidadDTO> unidades;
     private Boolean activo;
 }

@@ -26,4 +26,6 @@ public interface MateriaRepository extends JpaRepository<Materia, String> {
     boolean existsByNombreIgnoreCaseAndPlantelIdAndIdNot(String nombre, Long plantelId, String id);
 
     Optional<Materia> findByPlantelIdAndMateriaBaseId(Long plantelId, String materiaBaseId);
+
+    boolean existsByDocumentoMateria_Id(String documentoMateriaId);
 }

@@ -91,23 +91,14 @@ CREATE TABLE IF NOT EXISTS contenido_grupo (
     id VARCHAR(255) NOT NULL,
     descripcion TEXT NOT NULL,
     id_concepto_grupo VARCHAR(255) NOT NULL,
-    id_documento VARCHAR(128) NOT NULL,
-    pagina INTEGER,
-    seccion VARCHAR(255),
 
     CONSTRAINT pk_contenido_grupo PRIMARY KEY (id),
     CONSTRAINT fk_contenido_grupo_concepto
-        FOREIGN KEY (id_concepto_grupo) REFERENCES concepto_grupo (id) ON DELETE CASCADE,
-    CONSTRAINT fk_contenido_grupo_documento
-        FOREIGN KEY (id_documento) REFERENCES documentos (id) ON DELETE RESTRICT,
-    CONSTRAINT ck_contenido_grupo_pagina
-        CHECK (pagina IS NULL OR pagina > 0)
+        FOREIGN KEY (id_concepto_grupo) REFERENCES concepto_grupo (id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_contenido_grupo_concepto
     ON contenido_grupo (id_concepto_grupo);
-CREATE INDEX IF NOT EXISTS idx_contenido_grupo_documento
-    ON contenido_grupo (id_documento);
 
 CREATE TABLE IF NOT EXISTS fuentes_grupo (
     id_documento VARCHAR(128) NOT NULL,
