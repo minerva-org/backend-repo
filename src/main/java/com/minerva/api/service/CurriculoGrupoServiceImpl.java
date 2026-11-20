@@ -30,6 +30,7 @@ import com.minerva.api.repository.GrupoRepository;
 import com.minerva.api.repository.TemaGrupoRepository;
 import com.minerva.api.repository.TemaRepository;
 import com.minerva.api.repository.UnidadGrupoRepository;
+import com.minerva.api.mapper.Mapper;
 import com.minerva.api.repository.UnidadRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -311,7 +312,7 @@ public class CurriculoGrupoServiceImpl implements CurriculoGrupoService {
         return FuenteGrupoDTO.builder()
                 .idDocumento(fuente.getId().getIdDocumento())
                 .idGrupo(fuente.getId().getIdGrupo())
-                .documento(com.minerva.api.mapper.Mapper.toDTO(fuente.getDocumento()))
+                .documento(Mapper.toDTO(fuente.getDocumento()))
                 .build();
     }
 

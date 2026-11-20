@@ -14,4 +14,6 @@ public interface FuentesGrupoRepository extends JpaRepository<FuentesGrupo, Fuen
     List<FuentesGrupo> findByDocumentoIdOrderByGrupoIdAsc(String documentoId);
 
     boolean existsByIdIdDocumentoAndIdIdGrupo(String documentoId, String grupoId);
+
+    boolean existsByDocumento_Id(String documentoId);
 }

@@ -67,13 +67,6 @@ public class Grupo {
     @OneToMany(mappedBy = "grupo", fetch = FetchType.LAZY)
     private Set<UnidadGrupo> unidadesGrupo = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "fuentes_grupo",
-        joinColumns = @JoinColumn(name = "id_grupo"),
-        inverseJoinColumns = @JoinColumn(name = "id_documento")
-    )
-    private Set<Documento> fuentes = new HashSet<>();
 
     public void addAlumno(Persona alumno) {
         alumnos.add(alumno);

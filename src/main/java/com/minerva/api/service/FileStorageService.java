@@ -2,6 +2,7 @@ package com.minerva.api.service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.Base64;
 import java.util.HexFormat;
@@ -19,6 +20,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.minerva.api.dto.DocumentoDTO;
 import com.minerva.api.dto.FileDTO;
+import com.minerva.api.model.Documento;
+import com.minerva.api.repository.DocumentoRepository;
+import com.minerva.api.repository.FuentesGrupoRepository;
+import com.minerva.api.repository.MateriaRepository;
 
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -36,22 +41,31 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 public class FileStorageService {
 
     private static final long MAX_FILE_SIZE = 10L * 1024 * 1024;
-    private static final byte[] PDF_SIGNATURE = "%PDF-".getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+    private static final byte[] PDF_SIGNATURE = "%PDF-".getBytes(StandardCharsets.US_ASCII);
     private static final String ORIGINAL_FILENAME_METADATA = "original-filename-b64";
     private static final String DEFAULT_DOCUMENTS_PREFIX = "documentos/";
 
     private final S3Client s3Client;
-    private final DocumentoService documentoService;   // NUEVO
+    private final DocumentoService documentoService;
+    private final DocumentoRepository documentoRepository;
+    private final MateriaRepository materiaRepository;
+    private final FuentesGrupoRepository fuentesGrupoRepository;
     private final String bucket;
     private final String documentsPrefix;
 
     public FileStorageService(
             S3Client s3Client,
             DocumentoService documentoService,
+            DocumentoRepository documentoRepository,
+            MateriaRepository materiaRepository,
+            FuentesGrupoRepository fuentesGrupoRepository,
             @Value("${app.storage.s3.bucket}") String bucket,
             @Value("${app.storage.s3.documents-prefix:documentos/}") String documentsPrefix) {
         this.s3Client = s3Client;
         this.documentoService = documentoService;
+        this.documentoRepository = documentoRepository;
+        this.materiaRepository = materiaRepository;
+        this.fuentesGrupoRepository = fuentesGrupoRepository;
         this.bucket = bucket;
         this.documentsPrefix = normalizePrefix(documentsPrefix);
     }
@@ -65,7 +79,7 @@ public class FileStorageService {
         }
 
         String originalName = file.getOriginalFilename() == null ? "document.pdf" : file.getOriginalFilename();
-        if (!originalName.toLowerCase(java.util.Locale.ROOT).endsWith(".pdf")) {
+        if (!originalName.toLowerCase(Locale.ROOT).endsWith(".pdf")) {
             throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Solo se permiten archivos PDF.");
         }
 
@@ -79,10 +93,20 @@ public class FileStorageService {
             throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "El contenido no parece ser un PDF válido.");
         }
 
+        String checksum = sha256Hex(content);
+        Optional<Documento> documentoExistente = documentoRepository.findByChecksumSha256(checksum);
+        if (documentoExistente.isPresent()) {
+            Documento documento = documentoExistente.get();
+            return new FileDTO(UUID.fromString(documento.getId()),
+                    documento.getOriginalFilename(),
+                    documento.getContentType(),
+                    documento.getSizeBytes());
+        }
+
         UUID fileId = UUID.randomUUID();
-        String objectKey = objectKey(fileId);
+        String objectKey = documentsPrefix + fileId + ".pdf";
         String encodedName = Base64.getUrlEncoder().withoutPadding()
-                .encodeToString(originalName.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                .encodeToString(originalName.getBytes(StandardCharsets.UTF_8));
 
         try {
             s3Client.putObject(
@@ -99,15 +123,19 @@ public class FileStorageService {
         }
 
         try {
-            documentoService.saveDocumento(new DocumentoDTO(
+            DocumentoDTO documentoGuardado = documentoService.saveDocumento(new DocumentoDTO(
                     null,
                     objectKey,
                     originalName,
                     "application/pdf",
                     content.length,
-                    sha256Hex(content),
+                    checksum,
                     uploadedBy,
                     null));
+            return new FileDTO(UUID.fromString(documentoGuardado.id()),
+                    originalName,
+                    "application/pdf",
+                    content.length);
         } catch (RuntimeException exception) {
             // por si falla la BD, no dejamos el archivo huérfano en S3
             try {
@@ -117,11 +145,37 @@ public class FileStorageService {
             throw exception;
         }
 
-        return new FileDTO(fileId, originalName, "application/pdf", content.length);
     }
 
     public StoredFile download(UUID fileId) {
-        return downloadByObjectKey(objectKey(fileId), fileId + ".pdf");
+        Documento documento = documentoRepository.findById(fileId.toString())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No se encontró el documento."));
+        return downloadByObjectKey(documento.getObjectKey(),
+                documento.getOriginalFilename());
+    }
+
+    public void deleteIfOrphan(UUID fileId) {
+        Documento documento = documentoRepository.findById(fileId.toString())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No se encontró el documento."));
+
+        boolean asociado = materiaRepository.existsByDocumentoMateria_Id(fileId.toString())
+                || fuentesGrupoRepository.existsByDocumento_Id(fileId.toString());
+        if (asociado) {
+            return;
+        }
+
+        try {
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(documento.getObjectKey())
+                    .build());
+        } catch (S3Exception exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    "No se pudo eliminar el archivo huérfano del almacenamiento.");
+        }
+        documentoRepository.delete(documento);
     }
 
     public StoredFile downloadByReference(String planEstudio, String fuente) {
@@ -207,9 +261,6 @@ public class FileStorageService {
         return Optional.ofNullable(latestMatch).map(S3Object::key);
     }
 
-    private static String objectKey(UUID fileId) {
-        return "test/" + fileId + ".pdf";
-    }
 
     private static boolean matchesReference(String objectKey, String planToken, String fuenteToken) {
         if (objectKey == null || !objectKey.toLowerCase(Locale.ROOT).endsWith(".pdf")) {
@@ -260,7 +311,7 @@ public class FileStorageService {
             return fallbackName;
         }
         try {
-            return new String(Base64.getUrlDecoder().decode(encodedName), java.nio.charset.StandardCharsets.UTF_8);
+            return new String(Base64.getUrlDecoder().decode(encodedName), StandardCharsets.UTF_8);
         } catch (IllegalArgumentException exception) {
             return fallbackName;
         }

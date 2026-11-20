@@ -1,6 +1,7 @@
 package com.minerva.api.model;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -50,7 +51,7 @@ public class Documento {
 
     @PrePersist
     private void prePersist() {
-        if (id == null) id = java.util.UUID.randomUUID().toString();
+        if (id == null) id = UUID.randomUUID().toString();
         if (createdAt == null) createdAt = Instant.now();
     }
 }
