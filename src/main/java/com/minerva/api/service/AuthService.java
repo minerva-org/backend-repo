@@ -28,6 +28,7 @@ public class AuthService {
                 String password = request.getPassword() == null ? "" : request.getPassword();
 
                 String username = resolveUsername(identifier)
+                        .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
 
                 User user = userRespository.findByUsername(username)
                                 .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
