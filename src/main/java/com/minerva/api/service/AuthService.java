@@ -1,9 +1,8 @@
 package com.minerva.api.service;
 
-import java.util.Optional;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.minerva.api.User.Roles;
@@ -21,6 +20,7 @@ public class AuthService {
 
         private final UserRepository userRespository;
         private final JwtService jwtService;
+        private final PasswordEncoder passwordEncoder;
         private final AuthenticationManager authenticationManager;
 
         public AuthResponse login(LoginRequest request) {
@@ -28,6 +28,7 @@ public class AuthService {
                 String password = request.getPassword() == null ? "" : request.getPassword();
 
                 String username = resolveUsername(identifier)
+                                .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
 
                 User user = userRespository.findByUsername(username)
                                 .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
@@ -53,9 +54,9 @@ public class AuthService {
                                 .build();
         }
 
-        private Optional<String> resolveUsername(String identifier) {
+        private java.util.Optional<String> resolveUsername(String identifier) {
                 if (identifier == null || identifier.isBlank()) {
-                        return Optional.empty();
+                        return java.util.Optional.empty();
                 }
 
                 return userRespository.findByUsername(identifier)

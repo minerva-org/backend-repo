@@ -1,14 +1,11 @@
 package com.minerva.api.service;
 
-import java.util.Collection;
 import java.util.List;
 
 import com.minerva.api.dto.PersonaDatosCompletosResponseDTO;
 import com.minerva.api.dto.PersonaRequestDTO;
 import com.minerva.api.dto.PersonaResponseDTO;
 import com.minerva.api.User.Roles;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 public interface PersonaService {
     List<PersonaResponseDTO> findAll();
@@ -25,9 +22,6 @@ public interface PersonaService {
 
     List<PersonaResponseDTO> findAllByRol(Roles rol);
 
-    Page<PersonaResponseDTO> findPaginatedPeople(Long plantelId, Collection<Roles> roles, Boolean activo, String search,
-            Pageable pageable);
-
     PersonaDatosCompletosResponseDTO getDirectorPlantelByPlantelId(Long plantelId);
 
     PersonaResponseDTO getPersonaById(String personaId);
@@ -35,6 +29,6 @@ public interface PersonaService {
     PersonaResponseDTO savePersona(PersonaRequestDTO dto);
 
     PersonaResponseDTO updatePersona(String personaId, PersonaRequestDTO dto);
-
+    
     void deletePersona(String personaId);
 }

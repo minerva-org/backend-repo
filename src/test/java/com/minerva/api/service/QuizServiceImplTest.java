@@ -6,8 +6,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,9 +63,9 @@ class QuizServiceImplTest {
         quiz.setFechaFinalizacion(Instant.parse("2026-01-03T00:00:00Z"));
         quiz.setGrupo(grupo);
 
-        when(personaRepository.findById("A-1")).thenReturn(Optional.of(alumno));
-        when(grupoRepository.findByAlumnos_Id("A-1")).thenReturn(List.of(grupo));
-        when(quizRepository.findByGrupoIdIn(List.of("G-1"))).thenReturn(List.of(quiz));
+        when(personaRepository.findById("A-1")).thenReturn(java.util.Optional.of(alumno));
+        when(grupoRepository.findByAlumnos_Id("A-1")).thenReturn(java.util.List.of(grupo));
+        when(quizRepository.findByGrupoIdIn(java.util.List.of("G-1"))).thenReturn(java.util.List.of(quiz));
 
         var result = quizService.findAllByAlumnoId("A-1");
 
@@ -91,13 +89,13 @@ class QuizServiceImplTest {
         pregunta.setId("P-1");
         relacion.setPregunta(pregunta);
 
-        when(quizRepository.findById("Q-1")).thenReturn(Optional.of(quiz));
-        when(quizXPreguntaRepository.findByQuizId("Q-1")).thenReturn(List.of(relacion));
+        when(quizRepository.findById("Q-1")).thenReturn(java.util.Optional.of(quiz));
+        when(quizXPreguntaRepository.findByQuizId("Q-1")).thenReturn(java.util.List.of(relacion));
 
         quizService.deleteQuiz("Q-1");
 
         verify(preguntaService).deletePregunta("P-1");
-        verify(quizXPreguntaRepository).deleteAll(List.of(relacion));
+        verify(quizXPreguntaRepository).deleteAll(java.util.List.of(relacion));
         verify(quizRepository).delete(quiz);
     }
 }

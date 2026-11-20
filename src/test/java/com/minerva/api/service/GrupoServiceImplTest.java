@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,7 +70,7 @@ class GrupoServiceImplTest {
             .semestre("2025-A")
             .docenteId("P-1")
             .plantelId(10L)
-            .alumnosIds(List.of("A-1"))
+            .alumnosIds(java.util.List.of("A-1"))
             .build();
 
         GrupoDTO result = grupoService.saveGrupo(dto);
@@ -92,7 +91,7 @@ class GrupoServiceImplTest {
         grupo.addAlumno(alumno);
 
         when(personaRepository.findById("A-1")).thenReturn(Optional.of(alumno));
-        when(grupoRepository.findByAlumnos_Id("A-1")).thenReturn(List.of(grupo));
+        when(grupoRepository.findByAlumnos_Id("A-1")).thenReturn(java.util.List.of(grupo));
 
         var result = grupoService.findAllByAlumnoId("A-1");
 
