@@ -31,11 +31,32 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
 
+                                                .requestMatchers("/api/ai/laboratory/**")
+                                                .hasAnyAuthority("DEV", "ROLE_DEV")
+
+                                                .requestMatchers("/api/config/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL")
+
                                                 .requestMatchers("/api/planteles/**")
                                                 .hasAnyAuthority(
                                                                 "DEV", "ROLE_DEV",
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                                                                 "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL")
+
+                                                .requestMatchers(HttpMethod.POST,"/api/periodo/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL")
+
+                                                .requestMatchers(HttpMethod.GET,"/api/periodo/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE")
 
                                                 .requestMatchers("/api/instituciones/**")
                                                 .hasAnyAuthority(
@@ -43,7 +64,9 @@ public class SecurityConfig {
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                                                                 "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL")
 
-                                                .requestMatchers("/api/personas/**")
+                                                .requestMatchers("/api/personas/**",
+                                                                "/api/files/**"
+                                                )
                                                 .hasAnyAuthority(
                                                                 "DEV", "ROLE_DEV",
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.minerva.api.dto.QuizDTO;
+import com.minerva.api.User.Roles;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Persona;
@@ -175,7 +176,7 @@ public class QuizServiceImpl implements QuizService {
         Persona alumno = personaRepository.findById(alumnoId)
             .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
 
-        if (alumno.getRol() != com.minerva.api.User.Roles.ALUMNO) {
+        if (alumno.getRol() != Roles.ALUMNO) {
             throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
         }
 
