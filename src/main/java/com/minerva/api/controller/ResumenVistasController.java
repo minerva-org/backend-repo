@@ -26,6 +26,11 @@ public class ResumenVistasController {
         return ResponseEntity.ok(resumenVistasService.general(quizId));
     }
 
+    @GetMapping("/docente/{docenteId}")
+    public ResponseEntity<List<ResumenGeneralDTO>> resumenesDocente(@PathVariable String docenteId){
+        return ResponseEntity.ok(resumenVistasService.generalPorDocente(docenteId));
+    }
+
     @GetMapping("/alumnos")
     public ResponseEntity<List<AlumnoDesgloseDTO>> alumnos(@PathVariable String quizId) {
         return ResponseEntity.ok(resumenVistasService.alumnos(quizId));

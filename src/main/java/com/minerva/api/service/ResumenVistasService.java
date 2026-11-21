@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.minerva.api.dto.AlumnoDesgloseDTO;
 import com.minerva.api.dto.RespuestaAlumnoDTO;
 import com.minerva.api.dto.ResumenGeneralDTO;
+import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.QuizAlumnoPreguntaResumen;
+import com.minerva.api.repository.PersonaRepository;
 import com.minerva.api.repository.QuizAlumnoPreguntaResumenRepository;
 import com.minerva.api.repository.QuizResumenGeneralRepository;
 
@@ -20,22 +22,27 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class ResumenVistasService {
+public class ResumenVistasService { 
 
     private final QuizResumenGeneralRepository generalRepository;
     private final QuizAlumnoPreguntaResumenRepository alumnoPreguntaRepository;
+    private final PersonaRepository personaRepository;
 
     @Transactional(readOnly = true)
     public ResumenGeneralDTO general(String quizId) {
         return generalRepository.findById(quizId)
-                .map(g -> new ResumenGeneralDTO(
-                        g.getQuizId(), g.getGrupoId(), g.getGrupoClave(), g.getGrupoNombre(),
-                        g.getNumPreguntas(), g.getNumIntentos(), g.getNumRespondieron(),
-                        g.getNumEnCurso(), g.getNumAprobados(), g.getNumReprobados(),
-                        g.getPromedio(), g.getCalificacionMaxima(),
-                        g.getCalificacionMinima(), g.getDuracionPromedioSegundos()))
+                .map(Mapper::toDTO)
                 .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
     } 
+
+    @Transactional(readOnly = true)
+    public List<ResumenGeneralDTO> generalPorDocente(String docenteId){
+        if (!personaRepository.existsById(docenteId)) throw new EntityNotFoundException("No se encontró un docente con el Id: " + docenteId);
+        return generalRepository.findByDocenteId(docenteId)
+            .stream()
+            .map(Mapper::toDTO)
+            .toList();
+    }
 
     @Transactional(readOnly = true)
     public List<AlumnoDesgloseDTO> alumnos(String quizId) {
