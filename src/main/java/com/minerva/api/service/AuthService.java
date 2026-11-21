@@ -3,8 +3,16 @@ package com.minerva.api.service;
 import java.util.Optional;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.minerva.api.request.PasswordRequest;
 
 import com.minerva.api.User.Roles;
 import com.minerva.api.User.User;
@@ -19,18 +27,19 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthService {
 
-        private final UserRepository userRespository;
+        private final UserRepository userRepository;
         private final JwtService jwtService;
         private final AuthenticationManager authenticationManager;
+        private final PasswordEncoder passwordEncoder;
 
         public AuthResponse login(LoginRequest request) {
                 String identifier = request.getUsername() == null ? "" : request.getUsername().trim();
                 String password = request.getPassword() == null ? "" : request.getPassword();
 
                 String username = resolveUsername(identifier)
-                        .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
+                                .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
 
-                User user = userRespository.findByUsername(username)
+                User user = userRepository.findByUsername(username)
                                 .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
 
                 if (!user.isEnabled()) {
@@ -59,9 +68,9 @@ public class AuthService {
                         return Optional.empty();
                 }
 
-                return userRespository.findByUsername(identifier)
+                return userRepository.findByUsername(identifier)
                                 .map(User::getUsername)
-                                .or(() -> userRespository.findByPersonaEmailIgnoreCase(identifier)
+                                .or(() -> userRepository.findByPersonaEmailIgnoreCase(identifier)
                                                 .map(User::getUsername));
         }
 
@@ -75,6 +84,43 @@ public class AuthService {
                 return nombreRol + " deshabilitado";
         }
 
+        public void validarPassword(String username, String currentPassword) {
+                var user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new UsernameNotFoundException(
+                                                "Usuario no encontrado"));
+
+                if (currentPassword == null ||
+                                !passwordEncoder.matches(currentPassword, user.getPassword())) {
+                        throw new BadCredentialsException(
+                                        "La contraseña actual es incorrecta.");
+                }
+        }
+
+        public void cambiarPassword(String username, PasswordRequest request) {
+
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+                if (request.getCurrentPassword() == null
+                                || !passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+                        throw new ResponseStatusException(
+                                        HttpStatus.BAD_REQUEST,
+                                        "La contraseña actual es incorrecta");
+                }
+                if (request.getNewPassword() == null ||
+                                request.getNewPassword().isBlank()) {
+                        throw new ResponseStatusException(
+                                        HttpStatus.BAD_REQUEST,
+                                        "La nueva contraseña no puede estar vacía");
+                }
+                if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+                        throw new ResponseStatusException(
+                                        HttpStatus.BAD_REQUEST,
+                                        "La nueva contraseña debe ser diferente a la actual");
+                }
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                userRepository.save(user);
+        }
+
         // public AuthResponse register(RegisterRequest request){
         // User user = User.builder()
         // .username(request.username)
@@ -82,7 +128,7 @@ public class AuthService {
         // .role(Roles.ALUMNO)
         // .build();
 
-        // userRespository.save(user);
+        // userRepository.save(user);
 
         // return AuthResponse.builder()
         // .token(jwtService.getToken(user))
