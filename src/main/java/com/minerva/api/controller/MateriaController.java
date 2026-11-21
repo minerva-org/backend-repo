@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,6 +19,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
+import com.minerva.api.service.MateriaExtractionService;
+import tools.jackson.databind.JsonNode;
 
 @RestController 
 @RequestMapping ("api/materias")
@@ -27,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class MateriaController {
 
     private final MateriaService materiaService;
+    private final MateriaExtractionService materiaExtractionService;
 
     @GetMapping 
     public ResponseEntity<List<MateriaDTO>> getMaterias(
@@ -42,6 +47,12 @@ public class MateriaController {
         return ResponseEntity.ok(materiaService.getMateriaById(materiaId));
     }
 
+    @PostMapping(value = "/extract", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<JsonNode> extractMateria(
+            @RequestPart("file") MultipartFile file,
+            @AuthenticationPrincipal User usuario) {
+        return materiaExtractionService.extract(file, usuario);
+    }
 
     @PostMapping
     public ResponseEntity<MateriaDTO> saveMateria(

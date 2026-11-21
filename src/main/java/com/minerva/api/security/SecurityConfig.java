@@ -92,6 +92,15 @@ public class SecurityConfig {
                                                                 "ALUMNO", "ROLE_ALUMNO")
 
                                                 .requestMatchers(
+                                                                "/api/materias/extract")
+                                                .hasAnyAuthority(
+                                                                "ADMIN", "ROLE_ADMIN",
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                                                                "COORDINADOR", "ROLE_COORDINADOR")
+
+                                                .requestMatchers(
                                                                 "/api/materias/**",
                                                                 "/api/unidades/**",
                                                                 "/api/temas/**",

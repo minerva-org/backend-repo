@@ -27,7 +27,8 @@ import tools.jackson.databind.ObjectMapper;
 @Service
 public class AiLaboratoryClient {
 
-    private static final Set<Integer> FORWARDED_STATUSES = Set.of(200, 400, 413, 415, 422, 503);
+    private static final Set<Integer> FORWARDED_STATUSES =
+            Set.of(200, 400, 413, 415, 422, 502, 503, 504);
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
 
@@ -57,6 +58,13 @@ public class AiLaboratoryClient {
         parts.add("file", file.getResource());
         parts.add("request", new HttpEntity<>(request, jsonHeaders));
         return forward(restClient.post().uri("/laboratory/documents/extract")
+                .contentType(MediaType.MULTIPART_FORM_DATA).body(parts));
+    }
+
+    public ResponseEntity<JsonNode> extractDocument(MultipartFile file) {
+        var parts = new LinkedMultiValueMap<String, Object>();
+        parts.add("file", file.getResource());
+        return forward(restClient.post().uri("/documents/extract")
                 .contentType(MediaType.MULTIPART_FORM_DATA).body(parts));
     }
 

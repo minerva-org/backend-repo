@@ -86,4 +86,41 @@ class AiLaboratoryClientTest {
         var jsonError = assertThrows(ResponseStatusException.class, () -> client.prompts());
         assertEquals(502, jsonError.getStatusCode().value());
     }
+
+    // Input: PDF válido enviado al endpoint normal /documents/extract.
+    // Resultado esperado: reenvía el multipart con clave interna y conserva 200.
+    @Test
+    void forwardsNormalDocumentExtractionWithInternalKey() {
+        responseStatus = 200;
+        responseBody = "{\"units\":[{\"name\":\"Unidad\",\"topics\":[{\"name\":\"Tema\",\"concepts\":[{\"name\":\"Concepto\"}]}]}]}";
+
+        var result = client.extractDocument(new MockMultipartFile(
+                "file", "plan.pdf", "application/pdf",
+                "%PDF-valid-content".getBytes(StandardCharsets.UTF_8)));
+
+        assertEquals(200, result.getStatusCode().value());
+        assertEquals("/documents/extract", path.get());
+        assertEquals("test-internal-key", serviceKey.get());
+        assertTrue(contentType.get().startsWith("multipart/form-data;boundary="));
+        assertTrue(requestBody.get().contains("filename=\"plan.pdf\""));
+        assertTrue(requestBody.get().contains("%PDF-valid-content"));
+        assertEquals("Unidad", result.getBody().at("/units/0/name").asString());
+    }
+
+    // Input: AI devuelve 422 por documento sin jerarquía utilizable.
+    // Resultado esperado: preserva 422 y el código/mensaje de AI.
+    @Test
+    void preservesNormalDocumentExtraction422Diagnostic() {
+        responseStatus = 422;
+        responseBody = "{\"code\":\"NO_USABLE_HIERARCHY\",\"message\":\"No hay contenido utilizable.\"}";
+
+        var result = client.extractDocument(new MockMultipartFile(
+                "file", "recibo.pdf", "application/pdf",
+                "%PDF-no-academico".getBytes(StandardCharsets.UTF_8)));
+
+        assertEquals(422, result.getStatusCode().value());
+        assertEquals("NO_USABLE_HIERARCHY",
+                result.getBody().get("code").asString());
+        assertEquals("/documents/extract", path.get());
+    }
 }
