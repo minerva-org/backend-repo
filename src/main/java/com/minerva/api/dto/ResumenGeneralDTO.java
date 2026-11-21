@@ -1,0 +1,7 @@
+package com.minerva.api.dto;
+
+public record ResumenGeneralDTO(String quizId, String grupoId, String grupoClave, String grupoNombre,
+                                long numPreguntas, long numIntentos, long numRespondieron,
+                                long numEnCurso, long numAprobados, long numReprobados,
+                                double promedio, double calificacionMaxima,
+                                double calificacionMinima, double duracionPromedioSegundos) {}
