@@ -142,7 +142,7 @@ class FileStorageServiceTest {
         documento.setContentType("application/pdf");
         documento.setSizeBytes(content.length);
 
-        when(documentoRepository.findByChecksumSha256(any())).thenReturn(Optional.of(documento));
+        when(documentoRepository.findFirstByChecksumSha256OrderByCreatedAtDesc(any())).thenReturn(Optional.of(documento));
 
         FileDTO result = service.upload(file, "PERSONA-1");
 
@@ -164,7 +164,7 @@ class FileStorageServiceTest {
             "plan.pdf", "application/pdf", content.length,
             "checksum", "PERSONA-1", null);
 
-        when(documentoRepository.findByChecksumSha256(any())).thenReturn(Optional.empty());
+        when(documentoRepository.findFirstByChecksumSha256OrderByCreatedAtDesc(any())).thenReturn(Optional.empty());
         when(documentoService.saveDocumento(any(DocumentoDTO.class))).thenReturn(guardado);
 
         FileDTO result = service.upload(file, "PERSONA-1");
@@ -181,7 +181,7 @@ class FileStorageServiceTest {
         MockMultipartFile file = new MockMultipartFile(
             "file", "plan.pdf", "application/pdf", content);
 
-        when(documentoRepository.findByChecksumSha256(any())).thenReturn(Optional.empty());
+        when(documentoRepository.findFirstByChecksumSha256OrderByCreatedAtDesc(any())).thenReturn(Optional.empty());
         when(documentoService.saveDocumento(any(DocumentoDTO.class)))
             .thenThrow(new IllegalArgumentException("No se pudo guardar el documento"));
 

@@ -10,6 +10,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -39,6 +41,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Service
 public class FileStorageService {
+    private static final Logger LOGGER = Logger.getLogger(FileStorageService.class.getName());
 
     private static final long MAX_FILE_SIZE = 10L * 1024 * 1024;
     private static final byte[] PDF_SIGNATURE = "%PDF-".getBytes(StandardCharsets.US_ASCII);
@@ -94,7 +97,8 @@ public class FileStorageService {
         }
 
         String checksum = sha256Hex(content);
-        Optional<Documento> documentoExistente = documentoRepository.findByChecksumSha256(checksum);
+        Optional<Documento> documentoExistente =
+                documentoRepository.findFirstByChecksumSha256OrderByCreatedAtDesc(checksum);
         if (documentoExistente.isPresent()) {
             Documento documento = documentoExistente.get();
             return new FileDTO(UUID.fromString(documento.getId()),
@@ -118,8 +122,9 @@ public class FileStorageService {
                             .build(),
                     RequestBody.fromBytes(content));
         } catch (S3Exception exception) {
+            logS3Failure("SUBIR", bucket, objectKey, exception);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-                    "No se pudo guardar el archivo en el almacenamiento S3.");
+                    "No se pudo guardar el archivo. Intenta nuevamente.");
         }
 
         try {
@@ -140,7 +145,8 @@ public class FileStorageService {
             // por si falla la BD, no dejamos el archivo huérfano en S3
             try {
                 s3Client.deleteObject(DeleteObjectRequest.builder().bucket(bucket).key(objectKey).build());
-            } catch (S3Exception ignored) {
+            } catch (S3Exception rollbackException) {
+                logS3Failure("ELIMINAR_ROLLBACK", bucket, objectKey, rollbackException);
             }
             throw exception;
         }
@@ -172,8 +178,9 @@ public class FileStorageService {
                     .key(documento.getObjectKey())
                     .build());
         } catch (S3Exception exception) {
+            logS3Failure("ELIMINAR", bucket, documento.getObjectKey(), exception);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-                    "No se pudo eliminar el archivo huérfano del almacenamiento.");
+                    "No se pudo eliminar el archivo. Intenta nuevamente.");
         }
         documentoRepository.delete(documento);
     }
@@ -206,11 +213,12 @@ public class FileStorageService {
             String fileName = decodeFileName(encodedName, fallbackFileName);
             return new StoredFile(fileName, response.asByteArray());
         } catch (S3Exception exception) {
+            logS3Failure("DESCARGAR", bucket, objectKey, exception);
             if (exception.statusCode() == 404) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontró el archivo.");
             }
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-                    "No se pudo recuperar el archivo del almacenamiento S3.");
+                    "No se pudo recuperar el archivo. Intenta nuevamente.");
         }
     }
 
@@ -220,6 +228,26 @@ public class FileStorageService {
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 no disponible", e);
         }
+    }
+
+    private void logS3Failure(
+            String operacion,
+            String bucketName,
+            String objectKey,
+            S3Exception exception) {
+        String awsError = exception.awsErrorDetails() != null
+                ? exception.awsErrorDetails().errorCode()
+                : "UNKNOWN";
+        LOGGER.log(Level.WARNING,
+                "Operacion S3 fallida: operacion={0}, bucket={1}, key={2}, awsError={3}, status={4}, requestId={5}",
+                new Object[]{
+                        operacion,
+                        bucketName,
+                        objectKey,
+                        awsError,
+                        exception.statusCode(),
+                        exception.requestId()
+                });
     }
 
     private Optional<String> findLatestObjectKeyByReference(String planToken, String fuenteToken) {
@@ -239,8 +267,9 @@ public class FileStorageService {
             try {
                 response = s3Client.listObjectsV2(requestBuilder.build());
             } catch (S3Exception exception) {
+                logS3Failure("LISTAR", bucket, documentsPrefix, exception);
                 throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-                        "No se pudo consultar el almacenamiento S3.");
+                        "No se pudo procesar el archivo. Intenta nuevamente.");
             }
 
             for (S3Object current : response.contents()) {
