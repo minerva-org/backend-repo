@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
+import java.io.IOException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -52,12 +53,13 @@ public class GrupoFuenteServiceImpl implements GrupoFuenteService {
         byte[] content;
         try {
             content = file.getBytes();
-        } catch (java.io.IOException exception) {
+        } catch (IOException exception) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se pudo leer el archivo.");
         }
 
         String checksum = sha256Hex(content);
-        Optional<Documento> documentoExistente = documentoRepository.findByChecksumSha256(checksum);
+        Optional<Documento> documentoExistente =
+                documentoRepository.findFirstByChecksumSha256OrderByCreatedAtDesc(checksum);
 
         Documento documento;
         if (documentoExistente.isPresent()) {

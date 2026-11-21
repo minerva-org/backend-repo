@@ -10,7 +10,7 @@ import com.minerva.api.model.Documento;
 public interface DocumentoRepository extends JpaRepository<Documento, String> {
     List<Documento> findByUploadedByOrderByCreatedAtDesc(String uploadedBy);
 
-    Optional<Documento> findByChecksumSha256(String checksumSha256);
+    Optional<Documento> findFirstByChecksumSha256OrderByCreatedAtDesc(String checksumSha256);
 
     Optional<Documento> findByObjectKey(String objectKey);
 
