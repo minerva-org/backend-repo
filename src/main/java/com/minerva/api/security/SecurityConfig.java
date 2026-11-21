@@ -27,7 +27,9 @@ public class SecurityConfig {
                 return http
                                 .csrf(csrf -> csrf.disable())
                                 .authorizeHttpRequests(authRequest -> authRequest
-                                                .requestMatchers("/auth/**").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                                                .requestMatchers(HttpMethod.PUT, "/auth/cambiar-password")
+                                                .authenticated()
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
 
@@ -39,18 +41,27 @@ public class SecurityConfig {
                                                                 "DEV", "ROLE_DEV",
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL")
 
+                                                .requestMatchers(HttpMethod.GET, "/api/planteles/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE",
+                                                                "ALUMNO", "ROLE_ALUMNO")
+
                                                 .requestMatchers("/api/planteles/**")
                                                 .hasAnyAuthority(
                                                                 "DEV", "ROLE_DEV",
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                                                                 "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL")
 
-                                                .requestMatchers(HttpMethod.POST,"/api/periodo/**")
+                                                .requestMatchers(HttpMethod.POST, "/api/periodo/**")
                                                 .hasAnyAuthority(
                                                                 "DEV", "ROLE_DEV",
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL")
 
-                                                .requestMatchers(HttpMethod.GET,"/api/periodo/**")
+                                                .requestMatchers(HttpMethod.GET, "/api/periodo/**")
                                                 .hasAnyAuthority(
                                                                 "DEV", "ROLE_DEV",
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
@@ -65,14 +76,14 @@ public class SecurityConfig {
                                                                 "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL")
 
                                                 .requestMatchers("/api/personas/**",
-                                                                "/api/files/**"
-                                                )
+                                                                "/api/files/**")
                                                 .hasAnyAuthority(
                                                                 "DEV", "ROLE_DEV",
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                                                                 "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
                                                                 "COORDINADOR", "ROLE_COORDINADOR",
-                                                                "DOCENTE", "ROLE_DOCENTE")
+                                                                "DOCENTE", "ROLE_DOCENTE",
+                                                                "ALUMNO", "ROLE_ALUMNO")
 
                                                 .requestMatchers(
                                                                 "/api/materias/**",
