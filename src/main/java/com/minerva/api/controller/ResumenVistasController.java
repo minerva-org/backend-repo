@@ -15,15 +15,20 @@ import com.minerva.api.service.ResumenVistasService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/quizzes/{quizId}/resumen")
+@RequestMapping("/api/quizzes/resumen")
 @RequiredArgsConstructor
 public class ResumenVistasController {
 
     private final ResumenVistasService resumenVistasService;
 
-    @GetMapping("/general")
-    public ResponseEntity<ResumenGeneralDTO> general(@PathVariable String quizId) {
+    @GetMapping("/{quizId}/general")
+    public ResponseEntity<ResumenGeneralDTO> generalQuiz(@PathVariable String quizId) {
         return ResponseEntity.ok(resumenVistasService.general(quizId));
+    }
+
+    @GetMapping("/docente/{docenteId}")
+    public ResponseEntity<List<ResumenGeneralDTO>> resumenesDocente(@PathVariable String docenteId){
+        return ResponseEntity.ok(resumenVistasService.generalPorDocente(docenteId));
     }
 
     @GetMapping("/alumnos")

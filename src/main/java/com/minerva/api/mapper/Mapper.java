@@ -15,6 +15,7 @@ import com.minerva.api.dto.PlantelDTO;
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.dto.QuizDTO;
 import com.minerva.api.dto.QuizXPreguntaDTO;
+import com.minerva.api.dto.ResumenGeneralDTO;
 import com.minerva.api.dto.TemaDTO;
 import com.minerva.api.dto.UnidadDTO;
 import com.minerva.api.dto.InstitucionDTO;
@@ -31,6 +32,7 @@ import com.minerva.api.model.Persona;
 import com.minerva.api.model.Plantel;
 import com.minerva.api.model.Pregunta;
 import com.minerva.api.model.Quiz;
+import com.minerva.api.model.QuizResumenGeneral;
 import com.minerva.api.model.QuizXPregunta;
 import com.minerva.api.model.Tema;
 import com.minerva.api.model.Unidad;
@@ -277,5 +279,27 @@ public class Mapper {
             documento.getUploadedBy(),
             documento.getCreatedAt()
         );
+    }
+
+    public static ResumenGeneralDTO toDTO(QuizResumenGeneral g){
+        if(g == null) return null;
+
+        return new ResumenGeneralDTO(
+                        g.getQuizId(), 
+                        g.getGrupoId(), 
+                        g.getGrupoClave(), 
+                        g.getGrupoNombre(),
+                        g.getNumPreguntas(), 
+                        g.getNumIntentos(), 
+                        g.getNumRespondieron(),
+                        g.getNumEnCurso(), 
+                        g.getNumAprobados(), 
+                        g.getNumReprobados(),
+                        g.getPromedio(), 
+                        g.getCalificacionMaxima(),
+                        g.getCalificacionMinima(), 
+                        g.getDuracionPromedioSegundos(),
+                        g.getDocenteId(), 
+                        g.getDocenteNombre());
     }
 }
