@@ -45,7 +45,7 @@ public class GrupoController {
     @GetMapping("/mis-grupos")
     public ResponseEntity<List<GrupoDTO>> getMisGrupos(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(grupoService.findAllByAlumnoId(user.getPersona().getId()));
+        return ResponseEntity.ok(grupoService.findAllByUsuario(user));
     }
 
     @GetMapping("/{grupoId}")

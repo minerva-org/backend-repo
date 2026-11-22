@@ -54,6 +54,34 @@ class GrupoServiceImplTest {
     private GrupoServiceImpl grupoService;
 
     @Test
+    void findAllByUsuario_shouldReturnOnlyCoordinatorAssignedGroups() {
+        Persona coordinador = new Persona();
+        coordinador.setId("COORD-1");
+        coordinador.setRol(Roles.COORDINADOR);
+
+        User usuario = new User();
+        usuario.setPersona(coordinador);
+
+        Grupo grupoAsignado = new Grupo();
+        grupoAsignado.setId("G-1");
+        grupoAsignado.setDocente(coordinador);
+        Materia materia = new Materia();
+        materia.setId("MAT-1");
+        grupoAsignado.setMateria(materia);
+
+        when(grupoRepository.findByDocenteId("COORD-1"))
+                .thenReturn(List.of(grupoAsignado));
+        when(personaRepository.existsById("COORD-1"))
+                .thenReturn(true);
+
+        List<GrupoDTO> resultado = grupoService.findAllByUsuario(usuario);
+
+        assertEquals(1, resultado.size());
+        assertEquals("G-1", resultado.getFirst().getId());
+        verify(grupoRepository).findByDocenteId("COORD-1");
+    }
+
+    @Test
     void saveGrupo_shouldAllowCoordinatorAsTeacher() {
         Persona docente = new Persona();
         docente.setId("P-1");
