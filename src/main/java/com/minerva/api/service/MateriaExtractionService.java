@@ -21,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.minerva.api.User.Roles;
 import com.minerva.api.User.User;
+import com.minerva.api.security.RolAutorizacion;
 
 import tools.jackson.databind.JsonNode;
 
@@ -57,7 +58,7 @@ public class MateriaExtractionService {
             if (cached != null) {
                 LOGGER.log(Level.INFO,
                         "Extraccion reutilizada por checksum: checksum={0}, rol={1}",
-                        new Object[]{checksumPrefix(checksum), usuario.getPersona().getRol()});
+                        new Object[]{checksumPrefix(checksum), RolAutorizacion.obtenerRol(usuario)});
                 return ResponseEntity.ok(cached);
             }
         }
@@ -68,7 +69,7 @@ public class MateriaExtractionService {
                         checksumPrefix(checksum),
                         file.getOriginalFilename(),
                         file.getSize(),
-                        usuario.getPersona().getRol()
+                        RolAutorizacion.obtenerRol(usuario)
                 });
         ResponseEntity<JsonNode> response;
         try {
@@ -82,7 +83,7 @@ public class MateriaExtractionService {
         LOGGER.log(Level.INFO,
                 "Respuesta de extraccion: checksum={0}, status={1}, rol={2}",
                 new Object[]{checksumPrefix(checksum), response.getStatusCode().value(),
-                        usuario.getPersona().getRol()});
+                        RolAutorizacion.obtenerRol(usuario)});
         if (response.getStatusCode().value() == 200) {
             JsonNode tree = response.getBody();
             List<String> errors = validateTree(tree);
@@ -100,12 +101,12 @@ public class MateriaExtractionService {
     }
 
     private void validarRol(User usuario) {
-        if (usuario == null || usuario.getPersona() == null || usuario.getPersona().getRol() == null) {
+        if (usuario == null) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
                     "No tienes permiso para extraer el contenido de materias.");
         }
-        Roles rol = usuario.getPersona().getRol();
+        Roles rol = RolAutorizacion.obtenerRol(usuario);
         if (rol != Roles.ADMIN
                 && rol != Roles.DEV
                 && rol != Roles.DIRECTOR_GENERAL

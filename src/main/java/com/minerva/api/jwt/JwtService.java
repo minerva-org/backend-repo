@@ -55,6 +55,14 @@ public class JwtService {
         return getClaim(token, Claims::getSubject);
     }
 
+    public String getRoleFromToken(String token) {
+        String role = getClaim(token, claims -> claims.get("role", String.class));
+        if (role == null || role.isBlank()) {
+            return "USER";
+        }
+        return role.startsWith("ROLE_") ? role.substring("ROLE_".length()) : role;
+    }
+
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));

@@ -21,6 +21,7 @@ import com.minerva.api.repository.GrupoRepository;
 import com.minerva.api.repository.MateriaRepository;
 import com.minerva.api.repository.PersonaRepository;
 import com.minerva.api.repository.PlantelRepository;
+import com.minerva.api.security.RolAutorizacion;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +61,7 @@ public class GrupoServiceImpl implements GrupoService {
     @Transactional
     public GrupoDTO saveGrupo(GrupoDTO grupoDTO, User usuario) {
         if (usuario != null) {
-            Roles rol = usuario.getPersona().getRol();
+            Roles rol = RolAutorizacion.obtenerRol(usuario);
             if (rol != Roles.ADMIN
                     && rol != Roles.DEV
                     && rol != Roles.DIRECTOR_GENERAL

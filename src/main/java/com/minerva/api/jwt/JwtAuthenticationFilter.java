@@ -1,7 +1,9 @@
 package com.minerva.api.jwt;
 
 import java.io.IOException;
+import java.util.List;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,8 +42,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null){
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            if(jwtService.isTokenValid(token, userDetails)){
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            if(userDetails.isEnabled() && jwtService.isTokenValid(token, userDetails)){
+                String role = jwtService.getRoleFromToken(token);
+                List<SimpleGrantedAuthority> authorities = List.of(
+                    new SimpleGrantedAuthority(role),
+                    new SimpleGrantedAuthority("ROLE_" + role));
+                UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
