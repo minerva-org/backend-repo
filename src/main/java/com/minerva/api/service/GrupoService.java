@@ -9,9 +9,13 @@ import com.minerva.api.User.User;
 public interface GrupoService {
     List<GrupoDTO> findAll();
 
+    List<GrupoDTO> findAll(User usuario);
+
     List<GrupoDTO> findAllByDocenteId(String docenteId);
 
     List<GrupoDTO> findAllByPlantelId(Long plantelId);
+
+    List<GrupoDTO> findAllByPlantelId(Long plantelId, User usuario);
 
     List<GrupoDTO> findAllByAlumnoId(String alumnoId);
 

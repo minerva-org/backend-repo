@@ -28,8 +28,9 @@ public class GrupoController {
     private final GrupoFuenteService grupoFuenteService;
 
     @GetMapping
-    public ResponseEntity<List<GrupoDTO>> getAllGrupos() {
-        return ResponseEntity.ok(grupoService.findAll());
+    public ResponseEntity<List<GrupoDTO>> getAllGrupos(
+            @AuthenticationPrincipal User usuario) {
+        return ResponseEntity.ok(grupoService.findAll(usuario));
     }
 
     @GetMapping(params = "docenteId")
@@ -38,8 +39,10 @@ public class GrupoController {
     }
 
     @GetMapping(params = "plantelId")
-    public ResponseEntity<List<GrupoDTO>> getGruposByPlantel(@RequestParam Long plantelId) {
-        return ResponseEntity.ok(grupoService.findAllByPlantelId(plantelId));
+    public ResponseEntity<List<GrupoDTO>> getGruposByPlantel(
+            @RequestParam Long plantelId,
+            @AuthenticationPrincipal User usuario) {
+        return ResponseEntity.ok(grupoService.findAllByPlantelId(plantelId, usuario));
     }
 
     @GetMapping("/mis-grupos")

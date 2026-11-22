@@ -22,6 +22,7 @@ import com.minerva.api.repository.MateriaRepository;
 import com.minerva.api.repository.PersonaRepository;
 import com.minerva.api.repository.PlantelRepository;
 import com.minerva.api.security.RolAutorizacion;
+import com.minerva.api.security.RolAutorizacion;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -276,6 +277,35 @@ public class GrupoServiceImpl implements GrupoService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<GrupoDTO> findAll(User usuario) {
+        Roles rol = RolAutorizacion.obtenerRol(usuario);
+
+        if (rol == Roles.ADMIN || rol == Roles.DEV || rol == Roles.DIRECTOR_GENERAL) {
+            return findAll();
+        }
+
+        if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR
+                || rol == Roles.DOCENTE) {
+            Long plantelUsuario = usuario != null
+                    && usuario.getPersona() != null
+                    && usuario.getPersona().getPlantel() != null
+                            ? usuario.getPersona().getPlantel().getId()
+                            : null;
+            if (plantelUsuario == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes un plantel asignado.");
+            }
+            return findAllByPlantelId(plantelUsuario);
+        }
+
+        throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "No tienes permiso para consultar grupos.");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public GrupoDTO getGrupoById(String grupoId) {
         return Mapper.toDTO(buscarGrupoPorIdOClave(grupoId));
     }
@@ -302,6 +332,40 @@ public class GrupoServiceImpl implements GrupoService {
                 .stream()
                 .map(Mapper::toDTO)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GrupoDTO> findAllByPlantelId(Long plantelId, User usuario) {
+        Roles rol = RolAutorizacion.obtenerRol(usuario);
+
+        if (rol == Roles.ADMIN || rol == Roles.DEV || rol == Roles.DIRECTOR_GENERAL) {
+            return findAllByPlantelId(plantelId);
+        }
+
+        if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR
+                || rol == Roles.DOCENTE) {
+            Long plantelUsuario = usuario != null
+                    && usuario.getPersona() != null
+                    && usuario.getPersona().getPlantel() != null
+                            ? usuario.getPersona().getPlantel().getId()
+                            : null;
+            if (plantelUsuario == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes un plantel asignado.");
+            }
+            if (plantelId != null && !plantelUsuario.equals(plantelId)) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes permiso para consultar grupos de otro plantel.");
+            }
+            return findAllByPlantelId(plantelUsuario);
+        }
+
+        throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "No tienes permiso para consultar grupos.");
     }
 
     @Override
