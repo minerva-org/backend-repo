@@ -10,8 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.minerva.api.dto.AlumnoDesgloseDTO;
 import com.minerva.api.dto.RespuestaAlumnoDTO;
-import com.minerva.api.dto.ResumenGeneralDTO;
-import com.minerva.api.mapper.Mapper;
+import com.minerva.api.dto.ResumenesGeneralesDTO.ResumenGeneralDTO;
+import com.minerva.api.dto.ResumenesGeneralesDTO.ResumenGeneralDocenteDTO;
+import com.minerva.api.dto.ResumenesGeneralesDTO.ResumenGeneralGrupoDTO;
+import com.minerva.api.dto.ResumenesGeneralesDTO.ResumenGeneralPlantelDTO;
+import com.minerva.api.mapper.mapperResumenesGenerales.MapperResumenGeneral;
+import com.minerva.api.mapper.mapperResumenesGenerales.MapperResumenGeneralDocente;
+import com.minerva.api.mapper.mapperResumenesGenerales.MapperResumenGeneralGrupo;
+import com.minerva.api.mapper.mapperResumenesGenerales.MapperResumenGeneralPlantel;
 import com.minerva.api.model.QuizAlumnoPreguntaResumen;
 import com.minerva.api.repository.PersonaRepository;
 import com.minerva.api.repository.QuizAlumnoPreguntaResumenRepository;
@@ -29,20 +35,46 @@ public class ResumenVistasService {
     private final PersonaRepository personaRepository;
 
     @Transactional(readOnly = true)
-    public ResumenGeneralDTO general(String quizId) {
+    public List<ResumenGeneralDTO> general() {
+        return generalRepository.findAll()
+                .stream()
+                .map(MapperResumenGeneral::toDTO)
+                .toList();
+    } 
+
+    @Transactional(readOnly = true)
+    public ResumenGeneralDTO generalPorQuiz(String quizId) {
         return generalRepository.findById(quizId)
-                .map(Mapper::toDTO)
+                .map(MapperResumenGeneral::toDTO)
                 .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
     } 
 
     @Transactional(readOnly = true)
-    public List<ResumenGeneralDTO> generalPorDocente(String docenteId){
+    public List<ResumenGeneralDocenteDTO> generalPorDocente(String docenteId){
         if (!personaRepository.existsById(docenteId)) throw new EntityNotFoundException("No se encontró un docente con el Id: " + docenteId);
         return generalRepository.findByDocenteId(docenteId)
             .stream()
-            .map(Mapper::toDTO)
+            .map(MapperResumenGeneralDocente::toDTO)
             .toList();
-    }
+    } 
+
+    @Transactional(readOnly = true)
+    public List<ResumenGeneralGrupoDTO> generalPorGrupo(String grupoId){
+        if (!generalRepository.existsByGrupoId(grupoId)) throw new EntityNotFoundException("No se encontró un grupo con el Id: " + grupoId);
+        return generalRepository.findByGrupoId(grupoId)
+            .stream()
+            .map(MapperResumenGeneralGrupo::toDTO)
+            .toList();
+    } 
+
+    @Transactional(readOnly = true)
+    public List<ResumenGeneralPlantelDTO> generalPorPlantel(String plantelId){
+        if (!generalRepository.existsByPlantelId(plantelId)) throw new EntityNotFoundException("No se encontró un plantel con el Id: " + plantelId);
+        return generalRepository.findByDocenteId(plantelId)
+            .stream()
+            .map(MapperResumenGeneralPlantel::toDTO)
+            .toList();
+    } 
 
     @Transactional(readOnly = true)
     public List<AlumnoDesgloseDTO> alumnos(String quizId) {

@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.minerva.api.dto.AlumnoDesgloseDTO;
-import com.minerva.api.dto.ResumenGeneralDTO;
+import com.minerva.api.dto.ResumenesGeneralesDTO.ResumenGeneralDTO;
+import com.minerva.api.dto.ResumenesGeneralesDTO.ResumenGeneralDocenteDTO;
+import com.minerva.api.dto.ResumenesGeneralesDTO.ResumenGeneralGrupoDTO;
+import com.minerva.api.dto.ResumenesGeneralesDTO.ResumenGeneralPlantelDTO;
 import com.minerva.api.service.ResumenVistasService;
 
 import lombok.RequiredArgsConstructor;
@@ -21,14 +24,29 @@ public class ResumenVistasController {
 
     private final ResumenVistasService resumenVistasService;
 
-    @GetMapping("/{quizId}/general")
-    public ResponseEntity<ResumenGeneralDTO> generalQuiz(@PathVariable String quizId) {
-        return ResponseEntity.ok(resumenVistasService.general(quizId));
+    @GetMapping
+    public ResponseEntity<List<ResumenGeneralDTO>> resumenes(){
+        return ResponseEntity.ok(resumenVistasService.general());
     }
 
-    @GetMapping("/docente/{docenteId}")
-    public ResponseEntity<List<ResumenGeneralDTO>> resumenesDocente(@PathVariable String docenteId){
+    @GetMapping("/{plantelId}/resumen")
+    public ResponseEntity<List<ResumenGeneralPlantelDTO>> resumenesPlantel(@PathVariable String plantelId){
+        return ResponseEntity.ok(resumenVistasService.generalPorPlantel(plantelId));
+    }
+    
+    @GetMapping("/{docenteId}/resumen")
+    public ResponseEntity<List<ResumenGeneralDocenteDTO>> resumenesDocente(@PathVariable String docenteId){
         return ResponseEntity.ok(resumenVistasService.generalPorDocente(docenteId));
+    }
+    
+    @GetMapping("/{grupoId}/resumen")
+    public ResponseEntity<List<ResumenGeneralGrupoDTO>> resumenGrupo(@PathVariable String grupoId){
+        return ResponseEntity.ok(resumenVistasService.generalPorGrupo(grupoId));
+    }
+
+    @GetMapping("/{quizId}/general")
+    public ResponseEntity<ResumenGeneralDTO> generalQuiz(@PathVariable String quizId) {
+        return ResponseEntity.ok(resumenVistasService.generalPorQuiz(quizId));
     }
 
     @GetMapping("/alumnos")
