@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.minerva.api.dto.AlumnoDesgloseDTO;
@@ -29,22 +30,22 @@ public class ResumenVistasController {
         return ResponseEntity.ok(resumenVistasService.general());
     }
 
-    @GetMapping("/{plantelId}/resumen")
-    public ResponseEntity<List<ResumenGeneralPlantelDTO>> resumenesPlantel(@PathVariable String plantelId){
+    @GetMapping("/plantel/{plantelId}")
+    public ResponseEntity<List<ResumenGeneralPlantelDTO>> resumenesPlantel(@RequestParam String plantelId){
         return ResponseEntity.ok(resumenVistasService.generalPorPlantel(plantelId));
     }
     
-    @GetMapping("/{docenteId}/resumen")
+    @GetMapping("/docente/{docenteId}")
     public ResponseEntity<List<ResumenGeneralDocenteDTO>> resumenesDocente(@PathVariable String docenteId){
         return ResponseEntity.ok(resumenVistasService.generalPorDocente(docenteId));
     }
     
-    @GetMapping("/{grupoId}/resumen")
+    @GetMapping("/grupo/{grupoId}")
     public ResponseEntity<List<ResumenGeneralGrupoDTO>> resumenGrupo(@PathVariable String grupoId){
         return ResponseEntity.ok(resumenVistasService.generalPorGrupo(grupoId));
     }
 
-    @GetMapping("/{quizId}/general")
+    @GetMapping("/quiz/{quizId}")
     public ResponseEntity<ResumenGeneralDTO> generalQuiz(@PathVariable String quizId) {
         return ResponseEntity.ok(resumenVistasService.generalPorQuiz(quizId));
     }

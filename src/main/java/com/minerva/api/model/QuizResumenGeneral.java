@@ -65,7 +65,7 @@ public class QuizResumenGeneral {
     private String docenteNombre;
 
     @Column(name = "id_plantel")
-    private String plantelId;
+    private Long plantelId;
 
     @Column(name = "plantel_nombre")
     private String plantelNombre;

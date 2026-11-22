@@ -6,4 +6,4 @@ public record ResumenGeneralDTO(String quizId, String grupoId, String grupoClave
                                 double promedio, double calificacionMaxima,
                                 double calificacionMinima, double duracionPromedioSegundos,
                                 String idDocente, String docenteNombre,
-                                String idPlantel, String plantelNombre) {}
+                                Long idPlantel, String plantelNombre) {}

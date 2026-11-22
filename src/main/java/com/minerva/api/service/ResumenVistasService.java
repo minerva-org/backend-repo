@@ -69,8 +69,8 @@ public class ResumenVistasService {
 
     @Transactional(readOnly = true)
     public List<ResumenGeneralPlantelDTO> generalPorPlantel(String plantelId){
-        if (!generalRepository.existsByPlantelId(plantelId)) throw new EntityNotFoundException("No se encontró un plantel con el Id: " + plantelId);
-        return generalRepository.findByDocenteId(plantelId)
+        if (!generalRepository.existsByPlantelId(plantelId)) throw new EntityNotFoundException("No se encontró un quiz en el plantel con el Id: " + plantelId);
+        return generalRepository.findByPlantelId(plantelId)
             .stream()
             .map(MapperResumenGeneralPlantel::toDTO)
             .toList();
