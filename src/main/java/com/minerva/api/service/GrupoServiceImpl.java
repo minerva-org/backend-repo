@@ -336,9 +336,9 @@ public class GrupoServiceImpl implements GrupoService {
 
         return grupo.getAlumnos().stream()
                 .sorted(Comparator.comparing((Persona alumno) -> alumno.getApellidoPaterno())
-                        .thenComparing(alumno -> alumno.getNombre()))
-                .map(alumno -> new AlumnoGrupoDTO(alumno.getId(), alumno.getNombre(), alumno.getApellidoPaterno()))
-                .toList();
+                        .thenComparing((Persona alumno) -> alumno.getNombre()))
+                        .map(alumno -> new AlumnoGrupoDTO(alumno.getId(), alumno.getNombre(), alumno.getApellidoPaterno()))
+                        .toList();
     }
 
     @Override
