@@ -51,15 +51,22 @@ public class QuizResumenGeneral {
     @Column(name = "id_grupo")
     private String grupoId;
 
+    
+    @Column(name = "grupo_clave")
+    private String grupoClave;
+    
+    @Column(name = "grupo_nombre")
+    private String grupoNombre;
+
     @Column(name = "id_docente")
     private String docenteId;
 
     @Column(name = "docente_nombre")
     private String docenteNombre;
 
-    @Column(name = "grupo_clave")
-    private String grupoClave;
+    @Column(name = "id_plantel")
+    private Long plantelId;
 
-    @Column(name = "grupo_nombre")
-    private String grupoNombre;
+    @Column(name = "plantel_nombre")
+    private String plantelNombre;
 }
