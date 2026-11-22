@@ -10,5 +10,7 @@ public interface QuizAlumnoPreguntaResumenRepository extends JpaRepository <Quiz
     List<QuizAlumnoPreguntaResumen> findByQuizIdOrderByAlumnoNombreAscNumeroAsc(String quizId);
 
     List<QuizAlumnoPreguntaResumen> findByQuizIdAndAlumnoIdOrderByNumeroAsc(String quizId, String alumnoId);
+
+    List<QuizAlumnoPreguntaResumen> findByGrupoId(String grupoId);
     
 }

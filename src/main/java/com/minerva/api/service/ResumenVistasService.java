@@ -14,6 +14,7 @@ import com.minerva.api.dto.ResumenesGeneralesDTO.ResumenGeneralDTO;
 import com.minerva.api.dto.ResumenesGeneralesDTO.ResumenGeneralDocenteDTO;
 import com.minerva.api.dto.ResumenesGeneralesDTO.ResumenGeneralGrupoDTO;
 import com.minerva.api.dto.ResumenesGeneralesDTO.ResumenGeneralPlantelDTO;
+import com.minerva.api.mapper.MapperAlumnoDesgloseResumen;
 import com.minerva.api.mapper.mapperResumenesGenerales.MapperResumenGeneral;
 import com.minerva.api.mapper.mapperResumenesGenerales.MapperResumenGeneralDocente;
 import com.minerva.api.mapper.mapperResumenesGenerales.MapperResumenGeneralGrupo;
@@ -79,6 +80,12 @@ public class ResumenVistasService {
     @Transactional(readOnly = true)
     public List<AlumnoDesgloseDTO> alumnos(String quizId) {
         return agrupar(alumnoPreguntaRepository.findByQuizIdOrderByAlumnoNombreAscNumeroAsc(quizId));
+    }
+
+    @Transactional(readOnly = true)
+    public List<AlumnoDesgloseDTO> alumnosPorGrupo(String grupoId){
+        List<QuizAlumnoPreguntaResumen> filas = alumnoPreguntaRepository.findByGrupoId(grupoId);
+        return MapperAlumnoDesgloseResumen.toDesglose(filas);
     }
 
     @Transactional(readOnly = true)

@@ -50,9 +50,14 @@ public class ResumenVistasController {
         return ResponseEntity.ok(resumenVistasService.generalPorQuiz(quizId));
     }
 
-    @GetMapping("/alumnos")
+    @GetMapping("/alumnos/quiz/{quizId}")
     public ResponseEntity<List<AlumnoDesgloseDTO>> alumnos(@PathVariable String quizId) {
         return ResponseEntity.ok(resumenVistasService.alumnos(quizId));
+    }
+
+    @GetMapping("/alumnos/grupo/{grupoId}")
+    public ResponseEntity<List<AlumnoDesgloseDTO>> alumnosPorGrupo(@PathVariable String grupoId){
+        return ResponseEntity.ok(resumenVistasService.alumnosPorGrupo(grupoId));
     }
 
     @GetMapping("/alumnos/{alumnoId}")
