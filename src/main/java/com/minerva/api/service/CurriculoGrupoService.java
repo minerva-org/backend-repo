@@ -9,5 +9,5 @@ public interface CurriculoGrupoService {
 
     CurriculoGrupoDTO replaceCurriculo(String grupoId, CurriculoGrupoDTO curriculo);
 
-    UnidadGrupoDTO findUnidadById(String unidadGrupoId);
+    UnidadGrupoDTO findUnidadById(String grupoId, String unidadGrupoId);
 }

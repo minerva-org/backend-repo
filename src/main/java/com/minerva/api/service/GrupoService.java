@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.minerva.api.dto.AlumnoGrupoDTO;
 import com.minerva.api.dto.GrupoDTO;
+import com.minerva.api.User.User;
 
 public interface GrupoService {
     List<GrupoDTO> findAll();
@@ -17,6 +18,8 @@ public interface GrupoService {
     GrupoDTO getGrupoById(String grupoId);
 
     GrupoDTO saveGrupo(GrupoDTO grupoDTO);
+
+    GrupoDTO saveGrupo(GrupoDTO grupoDTO, User usuario);
 
     GrupoDTO updateGrupo(String grupoId, GrupoDTO grupoDTO);
 

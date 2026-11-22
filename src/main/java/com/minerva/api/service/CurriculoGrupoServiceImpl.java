@@ -120,10 +120,10 @@ public class CurriculoGrupoServiceImpl implements CurriculoGrupoService {
 
     @Override
     @Transactional(readOnly = true)
-    public UnidadGrupoDTO findUnidadById(String unidadGrupoId) {
-        UnidadGrupo unidadGrupo = unidadGrupoRepository.findById(unidadGrupoId)
+    public UnidadGrupoDTO findUnidadById(String grupoId, String unidadGrupoId) {
+        UnidadGrupo unidadGrupo = unidadGrupoRepository.findByIdAndGrupoId(unidadGrupoId, grupoId)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Unidad de grupo no encontrada con el id: " + unidadGrupoId));
+                        "Unidad de grupo no encontrada en el grupo."));
         return toUnidadDetalle(unidadGrupo);
     }
 

@@ -37,6 +37,6 @@ public class CurriculoGrupoController {
     public ResponseEntity<UnidadGrupoDTO> getUnidad(
             @PathVariable String grupoId,
             @PathVariable String unidadGrupoId) {
-        return ResponseEntity.ok(curriculoGrupoService.findUnidadById(unidadGrupoId));
+        return ResponseEntity.ok(curriculoGrupoService.findUnidadById(grupoId, unidadGrupoId));
     }
 }

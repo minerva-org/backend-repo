@@ -13,4 +13,5 @@ public class PreguntaDTO {
     private String id;
     private String descripcion;
     private String conceptoId;
+    private String grupoId;
 }

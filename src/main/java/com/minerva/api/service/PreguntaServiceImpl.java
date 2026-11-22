@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.mapper.Mapper;
@@ -18,6 +20,8 @@ import com.minerva.api.repository.QuizXPreguntaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import com.minerva.api.model.ConceptoGrupo;
+import com.minerva.api.repository.ConceptoGrupoRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,51 @@ public class PreguntaServiceImpl implements PreguntaService {
     private final ConceptoRepository conceptoRepository;
     private final OpcionRepository opcionRepository;
     private final QuizXPreguntaRepository quizXPreguntaRepository;
+    private final ConceptoGrupoRepository conceptoGrupoRepository;
+
+    private Concepto resolverConcepto(String conceptoId, String grupoId) {
+        if (conceptoId == null || conceptoId.isBlank()) {
+            throw new IllegalArgumentException("El concepto es obligatorio");
+        }
+
+        if (conceptoId.startsWith("CG-")) {
+            if (grupoId == null || grupoId.isBlank()) {
+                throw new IllegalArgumentException(
+                        "Se requiere el grupo para resolver un concepto de currículo.");
+            }
+            ConceptoGrupo conceptoGrupo = conceptoGrupoRepository.findById(conceptoId)
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Concepto de grupo no encontrado con el id: " + conceptoId));
+            String grupoConcepto = conceptoGrupo.getTemaGrupo()
+                    .getUnidadGrupo()
+                    .getGrupo()
+                    .getId();
+            if (!grupoId.equals(grupoConcepto)) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "El concepto no pertenece al grupo del quiz.");
+            }
+            if (conceptoGrupo.getConceptoOrigen() == null) {
+                throw new EntityNotFoundException(
+                        "El concepto de grupo no tiene concepto base asociado.");
+            }
+            return conceptoGrupo.getConceptoOrigen();
+        }
+
+        Concepto concepto = conceptoRepository.findById(conceptoId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Concepto no encontrado con el id: " + conceptoId));
+        if (grupoId != null && !grupoId.isBlank()
+                && !conceptoGrupoRepository
+                        .existsByConceptoOrigenIdAndTemaGrupoUnidadGrupoGrupoId(
+                                conceptoId,
+                                grupoId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "El concepto no pertenece al currículo del grupo.");
+        }
+        return concepto;
+    }
 
     @Override
     @Transactional
@@ -48,8 +97,7 @@ public class PreguntaServiceImpl implements PreguntaService {
             throw new IllegalArgumentException("El concepto es obligatorio");
         }
         String conceptoId = preguntaDTO.getConceptoId().trim();
-        Concepto concepto = conceptoRepository.findById(conceptoId)
-            .orElseThrow(() -> new EntityNotFoundException("Concepto no encontrado con el id: " + conceptoId));
+        Concepto concepto = resolverConcepto(conceptoId, preguntaDTO.getGrupoId());
 
         Pregunta pregunta = new Pregunta();
         pregunta.setId(id);
@@ -75,8 +123,7 @@ public class PreguntaServiceImpl implements PreguntaService {
 
         if (preguntaDTO.getConceptoId() != null) {
             String conceptoId = preguntaDTO.getConceptoId().trim();
-            Concepto concepto = conceptoRepository.findById(conceptoId)
-                .orElseThrow(() -> new EntityNotFoundException("No existe un concepto con el id: " + conceptoId));
+            Concepto concepto = resolverConcepto(conceptoId, preguntaDTO.getGrupoId());
             pregunta.setConcepto(concepto);
         }
 
