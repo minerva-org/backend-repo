@@ -8,6 +8,10 @@ import com.minerva.api.model.ConceptoGrupo;
 
 public interface ConceptoGrupoRepository extends JpaRepository<ConceptoGrupo, String> {
 
+    boolean existsByConceptoOrigenIdAndTemaGrupoUnidadGrupoGrupoId(
+            String conceptoOrigenId,
+            String grupoId);
+
     List<ConceptoGrupo> findByTemaGrupoIdAndActivoTrueOrderByIdAsc(String temaGrupoId);
 
     boolean existsByNombreIgnoreCaseAndTemaGrupoId(String nombre, String temaGrupoId);

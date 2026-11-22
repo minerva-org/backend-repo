@@ -12,6 +12,9 @@ import com.minerva.api.model.Pregunta;
 import com.minerva.api.model.Quiz;
 import com.minerva.api.model.QuizXPregunta;
 import com.minerva.api.repository.PreguntaRepository;
+import com.minerva.api.repository.ConceptoGrupoRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import com.minerva.api.repository.QuizRepository;
 import com.minerva.api.repository.QuizXPreguntaRepository;
 
@@ -25,6 +28,27 @@ public class QuizXPreguntaServiceImpl implements QuizXPreguntaService {
     private final QuizXPreguntaRepository quizXPreguntaRepository;
     private final QuizRepository quizRepository;
     private final PreguntaRepository preguntaRepository;
+    private final ConceptoGrupoRepository conceptoGrupoRepository;
+
+    private void validarPreguntaEnCurriculoDelGrupo(Quiz quiz, Pregunta pregunta) {
+        if (quiz == null || quiz.getGrupo() == null) {
+            throw new IllegalArgumentException("El quiz debe pertenecer a un grupo.");
+        }
+        if (pregunta == null || pregunta.getConcepto() == null) {
+            throw new IllegalArgumentException("La pregunta debe tener un concepto.");
+        }
+
+        String conceptoId = pregunta.getConcepto().getId();
+        String grupoId = quiz.getGrupo().getId();
+        if (!conceptoGrupoRepository
+                .existsByConceptoOrigenIdAndTemaGrupoUnidadGrupoGrupoId(
+                        conceptoId,
+                        grupoId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "La pregunta usa un concepto fuera del currículo del grupo.");
+        }
+    }
 
     @Override
     @Transactional
@@ -50,6 +74,7 @@ public class QuizXPreguntaServiceImpl implements QuizXPreguntaService {
         String preguntaId = quizXPreguntaDTO.getPreguntaId().trim();
         Pregunta pregunta = preguntaRepository.findById(preguntaId)
             .orElseThrow(() -> new EntityNotFoundException("Pregunta no encontrada con el id: " + preguntaId));
+        validarPreguntaEnCurriculoDelGrupo(quiz, pregunta);
 
         QuizXPregunta quizXPregunta = new QuizXPregunta();
         quizXPregunta.setId(id);
@@ -81,6 +106,7 @@ public class QuizXPreguntaServiceImpl implements QuizXPreguntaService {
                 .orElseThrow(() -> new EntityNotFoundException("Pregunta no encontrada con el id: " + preguntaId));
             quizXPregunta.setPregunta(pregunta);
             preguntaIdDestino = preguntaId;
+            validarPreguntaEnCurriculoDelGrupo(quizXPregunta.getQuiz(), pregunta);
         }
 
 

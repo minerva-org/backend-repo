@@ -2,8 +2,11 @@ package com.minerva.api.service;
 
 import java.util.List;
 import java.util.Comparator;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.minerva.api.dto.AlumnoGrupoDTO;
 import com.minerva.api.dto.GrupoDTO;
@@ -13,6 +16,7 @@ import com.minerva.api.model.Materia;
 import com.minerva.api.model.Persona;
 import com.minerva.api.model.Plantel;
 import com.minerva.api.User.Roles;
+import com.minerva.api.User.User;
 import com.minerva.api.repository.GrupoRepository;
 import com.minerva.api.repository.MateriaRepository;
 import com.minerva.api.repository.PersonaRepository;
@@ -29,6 +33,7 @@ public class GrupoServiceImpl implements GrupoService {
     private final PersonaRepository personaRepository;
     private final PlantelRepository plantelRepository;
     private final MateriaRepository materiaRepository;
+    private final CurriculoInicialGrupoService curriculoInicialGrupoService;
 
     private boolean esDocenteValido(Persona persona) {
         return persona.getRol() == Roles.DOCENTE || persona.getRol() == Roles.COORDINADOR;
@@ -48,6 +53,42 @@ public class GrupoServiceImpl implements GrupoService {
     @Override
     @Transactional
     public GrupoDTO saveGrupo(GrupoDTO grupoDTO) {
+        return saveGrupo(grupoDTO, null);
+    }
+
+    @Override
+    @Transactional
+    public GrupoDTO saveGrupo(GrupoDTO grupoDTO, User usuario) {
+        if (usuario != null) {
+            Roles rol = usuario.getPersona().getRol();
+            if (rol != Roles.ADMIN
+                    && rol != Roles.DEV
+                    && rol != Roles.DIRECTOR_GENERAL
+                    && rol != Roles.DIRECTOR_PLANTEL
+                    && rol != Roles.COORDINADOR) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes permiso para crear grupos.");
+            }
+            if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR) {
+                Long plantelUsuario = usuario.getPersona().getPlantel() != null
+                        ? usuario.getPersona().getPlantel().getId()
+                        : null;
+                if (plantelUsuario == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "No tienes un plantel asignado.");
+                }
+                if (grupoDTO.getPlantelId() != null
+                        && !grupoDTO.getPlantelId().equals(plantelUsuario)) {
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "Solo puedes crear grupos en tu plantel.");
+                }
+                grupoDTO.setPlantelId(plantelUsuario);
+            }
+        }
+
         Grupo grupo = new Grupo();
         if (grupoDTO.getId() == null || grupoDTO.getId().isBlank()) {
             throw new IllegalArgumentException("El id es obligatorio");
@@ -81,6 +122,9 @@ public class GrupoServiceImpl implements GrupoService {
         Materia materia = materiaRepository.findById(grupoDTO.getMateriaId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "La materia no fue encontrada con el id: " + grupoDTO.getMateriaId()));
+        if (!Boolean.TRUE.equals(materia.getActivo())) {
+            throw new IllegalArgumentException("No se puede crear un grupo con una materia desactivada.");
+        }
         grupo.setMateria(materia);
 
         if (grupoDTO.getDocenteId() != null && !grupoDTO.getDocenteId().isBlank()) {
@@ -91,6 +135,13 @@ public class GrupoServiceImpl implements GrupoService {
             if (!esDocenteValido(docente)) {
                 throw new IllegalArgumentException("La persona indicada no tiene un rol de docente o coordinador");
             }
+            if (docente.getPlantel() != null
+                    && docente.getPlantel().getId() != null
+                    && !docente.getPlantel().getId().equals(grupoDTO.getPlantelId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "El docente no pertenece al plantel del grupo.");
+            }
             grupo.setDocente(docente);
         }
 
@@ -100,6 +151,12 @@ public class GrupoServiceImpl implements GrupoService {
         Plantel plantel = plantelRepository.findById(grupoDTO.getPlantelId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Plantel no encontrado con el id: " + grupoDTO.getPlantelId()));
+        if (materia.getPlantelId() != null
+                && !materia.getPlantelId().equals(grupoDTO.getPlantelId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "La materia no pertenece al plantel del grupo.");
+        }
 
         grupo.setId(id);
         grupo.setClaveGrupo(claveGrupo);
@@ -122,7 +179,9 @@ public class GrupoServiceImpl implements GrupoService {
             }
         }
 
-        return Mapper.toDTO(grupoRepository.save(grupo));
+        Grupo grupoGuardado = grupoRepository.save(grupo);
+        curriculoInicialGrupoService.initializeFromMateria(grupoGuardado, materia);
+        return Mapper.toDTO(grupoGuardado);
     }
 
     @Override
