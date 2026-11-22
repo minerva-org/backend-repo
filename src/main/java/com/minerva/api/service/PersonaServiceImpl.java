@@ -107,10 +107,9 @@ public class PersonaServiceImpl implements PersonaService {
         Persona persona = crearInstanciaPorRol(dto);
         persona.setId(id);
         persona.setNombre(dto.getNombre().trim());
-        persona.setApellidoPaterno((dto.getApellidoPaterno() != null && !dto.getApellidoPaterno().isBlank())
-                ? dto.getApellidoPaterno()
-                : dto.getApellidoMaterno());
-        persona.setApellidoMaterno(dto.getApellidoMaterno().trim());
+        persona.setApellidoPaterno(dto.getApellidoPaterno().trim());
+        persona.setApellidoMaterno(dto.getApellidoMaterno() != null && !dto.getApellidoMaterno().isBlank()
+                                    ? dto.getApellidoMaterno().trim() : dto.getApellidoPaterno().trim());
         persona.setCalle(dto.getCalle().trim());
         persona.setColonia(dto.getColonia().trim());
         persona.setMunicipio(dto.getMunicipio().trim());

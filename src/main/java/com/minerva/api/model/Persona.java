@@ -24,10 +24,10 @@ public class Persona {
     @Column(nullable = false)
     private String nombre;
 
-    @Column(name = "apellido_paterno")
+    @Column(name = "apellido_paterno", nullable = false)
     private String apellidoPaterno;
 
-    @Column(name = "apellido_materno", nullable = false)
+    @Column(name = "apellido_materno")
     private String apellidoMaterno;
 
     @Column(nullable = false, unique = true)
