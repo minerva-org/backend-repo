@@ -27,6 +27,7 @@ import com.minerva.api.repository.PlanEstudioRepository;
 import com.minerva.api.repository.PlantelRepository;
 import com.minerva.api.repository.TemaRepository;
 import com.minerva.api.repository.UnidadRepository;
+import com.minerva.api.security.RolAutorizacion;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +50,7 @@ public class MateriaServiceImpl implements MateriaService{
     }
 
     private void validarRolCatalogo(User usuario) {
-        Roles rol = usuario.getPersona().getRol();
+        Roles rol = RolAutorizacion.obtenerRol(usuario);
         if (rol != Roles.ADMIN
                 && rol != Roles.DEV
                 && rol != Roles.DIRECTOR_GENERAL
@@ -297,7 +298,7 @@ public class MateriaServiceImpl implements MateriaService{
         String nombre = materiaDTO.getNombre().trim();
 
         if (usuario != null) {
-            Roles rol = usuario.getPersona().getRol();
+            Roles rol = RolAutorizacion.obtenerRol(usuario);
             if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR) {
                 Long plantelUsuario = usuario.getPersona().getPlantel() != null
                         ? usuario.getPersona().getPlantel().getId()
@@ -360,7 +361,7 @@ public class MateriaServiceImpl implements MateriaService{
                 "Materia no encontrada con el Id: " + materiaId));
 
         if (usuario != null) {
-            Roles rol = usuario.getPersona().getRol();
+            Roles rol = RolAutorizacion.obtenerRol(usuario);
             if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR) {
                 Long plantelUsuario = usuario.getPersona().getPlantel() != null
                         ? usuario.getPersona().getPlantel().getId()
@@ -451,7 +452,7 @@ public class MateriaServiceImpl implements MateriaService{
             .orElseThrow(() -> new EntityNotFoundException("Materia no encontrada con el id: " + materiaId));
 
         if (usuario != null) {
-            Roles rol = usuario.getPersona().getRol();
+            Roles rol = RolAutorizacion.obtenerRol(usuario);
             if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR) {
                 Long plantelUsuario = usuario.getPersona().getPlantel() != null
                         ? usuario.getPersona().getPlantel().getId()
@@ -484,7 +485,7 @@ public class MateriaServiceImpl implements MateriaService{
             .orElseThrow(() -> new EntityNotFoundException("Materia no encontrada con el id: " + materialId));
 
         if (usuario != null) {
-            Roles rol = usuario.getPersona().getRol();
+            Roles rol = RolAutorizacion.obtenerRol(usuario);
             if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR) {
                 Long plantelUsuario = usuario.getPersona().getPlantel() != null
                         ? usuario.getPersona().getPlantel().getId()
@@ -555,7 +556,7 @@ public class MateriaServiceImpl implements MateriaService{
     @Override
     @Transactional(readOnly = true)
     public List<MateriaDTO> findAllByIdplantel(Long plantelId, User usuario) {
-        Roles rol = usuario.getPersona().getRol();
+        Roles rol = RolAutorizacion.obtenerRol(usuario);
         if (rol == Roles.ADMIN || rol == Roles.DEV || rol == Roles.DIRECTOR_GENERAL) {
             return findAllByIdplantel(plantelId);
         }
@@ -576,7 +577,7 @@ public class MateriaServiceImpl implements MateriaService{
     @Override
     @Transactional(readOnly = true)
     public List<MateriaDTO> findMateriasVisibles(Long plantelId, User usuario) {
-        Roles rol = usuario.getPersona().getRol();
+        Roles rol = RolAutorizacion.obtenerRol(usuario);
 
         if (rol == Roles.DIRECTOR_GENERAL) {
             return plantelId == null

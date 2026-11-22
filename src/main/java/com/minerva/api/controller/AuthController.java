@@ -24,8 +24,6 @@ public class AuthController {
 
     @PostMapping(value = "login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        System.out.println("========== LOGIN CONTROLLER ==========");
-        System.out.println("Username recibido: " + request.getUsername());
         return ResponseEntity.ok(authService.login(request));
     }
 

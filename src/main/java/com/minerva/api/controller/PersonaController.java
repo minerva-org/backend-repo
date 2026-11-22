@@ -17,6 +17,8 @@ import com.minerva.api.service.PersonaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.minerva.api.User.User;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/api/personas")
@@ -26,8 +28,15 @@ public class PersonaController {
     private final PersonaService personaService;
 
     @GetMapping
-    public ResponseEntity<List<PersonaResponseDTO>> getAll() {
-        return ResponseEntity.ok(personaService.findAll());
+    public ResponseEntity<List<PersonaResponseDTO>> getAll(
+            @AuthenticationPrincipal User usuario) {
+        return ResponseEntity.ok(personaService.findAll(usuario));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<PersonaResponseDTO> getAuthenticatedPersona(
+            @AuthenticationPrincipal User usuario) {
+        return ResponseEntity.ok(personaService.getAuthenticatedPersona(usuario));
     }
 
     @GetMapping("/detalles")
@@ -36,8 +45,10 @@ public class PersonaController {
     }
 
     @GetMapping(params = "plantelId")
-    public ResponseEntity<List<PersonaResponseDTO>> getByPlantel(@RequestParam Long plantelId) {
-        return ResponseEntity.ok(personaService.findAllByPlantelId(plantelId));
+    public ResponseEntity<List<PersonaResponseDTO>> getByPlantel(
+            @RequestParam Long plantelId,
+            @AuthenticationPrincipal User usuario) {
+        return ResponseEntity.ok(personaService.findAllByPlantelId(plantelId, usuario));
     }
 
     // @GetMapping(params = {"plantelId", "rol=DOCENTE"})
@@ -56,13 +67,17 @@ public class PersonaController {
 
     @GetMapping(params = { "plantelId", "rol" })
     public ResponseEntity<List<PersonaResponseDTO>> getAlumnosActivosByPlantel(
-            @RequestParam Long plantelId, @RequestParam Roles rol, @RequestParam(required = false) Boolean activo) {
-        return ResponseEntity.ok(personaService.findAllByPlantelIdAndRolAndStatus(plantelId, rol, activo));
+            @RequestParam Long plantelId, @RequestParam Roles rol, @RequestParam(required = false) Boolean activo,
+            @AuthenticationPrincipal User usuario) {
+        return ResponseEntity.ok(
+                personaService.findAllByPlantelIdAndRolAndStatus(plantelId, rol, activo, usuario));
     }
 
     @GetMapping(params = "rol")
-    public ResponseEntity<List<PersonaResponseDTO>> getByRol(@RequestParam Roles rol) {
-        return ResponseEntity.ok(personaService.findAllByRol(rol));
+    public ResponseEntity<List<PersonaResponseDTO>> getByRol(
+            @RequestParam Roles rol,
+            @AuthenticationPrincipal User usuario) {
+        return ResponseEntity.ok(personaService.findAllByRol(rol, usuario));
     }
 
     @GetMapping("/plantel/{plantelId}/director")
@@ -79,7 +94,8 @@ public class PersonaController {
     public ResponseEntity<Page<PersonaResponseDTO>> getPersonasPaginadas(@RequestParam Long plantelId,
             @RequestParam Collection<Roles> roles, @RequestParam(required = false) Boolean activo,
             @RequestParam(required = false) String search, @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal User usuario) {
         if (page < 0 || size < 1 || size > 100) {
             throw new IllegalArgumentException("Parametros de paginacion invalidos");
         }
@@ -87,7 +103,7 @@ public class PersonaController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
 
         return ResponseEntity
-                .ok(personaService.findPaginatedPeople(plantelId, roles, activo, search, pageable));
+                .ok(personaService.findPaginatedPeople(plantelId, roles, activo, search, pageable, usuario));
     }
 
     @PostMapping

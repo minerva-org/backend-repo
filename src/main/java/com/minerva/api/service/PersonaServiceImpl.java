@@ -21,6 +21,9 @@ import com.minerva.api.User.Roles;
 import com.minerva.api.repository.PersonaRepository;
 import com.minerva.api.repository.PlantelRepository;
 import com.minerva.api.User.UserRepository;
+import com.minerva.api.security.RolAutorizacion;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +45,38 @@ public class PersonaServiceImpl implements PersonaService {
     private final PlantelRepository plantelRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private Long obtenerPlantelUsuario(User usuario) {
+        return usuario != null && usuario.getPersona() != null
+                && usuario.getPersona().getPlantel() != null
+                        ? usuario.getPersona().getPlantel().getId()
+                        : null;
+    }
+
+    private Long resolverPlantelPermitido(Long plantelSolicitado, User usuario) {
+        Roles rol = RolAutorizacion.obtenerRol(usuario);
+        if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR
+                || rol == Roles.DOCENTE || rol == Roles.ALUMNO) {
+            Long plantelUsuario = obtenerPlantelUsuario(usuario);
+            if (plantelUsuario == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes un plantel asignado.");
+            }
+            if (plantelSolicitado != null && !plantelSolicitado.equals(plantelUsuario)) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes permiso para consultar personas de este plantel.");
+            }
+            return plantelUsuario;
+        }
+        if (plantelSolicitado == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Se requiere el plantel solicitado.");
+        }
+        return plantelSolicitado;
+    }
 
     @Value("${app.security.default-password:Cambiar123!}")
     private String defaultPassword;
@@ -263,6 +298,35 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<PersonaResponseDTO> findAll(User usuario) {
+        Roles rol = RolAutorizacion.obtenerRol(usuario);
+        if (rol == Roles.DIRECTOR_PLANTEL || rol == Roles.COORDINADOR
+                || rol == Roles.DOCENTE || rol == Roles.ALUMNO) {
+            Long plantelId = obtenerPlantelUsuario(usuario);
+            if (plantelId == null) {
+                return List.of();
+            }
+            return personaRepository.findByPlantelId(plantelId)
+                    .stream()
+                    .map(this::toDTOConUsername)
+                    .toList();
+        }
+        return findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PersonaResponseDTO getAuthenticatedPersona(User usuario) {
+        if (usuario == null || usuario.getPersona() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "No se pudo identificar al usuario autenticado.");
+        }
+        return toDTOConUsername(usuario.getPersona());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<PersonaDatosCompletosResponseDTO> findAllDatos() {
         return personaRepository.findAll().stream().map(Mapper::todoPersonaDTO).toList();
     }
@@ -278,6 +342,17 @@ public class PersonaServiceImpl implements PersonaService {
                 .stream()
                 .map(this::toDTOConUsername)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PersonaResponseDTO> findAllByPlantelIdAndRolAndStatus(
+            long plantelId,
+            Roles rol,
+            Boolean activo,
+            User usuario) {
+        Long plantelPermitido = resolverPlantelPermitido(plantelId, usuario);
+        return findAllByPlantelIdAndRolAndStatus(plantelPermitido, rol, activo);
     }
 
     @Override
@@ -314,6 +389,13 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<PersonaResponseDTO> findAllByPlantelId(Long plantelId, User usuario) {
+        Long plantelPermitido = resolverPlantelPermitido(plantelId, usuario);
+        return findAllByPlantelId(plantelPermitido);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<PersonaResponseDTO> findAllDocentesByPlantelId(Long plantelId) {
         if (!plantelRepository.existsById(plantelId)) {
             throw new EntityNotFoundException("Plantel no encontrado con el id: " + plantelId);
@@ -342,6 +424,24 @@ public class PersonaServiceImpl implements PersonaService {
     @Transactional(readOnly = true)
     public List<PersonaResponseDTO> findAllByRol(Roles rol) {
         return personaRepository.findByRol(rol).stream().map(this::toDTOConUsername).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PersonaResponseDTO> findAllByRol(Roles rol, User usuario) {
+        Roles rolAutenticado = RolAutorizacion.obtenerRol(usuario);
+        if (rolAutenticado == Roles.DIRECTOR_PLANTEL || rolAutenticado == Roles.COORDINADOR
+                || rolAutenticado == Roles.DOCENTE || rolAutenticado == Roles.ALUMNO) {
+            Long plantelId = obtenerPlantelUsuario(usuario);
+            if (plantelId == null) {
+                return List.of();
+            }
+            return personaRepository.findByPlantelIdAndRol(plantelId, rol)
+                    .stream()
+                    .map(this::toDTOConUsername)
+                    .toList();
+        }
+        return findAllByRol(rol);
     }
 
     private PersonaResponseDTO toDTOConUsername(Persona persona) {
@@ -375,6 +475,19 @@ public class PersonaServiceImpl implements PersonaService {
         personas = personaRepository.findPaginatedPeople(plantelId, roles, activo, searchNormalizado, pageable);
 
         return personas.map(this::toDTOConUsername);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PersonaResponseDTO> findPaginatedPeople(
+            Long plantelId,
+            Collection<Roles> roles,
+            Boolean activo,
+            String search,
+            Pageable pageable,
+            User usuario) {
+        Long plantelPermitido = resolverPlantelPermitido(plantelId, usuario);
+        return findPaginatedPeople(plantelPermitido, roles, activo, search, pageable);
     }
 
 }
