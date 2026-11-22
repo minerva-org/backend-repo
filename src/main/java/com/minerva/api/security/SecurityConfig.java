@@ -138,16 +138,58 @@ public class SecurityConfig {
                                                                 "COORDINADOR", "ROLE_COORDINADOR",
                                                                 "DOCENTE", "ROLE_DOCENTE")
 
+                                                .requestMatchers(
+                                                                HttpMethod.POST,
+                                                                "/api/quiz-x-pregunta",
+                                                                "/api/quiz-x-pregunta/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE")
+                                                .requestMatchers(
+                                                                HttpMethod.PATCH,
+                                                                "/api/quiz-x-pregunta/{id}")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE")
+                                                .requestMatchers(
+                                                                HttpMethod.DELETE,
+                                                                "/api/quiz-x-pregunta/{id}")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE")
                                                 .requestMatchers("/api/quiz-x-pregunta/**")
                                                 .hasAnyAuthority(
                                                                 "DEV", "ROLE_DEV",
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                                                                 "COORDINADOR", "ROLE_COORDINADOR",
                                                                 "DOCENTE", "ROLE_DOCENTE")
+                                                .requestMatchers(HttpMethod.POST, "/api/quizzes")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE")
+                                                .requestMatchers(
+                                                                HttpMethod.PATCH,
+                                                                "/api/quizzes/{quizId}")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE")
+                                                .requestMatchers(
+                                                                HttpMethod.DELETE,
+                                                                "/api/quizzes/{quizId}")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE")
                                                 .requestMatchers("/api/quizzes/**")
                                                 .hasAnyAuthority(
                                                                 "DEV", "ROLE_DEV",
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
                                                                 "COORDINADOR", "ROLE_COORDINADOR",
                                                                 "DOCENTE", "ROLE_DOCENTE",
                                                                 "ALUMNO", "ROLE_ALUMNO")

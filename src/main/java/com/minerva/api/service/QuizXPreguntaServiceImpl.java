@@ -17,6 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import com.minerva.api.repository.QuizRepository;
 import com.minerva.api.repository.QuizXPreguntaRepository;
+import com.minerva.api.User.Roles;
+import com.minerva.api.User.User;
+import com.minerva.api.security.RolAutorizacion;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,50 @@ public class QuizXPreguntaServiceImpl implements QuizXPreguntaService {
     private final QuizRepository quizRepository;
     private final PreguntaRepository preguntaRepository;
     private final ConceptoGrupoRepository conceptoGrupoRepository;
+
+    private void validarLecturaQuiz(Quiz quiz, User usuario) {
+        Roles rol = RolAutorizacion.obtenerRol(usuario);
+        if (rol == Roles.ADMIN || rol == Roles.DEV || rol == Roles.DIRECTOR_GENERAL) {
+            return;
+        }
+        if (quiz == null || quiz.getGrupo() == null) {
+            throw new EntityNotFoundException("Quiz no encontrado.");
+        }
+        if (rol == Roles.DIRECTOR_PLANTEL) {
+            Long plantelUsuario = usuario != null
+                    && usuario.getPersona() != null
+                    && usuario.getPersona().getPlantel() != null
+                            ? usuario.getPersona().getPlantel().getId()
+                            : null;
+            if (plantelUsuario == null
+                    || quiz.getGrupo().getPlantel() == null
+                    || !plantelUsuario.equals(quiz.getGrupo().getPlantel().getId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes permiso para consultar este quiz.");
+            }
+            return;
+        }
+        if (rol == Roles.DOCENTE || rol == Roles.COORDINADOR) {
+            if (quiz.getGrupo().getDocente() != null
+                    && usuario != null
+                    && usuario.getPersona() != null
+                    && quiz.getGrupo().getDocente().getId()
+                            .equals(usuario.getPersona().getId())) {
+                return;
+            }
+        }
+        if (rol == Roles.ALUMNO
+                && usuario != null
+                && usuario.getPersona() != null
+                && quiz.getGrupo().getAlumnos().stream()
+                        .anyMatch(alumno -> alumno.getId().equals(usuario.getPersona().getId()))) {
+            return;
+        }
+        throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "No tienes permiso para consultar este quiz.");
+    }
 
     private void validarPreguntaEnCurriculoDelGrupo(Quiz quiz, Pregunta pregunta) {
         if (quiz == null || quiz.getGrupo() == null) {
@@ -155,5 +202,14 @@ public class QuizXPreguntaServiceImpl implements QuizXPreguntaService {
             .stream()
             .map(qxp -> Mapper.toDTO(qxp.getPregunta()))
             .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PreguntaDTO> findPreguntasByQuizId(String quizId, User usuario) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
+        validarLecturaQuiz(quiz, usuario);
+        return findPreguntasByQuizId(quizId);
     }
 }

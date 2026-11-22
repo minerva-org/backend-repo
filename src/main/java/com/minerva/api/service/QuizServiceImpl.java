@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.minerva.api.dto.QuizDTO;
 import com.minerva.api.User.Roles;
+import com.minerva.api.User.User;
+import com.minerva.api.security.RolAutorizacion;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Persona;
@@ -21,6 +23,8 @@ import com.minerva.api.repository.QuizXPreguntaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,64 @@ public class QuizServiceImpl implements QuizService {
     private final PersonaRepository personaRepository;
     private final QuizXPreguntaRepository quizXPreguntaRepository;
     private final PreguntaService preguntaService;
+
+    private void validarLecturaGrupo(Grupo grupo, User usuario) {
+        if (grupo == null) {
+            throw new EntityNotFoundException("Grupo no encontrado.");
+        }
+        Roles rol = RolAutorizacion.obtenerRol(usuario);
+
+        if (rol == Roles.ADMIN || rol == Roles.DEV || rol == Roles.DIRECTOR_GENERAL) {
+            return;
+        }
+        if (rol == Roles.DIRECTOR_PLANTEL) {
+            Long plantelUsuario = usuario != null
+                    && usuario.getPersona() != null
+                    && usuario.getPersona().getPlantel() != null
+                            ? usuario.getPersona().getPlantel().getId()
+                            : null;
+            if (plantelUsuario == null
+                    || grupo.getPlantel() == null
+                    || !plantelUsuario.equals(grupo.getPlantel().getId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes permiso para consultar quizzes de este grupo.");
+            }
+            return;
+        }
+        if (rol == Roles.DOCENTE || rol == Roles.COORDINADOR) {
+            if (grupo.getDocente() == null
+                    || usuario == null
+                    || usuario.getPersona() == null
+                    || !grupo.getDocente().getId().equals(usuario.getPersona().getId())) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes permiso para consultar quizzes de este grupo.");
+            }
+            return;
+        }
+        throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "No tienes permiso para consultar quizzes.");
+    }
+
+    private void validarGestionGrupo(Grupo grupo, User usuario) {
+        Roles rol = RolAutorizacion.obtenerRol(usuario);
+        if (rol == Roles.DEV) {
+            return;
+        }
+        if (rol == Roles.DOCENTE || rol == Roles.COORDINADOR) {
+            if (grupo.getDocente() != null
+                    && usuario != null
+                    && usuario.getPersona() != null
+                    && grupo.getDocente().getId().equals(usuario.getPersona().getId())) {
+                return;
+            }
+        }
+        throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "Solo el docente asignado puede crear o modificar quizzes.");
+    }
 
     @Override
     @Transactional
@@ -76,6 +138,18 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     @Transactional
+    public QuizDTO saveQuiz(QuizDTO quizDTO, User usuario) {
+        if (quizDTO == null || quizDTO.getGrupoId() == null || quizDTO.getGrupoId().isBlank()) {
+            throw new IllegalArgumentException("El grupo es obligatorio");
+        }
+        Grupo grupo = grupoRepository.findById(quizDTO.getGrupoId().trim())
+                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + quizDTO.getGrupoId()));
+        validarGestionGrupo(grupo, usuario);
+        return saveQuiz(quizDTO);
+    }
+
+    @Override
+    @Transactional
     public QuizDTO updateQuiz(String quizId, QuizDTO quizDTO) {
         Quiz quiz = quizRepository.findById(quizId)
             .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
@@ -114,6 +188,21 @@ public class QuizServiceImpl implements QuizService {
         return Mapper.toDTO(quizRepository.save(quiz));
     }
 
+    @Override
+    @Transactional
+    public QuizDTO updateQuiz(String quizId, QuizDTO quizDTO, User usuario) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
+        validarGestionGrupo(quiz.getGrupo(), usuario);
+        if (quizDTO != null && quizDTO.getGrupoId() != null && !quizDTO.getGrupoId().isBlank()) {
+            Grupo grupoDestino = grupoRepository.findById(quizDTO.getGrupoId().trim())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "No existe un grupo con el id: " + quizDTO.getGrupoId()));
+            validarGestionGrupo(grupoDestino, usuario);
+        }
+        return updateQuiz(quizId, quizDTO);
+    }
+
     private void validarFechas(Instant fechaInicio, Instant fechaFinalizacion) {
         if (fechaInicio != null && fechaFinalizacion != null && !fechaInicio.isBefore(fechaFinalizacion)) {
             throw new IllegalArgumentException(
@@ -141,12 +230,64 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
+    @Transactional
+    public void deleteQuiz(String quizId, User usuario) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
+        validarGestionGrupo(quiz.getGrupo(), usuario);
+        deleteQuiz(quizId);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<QuizDTO> findAll() {
         return quizRepository.findAll()
             .stream()
             .map(Mapper::toDTO)
             .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuizDTO> findAll(User usuario) {
+        Roles rol = RolAutorizacion.obtenerRol(usuario);
+        if (rol == Roles.ADMIN || rol == Roles.DEV || rol == Roles.DIRECTOR_GENERAL) {
+            return findAll();
+        }
+        if (usuario == null || usuario.getPersona() == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuario no autenticado.");
+        }
+        if (rol == Roles.ALUMNO) {
+            return findAllByAlumnoId(usuario.getPersona().getId());
+        }
+        if (rol == Roles.DIRECTOR_PLANTEL) {
+            Long plantelId = usuario.getPersona().getPlantel() != null
+                    ? usuario.getPersona().getPlantel().getId()
+                    : null;
+            if (plantelId == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes un plantel asignado.");
+            }
+            return quizRepository.findAll().stream()
+                    .filter(quiz -> quiz.getGrupo() != null
+                            && quiz.getGrupo().getPlantel() != null
+                            && plantelId.equals(quiz.getGrupo().getPlantel().getId()))
+                    .map(Mapper::toDTO)
+                    .toList();
+        }
+        if (rol == Roles.DOCENTE || rol == Roles.COORDINADOR) {
+            return quizRepository.findAll().stream()
+                    .filter(quiz -> quiz.getGrupo() != null
+                            && quiz.getGrupo().getDocente() != null
+                            && quiz.getGrupo().getDocente().getId()
+                                    .equals(usuario.getPersona().getId()))
+                    .map(Mapper::toDTO)
+                    .toList();
+        }
+        throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "No tienes permiso para consultar quizzes.");
     }
 
     @Override
@@ -160,6 +301,15 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     @Transactional(readOnly = true)
+    public QuizDTO getQuizById(String quizId, User usuario) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
+        validarLecturaGrupo(quiz.getGrupo(), usuario);
+        return Mapper.toDTO(quiz);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<QuizDTO> findAllByGrupoId(String grupoId) {
         if (!grupoRepository.existsById(grupoId)) {
             throw new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId);
@@ -168,6 +318,15 @@ public class QuizServiceImpl implements QuizService {
             .stream()
             .map(Mapper::toDTO)
             .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuizDTO> findAllByGrupoId(String grupoId, User usuario) {
+        Grupo grupo = grupoRepository.findById(grupoId)
+                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
+        validarLecturaGrupo(grupo, usuario);
+        return findAllByGrupoId(grupoId);
     }
 
     @Override

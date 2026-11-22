@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.dto.QuizXPreguntaDTO;
+import com.minerva.api.User.User;
 
 public interface QuizXPreguntaService {
     List<QuizXPreguntaDTO> findAll();
@@ -17,4 +18,6 @@ public interface QuizXPreguntaService {
     void deleteQuizXPregunta(String id);
 
     List<PreguntaDTO> findPreguntasByQuizId(String quizId);
+
+    List<PreguntaDTO> findPreguntasByQuizId(String quizId, User usuario);
 }

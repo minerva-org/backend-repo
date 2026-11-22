@@ -38,6 +38,18 @@ import com.minerva.api.model.Unidad;
 import com.minerva.api.model.Institucion;
 
 public class Mapper {
+    private static String nombreCompletoPersona(Persona persona) {
+        if (persona == null) {
+            return null;
+        }
+        return java.util.stream.Stream.of(
+                        persona.getNombre(),
+                        persona.getApellidoPaterno(),
+                        persona.getApellidoMaterno())
+                .filter(nombre -> nombre != null && !nombre.isBlank())
+                .collect(java.util.stream.Collectors.joining(" "));
+    }
+
     public static PlantelDTO toDTO(Plantel plantel) {
         if (plantel == null)
             return null;
@@ -240,6 +252,10 @@ public class Mapper {
                 .plantelId(grupo.getPlantel() != null ? grupo.getPlantel().getId() : null)
                 .alumnosIds(grupo.getAlumnos() == null ? Collections.emptyList()
                         : grupo.getAlumnos().stream().map(Persona::getId).toList())
+                .docenteNombre(nombreCompletoPersona(grupo.getDocente()))
+                .docenteEmail(grupo.getDocente() != null
+                        ? grupo.getDocente().getEmail()
+                        : null)
                 .build();
     }
 
