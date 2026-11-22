@@ -14,6 +14,8 @@ public interface GrupoService {
     List<GrupoDTO> findAllByPlantelId(Long plantelId);
 
     List<GrupoDTO> findAllByAlumnoId(String alumnoId);
+
+    List<GrupoDTO> findAllByUsuario(User usuario);
     
     GrupoDTO getGrupoById(String grupoId);
 

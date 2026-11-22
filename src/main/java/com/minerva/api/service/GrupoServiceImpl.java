@@ -322,6 +322,23 @@ public class GrupoServiceImpl implements GrupoService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<GrupoDTO> findAllByUsuario(User usuario) {
+        if (usuario == null || usuario.getPersona() == null) {
+            throw new IllegalArgumentException("Usuario no autenticado.");
+        }
+
+        Persona persona = usuario.getPersona();
+        if (persona.getRol() == Roles.ALUMNO) {
+            return findAllByAlumnoId(persona.getId());
+        }
+        if (persona.getRol() == Roles.DOCENTE || persona.getRol() == Roles.COORDINADOR) {
+            return findAllByDocenteId(persona.getId());
+        }
+        throw new IllegalArgumentException("El usuario no tiene grupos asignados por persona.");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<String> getAlumnosIdsDeGrupo(String grupoId) {
         Grupo grupo = buscarGrupoPorIdOClave(grupoId);
 
