@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -23,13 +24,13 @@ public class SolicitudesGrupos {
     private String id;
 
     @ManyToOne (fetch = FetchType.LAZY)
-    @Column(name = "id_grupo")
+    @JoinColumn (name = "id_grupo", nullable = false)
     private Grupo grupoId;
 
     
     @ManyToOne (fetch = FetchType.LAZY)
-    @Column(name = "id_alumno")
-    private Alumno alumnoId;
+    @JoinColumn (name = "id_alumno", nullable = false)
+    private Alumno alumnoId; 
     
     @PrePersist
     public void generarUUID() {

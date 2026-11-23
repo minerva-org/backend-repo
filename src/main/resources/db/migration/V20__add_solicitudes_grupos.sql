@@ -1,4 +1,4 @@
-CREATE IF NOT EXISTS solicitudes_grupos(
+CREATE TABLE IF NOT EXISTS solicitudes_grupos(
     id          VARCHAR(40)  NOT NULL,
     id_grupo    VARCHAR(255) NOT NULL,
     id_alumno   VARCHAR(255) NOT NULL,

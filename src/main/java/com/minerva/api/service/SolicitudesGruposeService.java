@@ -31,10 +31,10 @@ import lombok.RequiredArgsConstructor;
 public class SolicitudesGruposeService {
 
     private final AlumnoRepository alumnoRepository;
-    private final DocenteRepository docenteRepository;
     private final PersonaRepository personaRepository;
     private final GrupoRepository grupoRepository;
     private final SolicitudesGruposRepository solicitudesRepository;
+        private final GrupoService grupoService;
 
     public SolicitudesGruposResponseDTO saveSolicitud(SolicitudesGruposRequestDTO solicitud) {
         if (solicitud == null)
@@ -136,5 +136,56 @@ public class SolicitudesGruposeService {
                 .map(solicitud -> MapperSolicitudesGrupos.toDTO(solicitud, solicitud.getAlumnoId(),
                         solicitud.getGrupoId()))
                 .toList();
+    }
+
+    public void aceptar(String solicitudId, String docenteId){
+        if(solicitudId == null || solicitudId.isBlank())
+            throw new IllegalArgumentException("El id de la solicitud es obligatorio");
+
+        if(docenteId == null || docenteId.isBlank())
+            throw new IllegalArgumentException("El id del docente es obligatorio");
+
+        Persona docente = personaRepository.findById(docenteId)
+            .orElseThrow(() -> new EntityNotFoundException("No se encontró un docente con este id: " + docenteId));
+
+        SolicitudesGrupos solicitud = solicitudesRepository.findById(solicitudId)
+            .orElseThrow(() -> new EntityNotFoundException("No se encontró una solicitud con este id: " + docenteId));
+
+        Alumno alumno = alumnoRepository.findById(solicitud.getAlumnoId().getId())
+            .orElseThrow(() -> new EntityNotFoundException("No se encontró un alumno con este id: " + docenteId));
+
+        Grupo grupo = grupoRepository.findById(solicitud.getGrupoId().getId())
+            .orElseThrow(() -> new EntityNotFoundException("No se encontró un grupo con este id: " + solicitud.getGrupoId().getId()));
+
+        if(grupo.getDocente().getId() != docente.getId()){
+            throw new IllegalArgumentException("No puede aceptar solicitudes de un grupo al que no pertenece");
+        }
+        grupoService.agregarAlumno(grupo.getId(), alumno.getId());
+        solicitudesRepository.delete(solicitud);
+    }
+
+        public void rechazar(String solicitudId, String docenteId){
+        if(solicitudId == null || solicitudId.isBlank())
+            throw new IllegalArgumentException("El id de la solicitud es obligatorio");
+
+        if(docenteId == null || docenteId.isBlank())
+            throw new IllegalArgumentException("El id del docente es obligatorio");
+
+        Persona docente = personaRepository.findById(docenteId)
+            .orElseThrow(() -> new EntityNotFoundException("No se encontró un docente con este id: " + docenteId));
+
+        SolicitudesGrupos solicitud = solicitudesRepository.findById(solicitudId)
+            .orElseThrow(() -> new EntityNotFoundException("No se encontró una solicitud con este id: " + docenteId));
+
+        if(!alumnoRepository.existsById(solicitud.getAlumnoId().getId()))
+            throw new EntityNotFoundException("No se encontró un alumno con este id: " + solicitud.getAlumnoId().getId());
+        
+        Grupo grupo = grupoRepository.findById(solicitud.getGrupoId().getId())
+            .orElseThrow(() -> new EntityNotFoundException("No se encontró un grupo con este id: " + solicitud.getGrupoId().getId()));
+
+        if(grupo.getDocente().getId() != docente.getId()){
+            throw new IllegalArgumentException("No puede descartar solicitudes de un grupo al que no pertenece");
+        }
+        solicitudesRepository.delete(solicitud);
     }
 }

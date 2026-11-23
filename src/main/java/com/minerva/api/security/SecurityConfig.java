@@ -80,7 +80,31 @@ public class SecurityConfig {
                                                                 "DEV", "ROLE_DEV",
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                                                                 "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL")
+                                                .requestMatchers(HttpMethod.GET,"/api/solicitud/solicitudes")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                                                                "DOCENTE", "ROLE_DOCENTE")
+                                                .requestMatchers(HttpMethod.POST,"/api/solicitud/*/aceptar")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                                                                "DOCENTE", "ROLE_DOCENTE")
+                                                .requestMatchers(HttpMethod.DELETE,"/api/solicitud/*/rechazar")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                                                                "DOCENTE", "ROLE_DOCENTE")
 
+                                                .requestMatchers(HttpMethod.POST,"/api/solicitud/*/rechazar")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                                                                "ALUMNO", "ROLE_ALUMNO")
                                                 .requestMatchers("/api/personas/**",
                                                                 "/api/files/**")
                                                 .hasAnyAuthority(

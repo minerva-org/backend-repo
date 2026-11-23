@@ -41,15 +41,18 @@ public class SolicitudGrupoController {
     }
 
     @PostMapping("/{solicitudId}/aceptar")
-    public ResponseEntity<Void> aceptar(@PathVariable String solicitudId) {
-        solicitudService.aceptar(solicitudId);
+    public ResponseEntity<Void> aceptar(@PathVariable String solicitudId, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        String id = user.getPersona().getId();
+        solicitudService.aceptar(solicitudId, id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    // Rechazar / descartar solicitud -> DELETE /api/solicitudes-grupos/{solicitudId}
-    @DeleteMapping("/{solicitudId}")
-    public ResponseEntity<Void> rechazar(@PathVariable String solicitudId) {
-        solicitudService.rechazar(solicitudId);
+    @DeleteMapping("/{solicitudId}/rechazar")
+    public ResponseEntity<Void> rechazar(@PathVariable String solicitudId, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        String id = user.getPersona().getId();
+        solicitudService.rechazar(solicitudId, id);
         return ResponseEntity.noContent().build();
     }
 
