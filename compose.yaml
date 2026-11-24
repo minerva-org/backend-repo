@@ -26,7 +26,7 @@ services:
       - 'SPRING_PROFILES_ACTIVE=dev'
       - 'AI_SERVICE_BASE_URL=${AI_SERVICE_BASE_URL:-http://host.docker.internal:8000}'
       - 'AI_SERVICE_API_KEY=${AI_SERVICE_API_KEY:?Configura AI_SERVICE_API_KEY en backend-repo/.env}'
-      - 'CURRICULUM_MOCK_ENABLED=${CURRICULUM_MOCK_ENABLED:false}'
+      - 'CURRICULUM_MOCK_ENABLED=${CURRICULUM_MOCK_ENABLED:-false}'
       - 'S3_ENDPOINT=${S3_ENDPOINT-http://minio:9000}'
       - 'S3_REGION=${S3_REGION:-us-east-1}'
       - 'S3_BUCKET=${S3_BUCKET:-minerva-documents-dev}'
