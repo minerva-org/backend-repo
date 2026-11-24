@@ -71,6 +71,19 @@ public class QuizServiceImpl implements QuizService {
             }
             return;
         }
+
+        if (rol == Roles.ALUMNO) {
+            if (usuario == null
+                    || usuario.getPersona() == null
+                    || grupo.getAlumnos() == null
+                    || grupo.getAlumnos().stream().noneMatch(
+                            alumno -> alumno.getId().equals(usuario.getPersona().getId()))) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "No tienes permiso para consultar quizzes de este grupo.");
+            }
+            return;
+        }
         throw new ResponseStatusException(
                 HttpStatus.FORBIDDEN,
                 "No tienes permiso para consultar quizzes.");
@@ -115,7 +128,7 @@ public class QuizServiceImpl implements QuizService {
         }
         String grupoId = quizDTO.getGrupoId().trim();
         Grupo grupo = grupoRepository.findById(grupoId)
-            .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
+                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId));
 
         if (quizRepository.existsByNombreIgnoreCaseAndGrupoId(nombre, grupoId)) {
             throw new IllegalArgumentException("Ya existe un quiz con ese nombre en este grupo");
@@ -143,7 +156,8 @@ public class QuizServiceImpl implements QuizService {
             throw new IllegalArgumentException("El grupo es obligatorio");
         }
         Grupo grupo = grupoRepository.findById(quizDTO.getGrupoId().trim())
-                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con el id: " + quizDTO.getGrupoId()));
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Grupo no encontrado con el id: " + quizDTO.getGrupoId()));
         validarGestionGrupo(grupo, usuario);
         return saveQuiz(quizDTO);
     }
@@ -152,13 +166,13 @@ public class QuizServiceImpl implements QuizService {
     @Transactional
     public QuizDTO updateQuiz(String quizId, QuizDTO quizDTO) {
         Quiz quiz = quizRepository.findById(quizId)
-            .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
+                .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
 
         Grupo grupoDestino = quiz.getGrupo();
         if (quizDTO.getGrupoId() != null) {
             String grupoId = quizDTO.getGrupoId().trim();
             grupoDestino = grupoRepository.findById(grupoId)
-                .orElseThrow(() -> new EntityNotFoundException("No existe un grupo con el id: " + grupoId));
+                    .orElseThrow(() -> new EntityNotFoundException("No existe un grupo con el id: " + grupoId));
         }
 
         String nombreDestino = quiz.getNombre();
@@ -175,9 +189,11 @@ public class QuizServiceImpl implements QuizService {
         }
 
         Instant fechaInicioDestino = quizDTO.getFechaInicio() != null
-            ? quizDTO.getFechaInicio() : quiz.getFechaInicio();
+                ? quizDTO.getFechaInicio()
+                : quiz.getFechaInicio();
         Instant fechaFinalizacionDestino = quizDTO.getFechaFinalizacion() != null
-            ? quizDTO.getFechaFinalizacion() : quiz.getFechaFinalizacion();
+                ? quizDTO.getFechaFinalizacion()
+                : quiz.getFechaFinalizacion();
         validarFechas(fechaInicioDestino, fechaFinalizacionDestino);
 
         quiz.setNombre(nombreDestino);
@@ -206,7 +222,7 @@ public class QuizServiceImpl implements QuizService {
     private void validarFechas(Instant fechaInicio, Instant fechaFinalizacion) {
         if (fechaInicio != null && fechaFinalizacion != null && !fechaInicio.isBefore(fechaFinalizacion)) {
             throw new IllegalArgumentException(
-                "La fecha de inicio debe ser anterior a la fecha de finalización");
+                    "La fecha de inicio debe ser anterior a la fecha de finalización");
         }
     }
 
@@ -214,7 +230,7 @@ public class QuizServiceImpl implements QuizService {
     @Transactional
     public void deleteQuiz(String quizId) {
         Quiz quiz = quizRepository.findById(quizId)
-            .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
+                .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
 
         List<QuizXPregunta> relacionesQuiz = quizXPreguntaRepository.findByQuizId(quizId);
         if (!relacionesQuiz.isEmpty()) {
@@ -242,9 +258,9 @@ public class QuizServiceImpl implements QuizService {
     @Transactional(readOnly = true)
     public List<QuizDTO> findAll() {
         return quizRepository.findAll()
-            .stream()
-            .map(Mapper::toDTO)
-            .toList();
+                .stream()
+                .map(Mapper::toDTO)
+                .toList();
     }
 
     @Override
@@ -294,7 +310,7 @@ public class QuizServiceImpl implements QuizService {
     @Transactional(readOnly = true)
     public QuizDTO getQuizById(String quizId) {
         Quiz quiz = quizRepository.findById(quizId)
-            .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
+                .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
 
         return Mapper.toDTO(quiz);
     }
@@ -315,9 +331,9 @@ public class QuizServiceImpl implements QuizService {
             throw new EntityNotFoundException("Grupo no encontrado con el id: " + grupoId);
         }
         return quizRepository.findByGrupoId(grupoId)
-            .stream()
-            .map(Mapper::toDTO)
-            .toList();
+                .stream()
+                .map(Mapper::toDTO)
+                .toList();
     }
 
     @Override
@@ -333,24 +349,24 @@ public class QuizServiceImpl implements QuizService {
     @Transactional(readOnly = true)
     public List<QuizDTO> findAllByAlumnoId(String alumnoId) {
         Persona alumno = personaRepository.findById(alumnoId)
-            .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
+                .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con el id: " + alumnoId));
 
         if (alumno.getRol() != Roles.ALUMNO) {
             throw new IllegalArgumentException("La persona indicada no tiene rol de alumno");
         }
 
         List<String> grupoIds = grupoRepository.findByAlumnos_Id(alumnoId)
-            .stream()
-            .map(grupo -> grupo.getId())
-            .toList();
+                .stream()
+                .map(grupo -> grupo.getId())
+                .toList();
 
         if (grupoIds.isEmpty()) {
             return List.of();
         }
 
         return quizRepository.findByGrupoIdIn(grupoIds)
-            .stream()
-            .map(Mapper::toDTO)
-            .toList();
+                .stream()
+                .map(Mapper::toDTO)
+                .toList();
     }
 }
