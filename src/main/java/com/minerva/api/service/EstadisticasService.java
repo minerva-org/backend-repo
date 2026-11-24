@@ -19,7 +19,12 @@ public interface EstadisticasService {
 
     List<EstadisticasTendenciaDTO> obtenerTendenciaAprobacion(User usuario);
 
+    List<EstadisticasTendenciaDTO> obtenerTendenciaAprobacionGrupo(
+            String grupoId, User usuario);
+
     List<EstadisticasGrupoResumenDTO> obtenerResumenGrupos(User usuario);
 
     List<EstadisticasPlantelDTO> obtenerEstadisticasPlanteles(User usuario);
+
+    EstadisticasPlantelDTO obtenerEstadisticasPlantel(Long plantelId, User usuario);
 }

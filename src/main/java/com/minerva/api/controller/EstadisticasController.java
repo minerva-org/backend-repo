@@ -30,6 +30,15 @@ public class EstadisticasController {
                 return ResponseEntity.ok(estadisticasService.obtenerEstadisticasPlanteles(usuario));
         }
 
+        @GetMapping("/planteles/{plantelId}")
+        public ResponseEntity<EstadisticasPlantelDTO> obtenerEstadisticasPlantel(
+                        @PathVariable Long plantelId,
+                        @AuthenticationPrincipal User usuario) {
+                return ResponseEntity.ok(
+                                estadisticasService.obtenerEstadisticasPlantel(
+                                                plantelId, usuario));
+        }
+
         @GetMapping("/quizzes")
         public ResponseEntity<EstadisticasGeneralesDTO> obtenerEstadisticas(
                         @AuthenticationPrincipal User usuario) {
@@ -54,6 +63,15 @@ public class EstadisticasController {
         public ResponseEntity<EstadisticasGrupoDTO> obtenerEstadisticasGrupo(
                         @PathVariable String grupoId, @AuthenticationPrincipal User usuario) {
                 return ResponseEntity.ok(estadisticasService.obtenerEstadisticasGrupo(grupoId, usuario));
+        }
+
+        @GetMapping("/grupos/{grupoId}/tendencia")
+        public ResponseEntity<List<EstadisticasTendenciaDTO>> obtenerTendenciaGrupo(
+                        @PathVariable String grupoId,
+                        @AuthenticationPrincipal User usuario) {
+                return ResponseEntity.ok(
+                                estadisticasService.obtenerTendenciaAprobacionGrupo(
+                                                grupoId, usuario));
         }
 
         @GetMapping("/materias")
