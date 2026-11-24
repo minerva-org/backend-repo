@@ -1,5 +1,8 @@
 package com.minerva.api.service;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,6 +23,9 @@ import tools.jackson.databind.node.ObjectNode;
 @Service
 @RequiredArgsConstructor
 public class QuizIaServiceImpl implements QuizIaService {
+    private static final Logger LOGGER =
+            Logger.getLogger(QuizIaServiceImpl.class.getName());
+
     private final GrupoRepository grupoRepository;
     private final PersonaRepository personaRepository;
     private final AiServiceClient aiServiceClient;
@@ -40,19 +46,35 @@ public class QuizIaServiceImpl implements QuizIaService {
                 || request.get("prompt").asText().isBlank()
                 || request.get("arbol") == null
                 || !request.get("arbol").isObject()) {
+            LOGGER.log(Level.WARNING,
+                    "QUIZ_IA_SOLICITUD_INVALIDA: grupoId={0}, personaId={1}",
+                    new Object[]{grupoId, personaId});
             throw new ResponseStatusException(
                     HttpStatus.UNPROCESSABLE_CONTENT,
                     "El prompt y el arbol curricular son obligatorios.");
         }
 
+        String prompt = request.get("prompt").asText();
+        LOGGER.log(Level.INFO,
+                "QUIZ_IA_SOLICITUD: grupoId={0}, personaId={1}, promptChars={2}",
+                new Object[]{grupoId, personaId, prompt.length()});
+
         ObjectNode datos = objectMapper.createObjectNode();
-        datos.put("prompt", request.get("prompt").asText());
+        datos.put("prompt", prompt);
         datos.set("arbol", request.get("arbol"));
 
         ObjectNode taskRequest = objectMapper.createObjectNode();
         taskRequest.put("tipo", "QUIZ_GENERATE");
         taskRequest.set("datos", datos);
-        return aiServiceClient.createTask(taskRequest);
+        JsonNode response = aiServiceClient.createTask(taskRequest);
+        JsonNode tareaIdNode = response.get("tareaId");
+        LOGGER.log(Level.INFO,
+                "QUIZ_IA_TAREA_CREADA: grupoId={0}, tareaId={1}",
+                new Object[]{grupoId,
+                        tareaIdNode != null && tareaIdNode.isTextual()
+                                ? tareaIdNode.asText()
+                                : "desconocida"});
+        return response;
     }
 
     @Override
@@ -70,6 +92,9 @@ public class QuizIaServiceImpl implements QuizIaService {
             String tareaId,
             String personaId) {
         validarAccesoGrupo(grupoId, personaId);
+        LOGGER.log(Level.INFO,
+                "QUIZ_IA_TAREA_CANCELADA: grupoId={0}, tareaId={1}",
+                new Object[]{grupoId, tareaId});
         aiServiceClient.deleteTask(tareaId);
     }
 
