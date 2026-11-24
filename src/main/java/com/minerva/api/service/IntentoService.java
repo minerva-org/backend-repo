@@ -1,8 +1,11 @@
 package com.minerva.api.service;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -204,10 +207,13 @@ public class IntentoService {
 
         if (!finalizado && respondidas < total) {
             Pregunta p = preguntaEnPosicion(quiz.getId(), respondidas);
-            List<OpcionAlumnoDTO> opciones = opcionRepository.findByPreguntaIdOrderByIdAsc(p.getId())
+            List<OpcionAlumnoDTO> opciones = new ArrayList<>(
+                    opcionRepository.findByPreguntaIdOrderByIdAsc(p.getId())
                     .stream()
                     .map(o -> new OpcionAlumnoDTO(o.getId(), o.getDescripcion()))
-                    .toList();
+                    .toList());
+            Collections.shuffle(opciones,
+                    new Random((intento.getId() + ":" + p.getId()).hashCode()));
             actual = new PreguntaAlumnoDTO(p.getId(), p.getDescripcion(), respondidas + 1, total, opciones);
         }
 
