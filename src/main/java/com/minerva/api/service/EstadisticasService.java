@@ -1,9 +1,9 @@
 package com.minerva.api.service;
 
+import java.util.List;
+
 import com.minerva.api.User.User;
-import com.minerva.api.dto.EstadisticasGeneralesDTO;
-import com.minerva.api.dto.EstadisticasQuizDTO;
-import com.minerva.api.dto.EstadisticasGrupoDTO;
+import com.minerva.api.dto.EstadisticasDTO.*;
 
 public interface EstadisticasService {
 
@@ -12,4 +12,14 @@ public interface EstadisticasService {
     EstadisticasQuizDTO obtenerEstadisticasQuiz(String quizId, User usuario);
 
     EstadisticasGrupoDTO obtenerEstadisticasGrupo(String grupoId, User usuario);
+
+    List<EstadisticasMateriaDTO> obtenerEstadisticasMateria(User usuario);
+
+    List<EstadisticasDocentesDTO> obtenerEstadisticasDocentes(User usuario);
+
+    List<EstadisticasTendenciaDTO> obtenerTendenciaAprobacion(User usuario);
+
+    List<EstadisticasGrupoResumenDTO> obtenerResumenGrupos(User usuario);
+
+    List<EstadisticasPlantelDTO> obtenerEstadisticasPlanteles(User usuario);
 }

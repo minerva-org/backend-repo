@@ -1,5 +1,7 @@
 package com.minerva.api.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,9 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.minerva.api.User.User;
-import com.minerva.api.dto.EstadisticasGeneralesDTO;
-import com.minerva.api.dto.EstadisticasQuizDTO;
-import com.minerva.api.dto.EstadisticasGrupoDTO;
+import com.minerva.api.dto.EstadisticasDTO.*;
 import com.minerva.api.service.EstadisticasService;
 
 @RestController
@@ -22,6 +22,12 @@ public class EstadisticasController {
         public EstadisticasController(
                         EstadisticasService estadisticasService) {
                 this.estadisticasService = estadisticasService;
+        }
+
+        @GetMapping("/planteles")
+        public ResponseEntity<List<EstadisticasPlantelDTO>> obtenerEstadisticasPlanteles(
+                        @AuthenticationPrincipal User usuario) {
+                return ResponseEntity.ok(estadisticasService.obtenerEstadisticasPlanteles(usuario));
         }
 
         @GetMapping("/quizzes")
@@ -38,9 +44,34 @@ public class EstadisticasController {
                 return ResponseEntity.ok(estadisticasService.obtenerEstadisticasQuiz(quizId, usuario));
         }
 
+        @GetMapping("/grupos")
+        public ResponseEntity<List<EstadisticasGrupoResumenDTO>> obtenerResumenGrupos(
+                        @AuthenticationPrincipal User usuario) {
+                return ResponseEntity.ok(estadisticasService.obtenerResumenGrupos(usuario));
+        }
+
         @GetMapping("/grupos/{grupoId}")
         public ResponseEntity<EstadisticasGrupoDTO> obtenerEstadisticasGrupo(
                         @PathVariable String grupoId, @AuthenticationPrincipal User usuario) {
                 return ResponseEntity.ok(estadisticasService.obtenerEstadisticasGrupo(grupoId, usuario));
         }
+
+        @GetMapping("/materias")
+        public ResponseEntity<List<EstadisticasMateriaDTO>> obtenerEstadisticasMateria(
+                        @AuthenticationPrincipal User usuario) {
+                return ResponseEntity.ok(estadisticasService.obtenerEstadisticasMateria(usuario));
+        }
+
+        @GetMapping("/docentes")
+        public ResponseEntity<List<EstadisticasDocentesDTO>> obtenerEstadisticasDocentes(
+                        @AuthenticationPrincipal User usuario) {
+                return ResponseEntity.ok(estadisticasService.obtenerEstadisticasDocentes(usuario));
+        }
+
+        @GetMapping("/tendencia")
+        public ResponseEntity<List<EstadisticasTendenciaDTO>> obtenerTendenciaAprobacion(
+                        @AuthenticationPrincipal User usuario) {
+                return ResponseEntity.ok(estadisticasService.obtenerTendenciaAprobacion(usuario));
+        }
+
 }
