@@ -20,6 +20,7 @@ public class GrupoDTO {
     private String docenteId;
     private Long plantelId;
     private String materiaId;
+    private String materiaNombre;
     private List<String> alumnosIds;
     private String docenteNombre;
     private String docenteEmail;

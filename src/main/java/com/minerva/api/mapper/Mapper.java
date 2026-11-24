@@ -248,6 +248,7 @@ public class Mapper {
                 .semestre(grupo.getSemestre())
                 .activo(grupo.isActivo())
                 .materiaId(grupo.getMateria().getId())
+                .materiaNombre(grupo.getMateria().getNombre())
                 .docenteId(grupo.getDocente() != null ? grupo.getDocente().getId() : null)
                 .plantelId(grupo.getPlantel() != null ? grupo.getPlantel().getId() : null)
                 .alumnosIds(grupo.getAlumnos() == null ? Collections.emptyList()
