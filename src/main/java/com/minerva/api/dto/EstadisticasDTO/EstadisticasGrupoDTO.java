@@ -1,11 +1,16 @@
-package com.minerva.api.dto;
+package com.minerva.api.dto.EstadisticasDTO;
 
-public record EstadisticasGeneralesDTO(
+public record EstadisticasGrupoDTO(
+        String grupoId,
+        String nombreGrupo,
+        String claveGrupo,
+        String semestre,
         double promedioGeneral,
         double porcentajeAprobacion,
         double porcentajeReprobacion,
         double indiceFocoLimpio,
         long alumnosEvaluados,
+        long quizzesAplicados,
         long intentosFinalizados,
         long incidenciasFoco,
         long intentosAprobados,

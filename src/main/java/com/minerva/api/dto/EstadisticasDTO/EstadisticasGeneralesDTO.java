@@ -1,9 +1,6 @@
+package com.minerva.api.dto.EstadisticasDTO;
 
-package com.minerva.api.dto;
-
-public record EstadisticasQuizDTO(
-                String quizId,
-                String nombreQuiz,
+public record EstadisticasGeneralesDTO(
                 double promedioGeneral,
                 double porcentajeAprobacion,
                 double porcentajeReprobacion,
