@@ -31,7 +31,6 @@ import com.minerva.api.model.Persona;
 import com.minerva.api.model.Plantel;
 import com.minerva.api.model.Pregunta;
 import com.minerva.api.model.Quiz;
-import com.minerva.api.model.QuizResumenGeneral;
 import com.minerva.api.model.QuizXPregunta;
 import com.minerva.api.model.Tema;
 import com.minerva.api.model.Unidad;
