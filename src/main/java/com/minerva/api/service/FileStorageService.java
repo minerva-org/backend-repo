@@ -2,6 +2,7 @@ package com.minerva.api.service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.Base64;
@@ -28,6 +29,7 @@ import com.minerva.api.repository.FuentesGrupoRepository;
 import com.minerva.api.repository.MateriaRepository;
 
 import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -159,6 +161,37 @@ public class FileStorageService {
                         "No se encontró el documento."));
         return downloadByObjectKey(documento.getObjectKey(),
                 documento.getOriginalFilename());
+    }
+
+    public StoredFileStream downloadStream(UUID fileId) {
+        Documento documento = documentoRepository.findById(fileId.toString())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No se encontró el documento."));
+        try {
+            ResponseInputStream<GetObjectResponse> response =
+                    s3Client.getObject(GetObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(documento.getObjectKey())
+                            .build());
+            return new StoredFileStream(
+                    documento.getOriginalFilename(),
+                    documento.getSizeBytes(),
+                    response);
+        } catch (S3Exception exception) {
+            logS3Failure(
+                    "DESCARGAR_STREAM",
+                    bucket,
+                    documento.getObjectKey(),
+                    exception);
+            if (exception.statusCode() == 404) {
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "No se encontró el archivo.");
+            }
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "No se pudo recuperar el archivo. Intenta nuevamente.");
+        }
     }
 
     public void deleteIfOrphan(UUID fileId) {
@@ -359,5 +392,16 @@ public class FileStorageService {
     }
 
     public record StoredFile(String fileName, byte[] content) {
+    }
+
+    public record StoredFileStream(
+            String fileName,
+            long contentLength,
+            InputStream content) implements AutoCloseable {
+
+        @Override
+        public void close() throws java.io.IOException {
+            content.close();
+        }
     }
 }
