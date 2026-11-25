@@ -90,6 +90,18 @@ public class QuizController {
         return ResponseEntity.accepted().body(response);
     }
 
+    @PostMapping("/generar/{grupoId}")
+    public ResponseEntity<JsonNode> generarQuizPorGrupo(
+            @PathVariable String grupoId,
+            @RequestBody JsonNode request,
+            @AuthenticationPrincipal User usuario) {
+        return ResponseEntity.accepted().body(
+                quizIaService.generar(
+                        grupoId,
+                        request,
+                        usuario.getPersona().getId()));
+    }
+
     @GetMapping("/tareas/{tareaId}")
     public ResponseEntity<JsonNode> consultarGeneracion(
             @RequestParam String grupoId,

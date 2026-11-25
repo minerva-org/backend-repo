@@ -38,14 +38,13 @@ public class PreguntaServiceImpl implements PreguntaService {
             throw new IllegalArgumentException("El concepto es obligatorio");
         }
 
-        if (conceptoId.startsWith("CG-")) {
+        ConceptoGrupo conceptoGrupo =
+                conceptoGrupoRepository.findById(conceptoId).orElse(null);
+        if (conceptoGrupo != null) {
             if (grupoId == null || grupoId.isBlank()) {
                 throw new IllegalArgumentException(
                         "Se requiere el grupo para resolver un concepto de currículo.");
             }
-            ConceptoGrupo conceptoGrupo = conceptoGrupoRepository.findById(conceptoId)
-                    .orElseThrow(() -> new EntityNotFoundException(
-                            "Concepto de grupo no encontrado con el id: " + conceptoId));
             String grupoConcepto = conceptoGrupo.getTemaGrupo()
                     .getUnidadGrupo()
                     .getGrupo()

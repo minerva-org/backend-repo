@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.minerva.api.User.Roles;
+import com.minerva.api.dto.CurriculoGrupoDTO;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Persona;
 import com.minerva.api.repository.GrupoRepository;
 import com.minerva.api.repository.PersonaRepository;
-import com.minerva.api.security.RolAutorizacion;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +28,7 @@ public class QuizIaServiceImpl implements QuizIaService {
 
     private final GrupoRepository grupoRepository;
     private final PersonaRepository personaRepository;
+    private final CurriculoGrupoService curriculoGrupoService;
     private final AiServiceClient aiServiceClient;
     private final ObjectMapper objectMapper;
 
@@ -43,15 +44,13 @@ public class QuizIaServiceImpl implements QuizIaService {
                 || !request.isObject()
                 || request.get("prompt") == null
                 || !request.get("prompt").isTextual()
-                || request.get("prompt").asText().isBlank()
-                || request.get("arbol") == null
-                || !request.get("arbol").isObject()) {
+                || request.get("prompt").asText().isBlank()) {
             LOGGER.log(Level.WARNING,
                     "QUIZ_IA_SOLICITUD_INVALIDA: grupoId={0}, personaId={1}",
                     new Object[]{grupoId, personaId});
             throw new ResponseStatusException(
                     HttpStatus.UNPROCESSABLE_CONTENT,
-                    "El prompt y el arbol curricular son obligatorios.");
+                    "El prompt es obligatorio.");
         }
 
         String prompt = request.get("prompt").asText();
@@ -61,7 +60,9 @@ public class QuizIaServiceImpl implements QuizIaService {
 
         ObjectNode datos = objectMapper.createObjectNode();
         datos.put("prompt", prompt);
-        datos.set("arbol", request.get("arbol"));
+        CurriculoGrupoDTO curriculo =
+                curriculoGrupoService.findByGrupoId(grupoId);
+        datos.set("arbol", objectMapper.valueToTree(curriculo));
 
         ObjectNode taskRequest = objectMapper.createObjectNode();
         taskRequest.put("tipo", "QUIZ_GENERATE");
@@ -104,11 +105,23 @@ public class QuizIaServiceImpl implements QuizIaService {
                     HttpStatus.FORBIDDEN,
                     "No tienes permiso para generar quizzes.");
         }
-        if (grupo.getDocente() == null
-                || !grupo.getDocente().getId().equals(persona.getId())) {
+        Roles role = persona.getRol();
+        boolean permitted =
+                role == Roles.DEV
+                || role == Roles.ADMIN
+                || role == Roles.DIRECTOR_GENERAL
+                || (role == Roles.DOCENTE
+                    && grupo.getDocente() != null
+                    && grupo.getDocente().getId().equals(persona.getId()))
+                || (role == Roles.COORDINADOR
+                    && grupo.getPlantel() != null
+                    && persona.getPlantel() != null
+                    && grupo.getPlantel().getId()
+                            .equals(persona.getPlantel().getId()));
+        if (!permitted) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
-                    "Solo el docente asignado puede generar quizzes.");
+                    "No tienes permiso para generar quizzes en este grupo.");
         }
     }
 
@@ -120,8 +133,15 @@ public class QuizIaServiceImpl implements QuizIaService {
         Roles rol = persona.getRol();
         if (rol == Roles.ADMIN
                 || rol == Roles.DEV
+                || rol == Roles.DIRECTOR_GENERAL
                 || (grupo.getDocente() != null
-                        && grupo.getDocente().getId().equals(persona.getId()))) {
+                        && grupo.getDocente().getId().equals(persona.getId()))
+                || ((rol == Roles.COORDINADOR
+                        || rol == Roles.DIRECTOR_PLANTEL)
+                    && grupo.getPlantel() != null
+                    && persona.getPlantel() != null
+                    && grupo.getPlantel().getId()
+                            .equals(persona.getPlantel().getId()))) {
             return;
         }
         throw new ResponseStatusException(

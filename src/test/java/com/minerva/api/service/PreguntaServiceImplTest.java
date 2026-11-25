@@ -150,6 +150,38 @@ class PreguntaServiceImplTest {
         assertEquals("CON-1", result.getConceptoId());
     }
 
+    @Test
+    void savePregunta_resolvesUuidConceptoGrupoWithoutPrefix() {
+        Concepto base = new Concepto();
+        base.setId("CON-UUID");
+        Grupo grupo = new Grupo();
+        grupo.setId("G-1");
+        UnidadGrupo unidad = new UnidadGrupo();
+        unidad.setGrupo(grupo);
+        TemaGrupo tema = new TemaGrupo();
+        tema.setUnidadGrupo(unidad);
+        ConceptoGrupo conceptoGrupo = new ConceptoGrupo();
+        conceptoGrupo.setId("96024cc8-42d6-4c72-bac4-c2fbf2e2caca");
+        conceptoGrupo.setTemaGrupo(tema);
+        conceptoGrupo.setConceptoOrigen(base);
+
+        when(conceptoGrupoRepository.findById(conceptoGrupo.getId()))
+                .thenReturn(Optional.of(conceptoGrupo));
+        when(preguntaRepository.existsById("P-UUID")).thenReturn(false);
+        when(preguntaRepository.save(any(Pregunta.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        PreguntaDTO result = preguntaService.savePregunta(
+                PreguntaDTO.builder()
+                        .id("P-UUID")
+                        .descripcion("Pregunta")
+                        .conceptoId(conceptoGrupo.getId())
+                        .grupoId("G-1")
+                        .build());
+
+        assertEquals("CON-UUID", result.getConceptoId());
+    }
+
     // Input: concepto CG-1 pertenece al grupo G-2 pero se usa en G-1.
     // Resultado esperado: 403 y no guarda pregunta.
     @Test
