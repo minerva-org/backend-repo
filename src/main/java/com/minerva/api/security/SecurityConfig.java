@@ -249,6 +249,15 @@ public class SecurityConfig {
                                                                 "COORDINADOR", "ROLE_COORDINADOR",
                                                                 "DOCENTE", "ROLE_DOCENTE")
 
+                                                .requestMatchers("/api/metrics-assistant/**")
+                                                .hasAnyAuthority(
+                                                                "DEV", "ROLE_DEV",
+                                                                "ADMIN", "ROLE_ADMIN",
+                                                                "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
+                                                                "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL",
+                                                                "COORDINADOR", "ROLE_COORDINADOR",
+                                                                "DOCENTE", "ROLE_DOCENTE")
+
                                                 .requestMatchers("/api/**").hasAnyAuthority("DEV", "ROLE_DEV")
                                                 .anyRequest().authenticated())
                                 .sessionManagement(
