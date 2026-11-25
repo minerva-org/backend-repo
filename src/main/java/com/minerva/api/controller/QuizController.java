@@ -1,4 +1,5 @@
 package com.minerva.api.controller;
+
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.minerva.api.User.User;
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.dto.QuizDTO;
+import com.minerva.api.dto.IntentoEstadoDTO;
+import com.minerva.api.service.IntentoService;
 import com.minerva.api.service.QuizService;
 import com.minerva.api.service.QuizXPreguntaService;
 
@@ -30,7 +33,7 @@ public class QuizController {
 
     private final QuizService quizService;
     private final QuizXPreguntaService quizXPreguntaService;
-    // private final IntentoService intentoService;
+    private final IntentoService intentoService;
 
     @GetMapping
     public ResponseEntity<List<QuizDTO>> getAllQuizzes(
@@ -49,6 +52,12 @@ public class QuizController {
     public ResponseEntity<List<QuizDTO>> getMisQuizzes(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return ResponseEntity.ok(quizService.findAllByAlumnoId(user.getPersona().getId()));
+    }
+
+    @GetMapping("/mis-intentos")
+    public ResponseEntity<List<IntentoEstadoDTO>> getMisIntentos(
+            @AuthenticationPrincipal User usuario) {
+        return ResponseEntity.ok(intentoService.misIntentos(usuario.getPersona().getId()));
     }
 
     @GetMapping("/{quizId}")
