@@ -1,27 +1,55 @@
 -- Datos reproducibles para visualizar grupos, resultados de quizzes y incidencias de foco.
 
--- 30 alumnos; los tres grupos tienen 20 alumnos cada uno y se solapan en bloques de 10.
+-- --- SECCIÓN PERSONAS (ID: 001, 002...) ---
 INSERT INTO personas (
     id, nombre, apellido_paterno, apellido_materno, email, rol, id_plantel, activo
 )
 SELECT
-    'DEMO-ALU-' || LPAD(n::text, 3, '0'),
-    'Alumno' || LPAD(n::text, 3, '0'),
-    'Visual',
-    CASE WHEN n % 2 = 0 THEN 'Norte' ELSE 'Sur' END,
-    'demo.alumno' || LPAD(n::text, 3, '0') || '@minerva.local',
+    LPAD(n::text, 3, '0'), -- ID limpio: 001, 002, etc.
+    d.nombre,
+    d.apellido,
+    -- Maternos variados
+    CASE (n % 5)
+        WHEN 0 THEN 'Hernández' WHEN 1 THEN 'Fernández' WHEN 2 THEN 'Peralta'
+        WHEN 3 THEN 'Ramírez' ELSE 'Vega'
+    END,
+    -- Formato de correo: {nombre}.{apellido}@chapala.edu.mx (sin acentos, sin números, en minúsculas)
+    LOWER(
+        translate(
+            d.nombre || '.' || d.apellido,
+            'áéíóúüñÁÉÍÓÚÜÑ',
+            'aeiouunAEIOUUN'
+        )
+    ) || '@chapala.edu.mx',
     'ALUMNO',
     CASE WHEN n <= 15 THEN 1 ELSE 2 END,
     TRUE
 FROM generate_series(1, 30) AS n
+CROSS JOIN LATERAL (
+    SELECT
+        (ARRAY[
+            'Alejandro', 'Sofia', 'David', 'Valentina',
+            'Javier', 'Isabella', 'Luis', 'Laura',
+            'Carlos', 'Camila', 'Pablo', 'Martina',
+            'Daniel', 'Paula', 'Miguel', 'Elena'
+        ])[(n % 16) + 1] AS nombre,
+        -- (n / 16) es división entera: 0 para n<16 y 1 para n>=16,
+        -- lo que desplaza el apellido en la segunda vuelta y evita correos repetidos.
+        (ARRAY[
+            'García', 'Rodríguez', 'López', 'Martínez',
+            'Sánchez', 'Pérez', 'González', 'Ruiz',
+            'Díaz', 'Torres', 'Vargas', 'Castro',
+            'Reyes', 'Mendoza', 'Silva', 'Flores'
+        ])[((n + n / 16) % 16) + 1] AS apellido
+) d
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO usuarios (username, password, reestablecimiento, id_persona)
 SELECT
-    'demo.alumno' || LPAD(n::text, 3, '0'),
+    'correo' || LPAD(n::text, 3, '0'), -- Username limpio
     '$2a$10$uQLQWy0yPw1QkIbK4U4c7e07jZeThR6OzjkRwwPbJuxWZQq5RivXa',
     FALSE,
-    'DEMO-ALU-' || LPAD(n::text, 3, '0')
+    LPAD(n::text, 3, '0') -- Referencia al ID limpio
 FROM generate_series(1, 30) AS n
 ON CONFLICT (username) DO NOTHING;
 
@@ -29,38 +57,43 @@ INSERT INTO alumnos (
     id, tutor, numero_tutor, fecha_ingreso, promedio_general
 )
 SELECT
-    'DEMO-ALU-' || LPAD(n::text, 3, '0'),
-    'Tutor ' || LPAD(n::text, 3, '0'),
-    '33' || LPAD((10000000 + n)::text, 8, '0'),
+    LPAD(n::text, 3, '0'), -- ID limpio
+    -- Nombres realistas de tutores rotativos
+    CASE (n % 5)
+        WHEN 0 THEN 'Lic. Ana Mendoza' WHEN 1 THEN 'Ing. Luis Soto' WHEN 2 THEN 'MSc. Carmen Robles'
+        WHEN 3 THEN 'Dr. Ricardo Vera' ELSE 'Prof. Elena Torres' END,
+    -- Número de tutor genérico para la referencia
+    'TUTOR-' || LPAD((10000000 + n)::text, 8, '0'),
     NOW() - ((31 - n) || ' days')::interval,
     ROUND((70 + (n * 7 % 25))::numeric, 1)::real
 FROM generate_series(1, 30) AS n
 ON CONFLICT (id) DO NOTHING;
 
+-- --- SECCIÓN GRUPOS (ID: GPO1, GPC3...) ---
 INSERT INTO grupo (
     id, clave_grupo, nombre, semestre, id_docente, id_materia, id_plantel, activo
 )
 VALUES
-    ('DEMO-GRP-A', 'DEMO-A', 'Visualización Grupo A', '5', 'DOC-001', 'MAT-SW', 1, TRUE),
-    ('DEMO-GRP-B', 'DEMO-B', 'Visualización Grupo B', '5', 'DOC-001', 'MAT-DB', 1, TRUE),
-    ('DEMO-GRP-C', 'DEMO-C', 'Visualización Grupo C', '5', 'DOC-002', 'MAT-SW', 2, TRUE)
+    ('GPO1', 'GPO1', 'Equipo Innovación y Desarrollo A', '5', 'DOC-001', 'MAT-SW', 1, TRUE),
+    ('GPO2', 'GPO2', 'Grupo de Análisis de Datos B', '5', 'DOC-001', 'MAT-DB', 1, TRUE),
+    ('GPC3', 'GPC3', 'Módulo Avanzado Ingeniería C', '5', 'DOC-002', 'MAT-SW', 2, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 -- Grupo A: alumnos 001-020.
 INSERT INTO grupos_alumnos (id_grupo, id_alumno)
-SELECT 'DEMO-GRP-A', 'DEMO-ALU-' || LPAD(n::text, 3, '0')
+SELECT 'GPO1', LPAD(n::text, 3, '0')
 FROM generate_series(1, 20) AS n
 ON CONFLICT DO NOTHING;
 
 -- Grupo B: alumnos 011-030.
 INSERT INTO grupos_alumnos (id_grupo, id_alumno)
-SELECT 'DEMO-GRP-B', 'DEMO-ALU-' || LPAD(n::text, 3, '0')
+SELECT 'GPO2', LPAD(n::text, 3, '0')
 FROM generate_series(11, 30) AS n
 ON CONFLICT DO NOTHING;
 
 -- Grupo C: alumnos 001-010 y 021-030.
 INSERT INTO grupos_alumnos (id_grupo, id_alumno)
-SELECT 'DEMO-GRP-C', 'DEMO-ALU-' || LPAD(n::text, 3, '0')
+SELECT 'GPC3', LPAD(n::text, 3, '0')
 FROM (
     SELECT n FROM generate_series(1, 10) AS n
     UNION ALL
@@ -68,31 +101,31 @@ FROM (
 ) datos
 ON CONFLICT DO NOTHING;
 
--- 20 preguntas base y tres distractores por cada una.
+-- --- PREGUNTAS Y OPCIONES (ID: 001, 002...) ---
 INSERT INTO pregunta (id, descripcion, id_concepto, activo)
 SELECT
-    'DEMO-PREG-' || LPAD(n::text, 3, '0'),
+    LPAD(n::text, 3, '0'), -- ID limpio
     CASE n
-        WHEN 1 THEN '¿Cuál es el propósito principal de una metodología ágil?'
-        WHEN 2 THEN '¿Qué caracteriza a Scrum?'
-        WHEN 3 THEN '¿Qué representa el Sprint en Scrum?'
-        WHEN 4 THEN '¿Quién prioriza el Product Backlog?'
-        WHEN 5 THEN '¿Cuál es el objetivo de una Daily Scrum?'
-        WHEN 6 THEN '¿Qué describe una historia de usuario?'
-        WHEN 7 THEN '¿Qué contiene típicamente un criterio de aceptación?'
-        WHEN 8 THEN '¿Para qué se utiliza un sprint backlog?'
-        WHEN 9 THEN '¿Qué mide una retrospectiva de Scrum?'
-        WHEN 10 THEN '¿Cuál es una práctica común de mejora continua?'
-        WHEN 11 THEN '¿Qué expresa la primera forma normal de una tabla?'
-        WHEN 12 THEN '¿Qué busca la normalización de una base de datos?'
-        WHEN 13 THEN '¿Qué es una clave primaria?'
-        WHEN 14 THEN '¿Para qué sirve una clave foránea?'
-        WHEN 15 THEN '¿Qué describe un índice en una base de datos?'
-        WHEN 16 THEN '¿Qué información puede mostrar un plan de ejecución?'
-        WHEN 17 THEN '¿Qué tipo de operación puede crear un índice?'
-        WHEN 18 THEN '¿Qué significa cardinalidad alta en una columna?'
-        WHEN 19 THEN '¿Qué problema puede producir la falta de índices?'
-        WHEN 20 THEN '¿Cuál es una consecuencia frecuente de una consulta mal optimizada?'
+        WHEN 1 THEN '¿Cuál es el propósito principal de implementar una metodología ágil?'
+        WHEN 2 THEN '¿Qué característica define al marco de trabajo Scrum?'
+        WHEN 3 THEN '¿Cómo se denomina el periodo de tiempo fijo en que un equipo Scrum construye incremento de producto?'
+        WHEN 4 THEN '¿Quién tiene la responsabilidad final de priorizar y gestionar el Product Backlog?'
+        WHEN 5 THEN '¿Cuál es el objetivo principal de la Daily Scrum (Scrum Diario)?'
+        WHEN 6 THEN '¿Qué tipo de enunciado describe una historia de usuario típica en un contexto ágil?'
+        WHEN 7 THEN '¿Qué información debe contener típicamente un criterio de aceptación?'
+        WHEN 8 THEN '¿Para qué se utiliza específicamente el Sprint Backlog?'
+        WHEN 9 THEN '¿Qué evalúa y mejora una retrospectiva del equipo Scrum?'
+        WHEN 10 THEN '¿Cuál es un ejemplo claro de práctica de mejora continua en desarrollo de software?'
+        WHEN 11 THEN '¿Qué establece la Primera Forma Normal (1NF) en el diseño relacional?'
+        WHEN 12 THEN '¿Cuál es el objetivo fundamental al normalizar una base de datos?'
+        WHEN 13 THEN '¿Qué función cumple una clave primaria (Primary Key)?'
+        WHEN 14 THEN '¿Cómo se relaciona una tabla con otra usando una clave foránea (Foreign Key)?'
+        WHEN 15 THEN '¿Cuál es el rol principal de un índice en la optimización de consultas?'
+        WHEN 16 THEN '¿Qué detalles proporciona típicamente un plan de ejecución de consulta?'
+        WHEN 17 THEN '¿Qué tipo de operación o estructura se usa para crear un índice eficientemente?'
+        WHEN 18 THEN '¿Cómo se interpreta el concepto de cardinalidad alta en una columna?'
+        WHEN 19 THEN '¿Qué impacto negativo puede generar la ausencia de índices apropiados?'
+        WHEN 20 THEN '¿Cuál es una consecuencia común de ejecutar consultas SQL no optimizadas?'
     END,
     CASE
         WHEN n <= 5 THEN 'CON-SW-1'
@@ -106,7 +139,7 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO opciones (id, descripcion, es_correcta, id_pregunta)
 SELECT
-    'DEMO-OPC-' || LPAD(n::text, 3, '0') || '-' || suffix,
+    'OPC-' || LPAD(n::text, 3, '0') || '-' || suffix, -- ID limpio de opción
     CASE suffix
         WHEN 'A' THEN respuesta_correcta
         WHEN 'B' THEN distractor_1
@@ -114,7 +147,7 @@ SELECT
         WHEN 'D' THEN distractor_3
     END,
     (suffix = 'A'),
-    'DEMO-PREG-' || LPAD(n::text, 3, '0')
+    LPAD(n::text, 3, '0') -- Referencia al ID de pregunta limpio
 FROM generate_series(1, 20) AS n
 CROSS JOIN unnest(ARRAY['A', 'B', 'C', 'D']) AS suffix
 CROSS JOIN LATERAL (
@@ -210,46 +243,46 @@ CROSS JOIN LATERAL (
 ) datos
 ON CONFLICT (id) DO NOTHING;
 
--- Cuatro quizzes pasados: 5, 10, 20 y 10 preguntas.
+-- --- QUIZES (ID: QZ05, QZ10...) ---
 INSERT INTO quiz (
     id, detalles, fecha_creacion, fecha_inicio, fecha_finalizacion, id_grupo
 )
 VALUES
-    ('DEMO-QZ-05', 'Diagnóstico Ágil - 5 preguntas', NOW() - INTERVAL '61 days', NOW() - INTERVAL '60 days', NOW() - INTERVAL '58 days', 'DEMO-GRP-A'),
-    ('DEMO-QZ-10', 'Base de Datos - 10 preguntas', NOW() - INTERVAL '46 days', NOW() - INTERVAL '45 days', NOW() - INTERVAL '43 days', 'DEMO-GRP-B'),
-    ('DEMO-QZ-20', 'Integración de Ingeniería - 20 preguntas', NOW() - INTERVAL '31 days', NOW() - INTERVAL '30 days', NOW() - INTERVAL '28 days', 'DEMO-GRP-C'),
-    ('DEMO-QZ-10B', 'Repaso Ágil y Datos - 10 preguntas', NOW() - INTERVAL '16 days', NOW() - INTERVAL '15 days', NOW() - INTERVAL '13 days', 'DEMO-GRP-A')
+    ('QZ05', 'Diagnóstico Inicial: Conceptos Ágiles Fundamentales - 5 preguntas', NOW() - INTERVAL '61 days', NOW() - INTERVAL '60 days', NOW() - INTERVAL '58 days', 'GPO1'),
+    ('QZ10', 'Evaluación de Bases de Datos Relacionales - 10 preguntas', NOW() - INTERVAL '46 days', NOW() - INTERVAL '45 days', NOW() - INTERVAL '43 days', 'GPO2'),
+    ('QZ20', 'Integración: Metodología y Diseño de Sistemas - 20 preguntas', NOW() - INTERVAL '31 days', NOW() - INTERVAL '30 days', NOW() - INTERVAL '28 days', 'GPC3'),
+    ('QZ10B', 'Repaso Rápido: Scrum y Normalización de Datos - 10 preguntas', NOW() - INTERVAL '16 days', NOW() - INTERVAL '15 days', NOW() - INTERVAL '13 days', 'GPO1')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO quiz_x_pregunta (id, id_quiz, id_pregunta)
 SELECT
-    'DEMO-QXP-05-' || LPAD(n::text, 3, '0'),
-    'DEMO-QZ-05',
-    'DEMO-PREG-' || LPAD(n::text, 3, '0')
+    'QXP-05-' || LPAD(n::text, 3, '0'), -- ID limpio de la relación
+    'QZ05',
+    LPAD(n::text, 3, '0') -- Referencia a pregunta limpia
 FROM generate_series(1, 5) AS n
 ON CONFLICT (id_quiz, id_pregunta) DO NOTHING;
 
 INSERT INTO quiz_x_pregunta (id, id_quiz, id_pregunta)
 SELECT
-    'DEMO-QXP-10-' || LPAD(n::text, 3, '0'),
-    'DEMO-QZ-10',
-    'DEMO-PREG-' || LPAD(n::text, 3, '0')
+    'QXP-10-' || LPAD(n::text, 3, '0'),
+    'QZ10',
+    LPAD(n::text, 3, '0')
 FROM generate_series(6, 15) AS n
 ON CONFLICT (id_quiz, id_pregunta) DO NOTHING;
 
 INSERT INTO quiz_x_pregunta (id, id_quiz, id_pregunta)
 SELECT
-    'DEMO-QXP-20-' || LPAD(n::text, 3, '0'),
-    'DEMO-QZ-20',
-    'DEMO-PREG-' || LPAD(n::text, 3, '0')
+    'QXP-20-' || LPAD(n::text, 3, '0'),
+    'QZ20',
+    LPAD(n::text, 3, '0')
 FROM generate_series(1, 20) AS n
 ON CONFLICT (id_quiz, id_pregunta) DO NOTHING;
 
 INSERT INTO quiz_x_pregunta (id, id_quiz, id_pregunta)
 SELECT
-    'DEMO-QXP-10B-' || LPAD(n::text, 3, '0'),
-    'DEMO-QZ-10B',
-    'DEMO-PREG-' || LPAD(n::text, 3, '0')
+    'QXP-10B-' || LPAD(n::text, 3, '0'),
+    'QZ10B',
+    LPAD(n::text, 3, '0')
 FROM (
     SELECT n FROM generate_series(1, 5) AS n
     UNION ALL
@@ -259,15 +292,15 @@ ON CONFLICT (id_quiz, id_pregunta) DO NOTHING;
 
 -- Intentos completados. Algunos alumnos se omiten deliberadamente para representar no entregas.
 WITH miembros AS (
-    SELECT 'DEMO-QZ-05' AS quiz_id, 'DEMO-ALU-' || LPAD(n::text, 3, '0') AS alumno_id, NOW() - INTERVAL '58 days 5 minutes' AS limite
+    SELECT 'QZ05' AS quiz_id, LPAD(n::text, 3, '0') AS alumno_id, NOW() - INTERVAL '58 days 5 minutes' AS limite
     FROM generate_series(1, 20) AS n
     WHERE n NOT IN (3, 18, 19)
     UNION ALL
-    SELECT 'DEMO-QZ-10', 'DEMO-ALU-' || LPAD(n::text, 3, '0'), NOW() - INTERVAL '43 days 5 minutes'
+    SELECT 'QZ10', LPAD(n::text, 3, '0'), NOW() - INTERVAL '43 days 5 minutes'
     FROM generate_series(11, 30) AS n
     WHERE n NOT IN (11, 25, 30)
     UNION ALL
-    SELECT 'DEMO-QZ-20', 'DEMO-ALU-' || LPAD(n::text, 3, '0'), NOW() - INTERVAL '28 days 5 minutes'
+    SELECT 'QZ20', LPAD(n::text, 3, '0'), NOW() - INTERVAL '28 days 5 minutes'
     FROM (
         SELECT n FROM generate_series(1, 10) AS n
         UNION ALL
@@ -275,7 +308,7 @@ WITH miembros AS (
     ) datos(n)
     WHERE n NOT IN (5, 22, 29)
     UNION ALL
-    SELECT 'DEMO-QZ-10B', 'DEMO-ALU-' || LPAD(n::text, 3, '0'), NOW() - INTERVAL '13 days 5 minutes'
+    SELECT 'QZ10B', LPAD(n::text, 3, '0'), NOW() - INTERVAL '13 days 5 minutes'
     FROM generate_series(1, 20) AS n
     WHERE n NOT IN (1, 14, 17)
 )
@@ -284,10 +317,10 @@ INSERT INTO intentos (
 )
 SELECT
     CASE quiz_id
-        WHEN 'DEMO-QZ-05' THEN 'DINT-05-' || RIGHT(alumno_id, 3)
-        WHEN 'DEMO-QZ-10' THEN 'DINT-10-' || RIGHT(alumno_id, 3)
-        WHEN 'DEMO-QZ-20' THEN 'DINT-20-' || RIGHT(alumno_id, 3)
-        WHEN 'DEMO-QZ-10B' THEN 'DINT-10B-' || RIGHT(alumno_id, 3)
+        WHEN 'QZ05' THEN 'INT-05-' || RIGHT(alumno_id, 3) -- ID limpio de intento
+        WHEN 'QZ10' THEN 'INT-10-' || RIGHT(alumno_id, 3)
+        WHEN 'QZ20' THEN 'INT-20-' || RIGHT(alumno_id, 3)
+        WHEN 'QZ10B' THEN 'INT-10B-' || RIGHT(alumno_id, 3)
     END,
     quiz_id,
     alumno_id,
@@ -296,8 +329,7 @@ SELECT
 FROM miembros
 ON CONFLICT (id_quiz, id_alumno) DO NOTHING;
 
--- Detalles por pregunta. DEMO-ALU-001 y -002 tienen foco alto (2-3 cambios por pregunta);
--- el resto alterna entre cero y una incidencia.
+-- Detalles por pregunta. Alumnos '001' y '002' tienen foco alto (2-3 cambios por pregunta).
 WITH payload AS (
     SELECT
         i.id AS intento_id,
@@ -307,17 +339,17 @@ WITH payload AS (
         ROW_NUMBER() OVER (PARTITION BY i.id ORDER BY qp.id) AS posicion
     FROM intentos i
     JOIN quiz_x_pregunta qp ON qp.id_quiz = i.id_quiz
-    WHERE i.id LIKE 'DINT-%'
+    WHERE i.id LIKE 'INT-%' -- Filtrado por ID limpio de intento
 )
 INSERT INTO detalles_intentos (
     id, id_intento, id_pregunta, cambios_pantalla, id_opcion, es_correcto
 )
 SELECT
-    'DDT-' || intento_id || '-' || LPAD(posicion::text, 2, '0'),
+    'DET-' || intento_id || '-' || LPAD(posicion::text, 2, '0'), -- ID limpio de detalle
     intento_id,
     pregunta_id,
     CASE
-        WHEN alumno_id IN ('DEMO-ALU-001', 'DEMO-ALU-002')
+        WHEN alumno_id IN ('001', '002')
             THEN 2 + ABS(MOD(HASHTEXT(intento_id || pregunta_id), 2))
         ELSE ABS(MOD(HASHTEXT(intento_id || pregunta_id), 3)) / 2
     END,
