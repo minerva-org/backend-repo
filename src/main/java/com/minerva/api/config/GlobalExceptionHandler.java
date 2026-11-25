@@ -2,6 +2,8 @@ package com.minerva.api.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -11,11 +13,25 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.minerva.api.excepciones.CuentaDeshabilitadaException;
+import com.minerva.api.service.AiServiceClient.AiServiceUnavailableException;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @RestControllerAdvice 
 public class GlobalExceptionHandler {
+
+    private static final Logger LOGGER =
+            Logger.getLogger(GlobalExceptionHandler.class.getName());
+
+    @ExceptionHandler(AiServiceUnavailableException.class)
+    public ResponseEntity<Map<String, String>> handleAiServiceUnavailable(
+            AiServiceUnavailableException ex) {
+        LOGGER.log(Level.SEVERE, "AI_SERVICE_NO_DISPONIBLE: " + ex.getMessage(), ex);
+        Map<String, String> body = new HashMap<>();
+        body.put("mensaje",
+                "El servicio de IA no está disponible en este momento. Intenta de nuevo más tarde.");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(body);
+    }
 
     @ExceptionHandler (EntityNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(EntityNotFoundException ex) {

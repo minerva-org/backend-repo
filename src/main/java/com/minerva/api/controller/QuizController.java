@@ -23,6 +23,8 @@ import com.minerva.api.dto.IntentoEstadoDTO;
 import com.minerva.api.service.IntentoService;
 import com.minerva.api.service.QuizService;
 import com.minerva.api.service.QuizXPreguntaService;
+import com.minerva.api.service.QuizIaService;
+import tools.jackson.databind.JsonNode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +35,8 @@ public class QuizController {
 
     private final QuizService quizService;
     private final QuizXPreguntaService quizXPreguntaService;
+    private final QuizIaService quizIaService;
+    // private final IntentoService intentoService;
     private final IntentoService intentoService;
 
     @GetMapping
@@ -72,6 +76,41 @@ public class QuizController {
             @PathVariable String quizId,
             @AuthenticationPrincipal User usuario) {
         return ResponseEntity.ok(quizXPreguntaService.findPreguntasByQuizId(quizId, usuario));
+    }
+
+    @PostMapping("/generar")
+    public ResponseEntity<JsonNode> generarQuiz(
+            @RequestParam String grupoId,
+            @RequestBody JsonNode request,
+            @AuthenticationPrincipal User usuario) {
+        JsonNode response = quizIaService.generar(
+                grupoId,
+                request,
+                usuario.getPersona().getId());
+        return ResponseEntity.accepted().body(response);
+    }
+
+    @GetMapping("/tareas/{tareaId}")
+    public ResponseEntity<JsonNode> consultarGeneracion(
+            @RequestParam String grupoId,
+            @PathVariable String tareaId,
+            @AuthenticationPrincipal User usuario) {
+        return ResponseEntity.ok(quizIaService.consultarTarea(
+                grupoId,
+                tareaId,
+                usuario.getPersona().getId()));
+    }
+
+    @DeleteMapping("/tareas/{tareaId}")
+    public ResponseEntity<Void> cancelarGeneracion(
+            @RequestParam String grupoId,
+            @PathVariable String tareaId,
+            @AuthenticationPrincipal User usuario) {
+        quizIaService.cancelarTarea(
+                grupoId,
+                tareaId,
+                usuario.getPersona().getId());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping

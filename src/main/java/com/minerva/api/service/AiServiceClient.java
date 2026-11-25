@@ -2,12 +2,15 @@ package com.minerva.api.service;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -16,6 +19,10 @@ import tools.jackson.databind.ObjectMapper;
 @Service
 public class AiServiceClient {
 
+    private static final Logger LOGGER =
+            Logger.getLogger(AiServiceClient.class.getName());
+
+    private final String baseUrl;
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
 
@@ -23,6 +30,7 @@ public class AiServiceClient {
             ObjectMapper objectMapper,
             @Value("${app.ai.service.base-url}") String baseUrl,
             @Value("${app.ai.service.api-key}") String apiKey) {
+        this.baseUrl = baseUrl;
         this.objectMapper = objectMapper;
         var factory = new JdkClientHttpRequestFactory(
                 HttpClient.newBuilder()
@@ -49,6 +57,7 @@ public class AiServiceClient {
             }
             return response;
         } catch (RestClientException exception) {
+            logRequestFailure("POST", "/v1/tareas", exception);
             throw new AiServiceUnavailableException(
                     "Could not create AI task.", exception);
         }
@@ -120,6 +129,31 @@ public class AiServiceClient {
         public boolean isUp() {
             return "UP".equals(status);
         }
+    }
+
+    private void logRequestFailure(
+            String method,
+            String path,
+            RestClientException exception) {
+        if (exception instanceof RestClientResponseException responseException) {
+            LOGGER.log(Level.SEVERE,
+                    "AI_SERVICE_RESPUESTA_ERROR: metodo={0}, url={1}{2}, status={3}, mensaje={4}, cuerpo={5}",
+                    new Object[]{method, baseUrl, path,
+                            responseException.getStatusCode().value(),
+                            responseException.getMessage(),
+                            responseException.getResponseBodyAsString()});
+            return;
+        }
+
+        Throwable cause = exception;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        LOGGER.log(Level.SEVERE,
+                "AI_SERVICE_CONEXION_ERROR: metodo={0}, url={1}{2}, tipo={3}, mensaje={4}",
+                new Object[]{method, baseUrl, path,
+                        cause.getClass().getSimpleName(),
+                        cause.getMessage()});
     }
 
     public static class AiServiceUnavailableException extends RuntimeException {
