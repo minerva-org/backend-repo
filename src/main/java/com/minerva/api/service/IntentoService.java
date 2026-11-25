@@ -10,12 +10,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.minerva.api.dto.IntentoDTO;
 import com.minerva.api.dto.IntentoEstadoDTO;
+import com.minerva.api.dto.AlumnoDesgloseDTO;
 import com.minerva.api.dto.OpcionAlumnoDTO;
 import com.minerva.api.dto.PreguntaAlumnoDTO;
 import com.minerva.api.dto.RespuestaRequestDTO;
@@ -32,6 +35,8 @@ import com.minerva.api.repository.IntentoRepository;
 import com.minerva.api.repository.OpcionRepository;
 import com.minerva.api.repository.QuizRepository;
 import com.minerva.api.repository.QuizXPreguntaRepository;
+import com.minerva.api.repository.QuizAlumnoPreguntaResumenRepository;
+import com.minerva.api.mapper.MapperAlumnoDesgloseResumen;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +52,8 @@ public class IntentoService {
     private final AlumnoRepository alumnoRepository;
     private final QuizXPreguntaRepository quizXPreguntaRepository;
     private final OpcionRepository opcionRepository;
+    private final QuizAlumnoPreguntaResumenRepository
+            alumnoPreguntaResumenRepository;
 
     public record Resultado(long correctas, long enBlanco, long total) {
     }
@@ -154,6 +161,33 @@ public class IntentoService {
                         i.getId(),
                         i.getFechaEnvio() != null))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AlumnoDesgloseDTO detalleResultados(
+            String quizId,
+            String intentoId,
+            String alumnoId) {
+        Intento intento = cargarIntento(quizId, intentoId, alumnoId);
+        if (intento.getFechaEnvio() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Finaliza el quiz antes de consultar sus resultados.");
+        }
+        if (!vencido(intento.getQuiz())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Los resultados estarán disponibles al cerrar el quiz.");
+        }
+        return MapperAlumnoDesgloseResumen.toDesglose(
+                alumnoPreguntaResumenRepository
+                        .findByQuizIdAndAlumnoIdOrderByNumeroAsc(
+                                quizId, alumnoId))
+                .stream()
+                .filter(detalle -> intentoId.equals(detalle.intentoId()))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "No se encontraron respuestas para este intento."));
     }
 
     private Intento cargarIntento(String quizId, String intentoId, String alumnoId) {
