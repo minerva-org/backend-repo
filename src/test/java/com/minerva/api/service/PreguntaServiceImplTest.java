@@ -25,11 +25,18 @@ import com.minerva.api.repository.OpcionRepository;
 import com.minerva.api.repository.PreguntaRepository;
 import com.minerva.api.repository.QuizXPreguntaRepository;
 import com.minerva.api.repository.ConceptoGrupoRepository;
+import com.minerva.api.repository.TemaGrupoRepository;
+import com.minerva.api.repository.UnidadGrupoRepository;
+import com.minerva.api.repository.TemaRepository;
+import com.minerva.api.repository.UnidadRepository;
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.model.Concepto;
 import com.minerva.api.model.ConceptoGrupo;
 import com.minerva.api.model.TemaGrupo;
+import com.minerva.api.model.Tema;
 import com.minerva.api.model.UnidadGrupo;
+import com.minerva.api.model.Unidad;
+import com.minerva.api.model.Materia;
 import com.minerva.api.model.Grupo;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -50,6 +57,18 @@ class PreguntaServiceImplTest {
 
     @Mock
     private ConceptoGrupoRepository conceptoGrupoRepository;
+
+    @Mock
+    private TemaGrupoRepository temaGrupoRepository;
+
+    @Mock
+    private UnidadGrupoRepository unidadGrupoRepository;
+
+    @Mock
+    private TemaRepository temaRepository;
+
+    @Mock
+    private UnidadRepository unidadRepository;
 
     @InjectMocks
     private PreguntaServiceImpl preguntaService;
@@ -180,6 +199,117 @@ class PreguntaServiceImplTest {
                         .build());
 
         assertEquals("CON-UUID", result.getConceptoId());
+    }
+
+    @Test
+    void savePregunta_materializesMissingBaseConceptForGroupConcept() {
+        Grupo grupo = new Grupo();
+        grupo.setId("G-1");
+        UnidadGrupo unidadGrupo = new UnidadGrupo();
+        unidadGrupo.setGrupo(grupo);
+        Tema temaBase = new Tema();
+        temaBase.setId("TEMA-BASE");
+        TemaGrupo temaGrupo = new TemaGrupo();
+        temaGrupo.setUnidadGrupo(unidadGrupo);
+        temaGrupo.setTemaOrigen(temaBase);
+        ConceptoGrupo conceptoGrupo = new ConceptoGrupo();
+        conceptoGrupo.setId("96024cc8-42d6-4c72-bac4-c2fbf2e2caca");
+        conceptoGrupo.setNombre("Principios de IA");
+        conceptoGrupo.setTemaGrupo(temaGrupo);
+
+        when(conceptoGrupoRepository.findById(conceptoGrupo.getId()))
+                .thenReturn(Optional.of(conceptoGrupo));
+        when(conceptoRepository.findFirstByNombreIgnoreCaseAndTemaId(
+                "Principios de IA", "TEMA-BASE"))
+                .thenReturn(Optional.empty());
+        when(conceptoRepository.save(any(Concepto.class)))
+                .thenAnswer(invocation -> {
+                    Concepto concepto = invocation.getArgument(0);
+                    concepto.setId("CON-NEW");
+                    return concepto;
+                });
+        when(conceptoGrupoRepository.save(conceptoGrupo))
+                .thenReturn(conceptoGrupo);
+        when(preguntaRepository.existsById("P-MISSING-ORIGIN"))
+                .thenReturn(false);
+        when(preguntaRepository.save(any(Pregunta.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        PreguntaDTO result = preguntaService.savePregunta(
+                PreguntaDTO.builder()
+                        .id("P-MISSING-ORIGIN")
+                        .descripcion("Pregunta")
+                        .conceptoId(conceptoGrupo.getId())
+                        .grupoId("G-1")
+                        .build());
+
+        assertEquals("CON-NEW", result.getConceptoId());
+        assertEquals("CON-NEW", conceptoGrupo.getConceptoOrigen().getId());
+    }
+
+    @Test
+    void savePregunta_materializesMissingTopicAndUnitOrigins() {
+        Materia materia = new Materia();
+        materia.setId("MAT-1");
+        Grupo grupo = new Grupo();
+        grupo.setId("G-1");
+        grupo.setMateria(materia);
+        UnidadGrupo unidadGrupo = new UnidadGrupo();
+        unidadGrupo.setNombre("Unidad IA");
+        unidadGrupo.setGrupo(grupo);
+        TemaGrupo temaGrupo = new TemaGrupo();
+        temaGrupo.setNombre("Introducción");
+        temaGrupo.setUnidadGrupo(unidadGrupo);
+        ConceptoGrupo conceptoGrupo = new ConceptoGrupo();
+        conceptoGrupo.setId("CG-SIN-ORIGEN");
+        conceptoGrupo.setNombre("Principios de IA");
+        conceptoGrupo.setTemaGrupo(temaGrupo);
+
+        when(conceptoGrupoRepository.findById(conceptoGrupo.getId()))
+                .thenReturn(Optional.of(conceptoGrupo));
+        when(unidadRepository.findFirstByNombreIgnoreCaseAndMateriaId(
+                "Unidad IA", "MAT-1"))
+                .thenReturn(Optional.empty());
+        when(unidadRepository.save(any(Unidad.class)))
+                .thenAnswer(invocation -> {
+                    Unidad unidad = invocation.getArgument(0);
+                    unidad.setId("UNIDAD-BASE");
+                    return unidad;
+                });
+        when(temaRepository.findFirstByNombreIgnoreCaseAndUnidadId(
+                "Introducción", "UNIDAD-BASE"))
+                .thenReturn(Optional.empty());
+        when(temaRepository.save(any(Tema.class)))
+                .thenAnswer(invocation -> {
+                    Tema tema = invocation.getArgument(0);
+                    tema.setId("TEMA-BASE-NUEVO");
+                    return tema;
+                });
+        when(conceptoRepository.findFirstByNombreIgnoreCaseAndTemaId(
+                "Principios de IA", "TEMA-BASE-NUEVO"))
+                .thenReturn(Optional.empty());
+        when(conceptoRepository.save(any(Concepto.class)))
+                .thenAnswer(invocation -> {
+                    Concepto concepto = invocation.getArgument(0);
+                    concepto.setId("CON-BASE-NUEVO");
+                    return concepto;
+                });
+        when(preguntaRepository.existsById("P-HIERARCHY"))
+                .thenReturn(false);
+        when(preguntaRepository.save(any(Pregunta.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        PreguntaDTO result = preguntaService.savePregunta(
+                PreguntaDTO.builder()
+                        .id("P-HIERARCHY")
+                        .descripcion("Pregunta")
+                        .conceptoId(conceptoGrupo.getId())
+                        .grupoId("G-1")
+                        .build());
+
+        assertEquals("CON-BASE-NUEVO", result.getConceptoId());
+        assertEquals("UNIDAD-BASE", unidadGrupo.getUnidadOrigen().getId());
+        assertEquals("TEMA-BASE-NUEVO", temaGrupo.getTemaOrigen().getId());
     }
 
     // Input: concepto CG-1 pertenece al grupo G-2 pero se usa en G-1.

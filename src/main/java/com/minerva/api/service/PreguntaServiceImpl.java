@@ -1,6 +1,7 @@
 package com.minerva.api.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 import com.minerva.api.dto.PreguntaDTO;
 import com.minerva.api.mapper.Mapper;
 import com.minerva.api.model.Concepto;
+import com.minerva.api.model.Tema;
+import com.minerva.api.model.Unidad;
 import com.minerva.api.model.Opcion;
 import com.minerva.api.model.Pregunta;
 import com.minerva.api.model.QuizXPregunta;
@@ -22,6 +25,10 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.minerva.api.model.ConceptoGrupo;
 import com.minerva.api.repository.ConceptoGrupoRepository;
+import com.minerva.api.repository.TemaGrupoRepository;
+import com.minerva.api.repository.UnidadGrupoRepository;
+import com.minerva.api.repository.TemaRepository;
+import com.minerva.api.repository.UnidadRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +39,10 @@ public class PreguntaServiceImpl implements PreguntaService {
     private final OpcionRepository opcionRepository;
     private final QuizXPreguntaRepository quizXPreguntaRepository;
     private final ConceptoGrupoRepository conceptoGrupoRepository;
+    private final TemaGrupoRepository temaGrupoRepository;
+    private final UnidadGrupoRepository unidadGrupoRepository;
+    private final TemaRepository temaRepository;
+    private final UnidadRepository unidadRepository;
 
     private Concepto resolverConcepto(String conceptoId, String grupoId) {
         if (conceptoId == null || conceptoId.isBlank()) {
@@ -55,8 +66,10 @@ public class PreguntaServiceImpl implements PreguntaService {
                         "El concepto no pertenece al grupo del quiz.");
             }
             if (conceptoGrupo.getConceptoOrigen() == null) {
-                throw new EntityNotFoundException(
-                        "El concepto de grupo no tiene concepto base asociado.");
+                Concepto materializado =
+                        materializarConceptoBase(conceptoGrupo);
+                conceptoGrupo.setConceptoOrigen(materializado);
+                conceptoGrupoRepository.save(conceptoGrupo);
             }
             return conceptoGrupo.getConceptoOrigen();
         }
@@ -74,6 +87,69 @@ public class PreguntaServiceImpl implements PreguntaService {
                     "El concepto no pertenece al currículo del grupo.");
         }
         return concepto;
+    }
+
+    private Concepto materializarConceptoBase(
+            ConceptoGrupo conceptoGrupo) {
+        var temaGrupo = conceptoGrupo.getTemaGrupo();
+        Tema temaBase = temaGrupo.getTemaOrigen();
+        if (temaBase == null) {
+            var unidadGrupo = temaGrupo.getUnidadGrupo();
+            Unidad unidadBase = unidadGrupo.getUnidadOrigen();
+            if (unidadBase == null) {
+                var materia = unidadGrupo.getMateria() != null
+                        ? unidadGrupo.getMateria()
+                        : unidadGrupo.getGrupo().getMateria();
+                if (materia == null) {
+                    throw new EntityNotFoundException(
+                            "La unidad del grupo no tiene materia base asociada.");
+                }
+                unidadBase = unidadRepository
+                        .findFirstByNombreIgnoreCaseAndMateriaId(
+                                unidadGrupo.getNombre(),
+                                materia.getId())
+                        .orElseGet(() -> {
+                            Unidad unidad = new Unidad();
+                            unidad.setId(UUID.randomUUID().toString());
+                            unidad.setNombre(unidadGrupo.getNombre());
+                            unidad.setMateria(materia);
+                            unidad.setActivo(true);
+                            return unidadRepository.save(unidad);
+                        });
+                unidadGrupo.setUnidadOrigen(unidadBase);
+                unidadGrupoRepository.save(unidadGrupo);
+            }
+
+            final Unidad resolvedUnidadBase = unidadBase;
+            temaBase = temaRepository
+                    .findFirstByNombreIgnoreCaseAndUnidadId(
+                            temaGrupo.getNombre(),
+                            resolvedUnidadBase.getId())
+                    .orElseGet(() -> {
+                        Tema tema = new Tema();
+                        tema.setId(UUID.randomUUID().toString());
+                        tema.setNombre(temaGrupo.getNombre());
+                        tema.setUnidad(resolvedUnidadBase);
+                        tema.setActivo(true);
+                        return temaRepository.save(tema);
+                    });
+            temaGrupo.setTemaOrigen(temaBase);
+            temaGrupoRepository.save(temaGrupo);
+        }
+
+        final Tema resolvedTemaBase = temaBase;
+        return conceptoRepository
+                .findFirstByNombreIgnoreCaseAndTemaId(
+                        conceptoGrupo.getNombre(),
+                        resolvedTemaBase.getId())
+                .orElseGet(() -> {
+                    Concepto concepto = new Concepto();
+                    concepto.setId(UUID.randomUUID().toString());
+                    concepto.setNombre(conceptoGrupo.getNombre());
+                    concepto.setTema(resolvedTemaBase);
+                    concepto.setActivo(true);
+                    return conceptoRepository.save(concepto);
+                });
     }
 
     @Override

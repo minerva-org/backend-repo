@@ -1,6 +1,7 @@
 package com.minerva.api.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,6 +13,9 @@ import com.minerva.api.model.Concepto;
 public interface ConceptoRepository extends JpaRepository<Concepto, String> {
     
     List<Concepto> findByTemaId(String temaId);
+
+    Optional<Concepto> findFirstByNombreIgnoreCaseAndTemaId(
+            String nombre, String temaId);
 
     boolean existsByNombreIgnoreCaseAndTemaId(String nombre, String conceptoId);
 
