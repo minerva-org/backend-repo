@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.minerva.api.User.User;
+import com.minerva.api.User.Roles;
 import com.minerva.api.dto.EstadisticasDTO.*;
 import com.minerva.api.model.Grupo;
 import com.minerva.api.model.Intento;
@@ -28,6 +29,7 @@ import com.minerva.api.repository.GrupoRepository;
 import com.minerva.api.repository.IntentoDetalleRepository;
 import com.minerva.api.repository.IntentoRepository;
 import com.minerva.api.repository.QuizRepository;
+import com.minerva.api.repository.PlantelRepository;
 import com.minerva.api.security.RolAutorizacion;
 
 @Service
@@ -40,17 +42,20 @@ public class EstadisticasServiceImpl implements EstadisticasService {
     private final IntentoRepository intentoRepository;
     private final IntentoDetalleRepository detalleRepository;
     private final QuizRepository quizRepository;
+    private final PlantelRepository plantelRepository;
 
     public EstadisticasServiceImpl(
             GrupoRepository grupoRepository,
             IntentoRepository intentoRepository,
             IntentoDetalleRepository detalleRepository,
-            QuizRepository quizRepository) {
+            QuizRepository quizRepository,
+            PlantelRepository plantelRepository) {
 
         this.grupoRepository = grupoRepository;
         this.intentoRepository = intentoRepository;
         this.detalleRepository = detalleRepository;
         this.quizRepository = quizRepository;
+        this.plantelRepository = plantelRepository;
     }
 
     @Override
@@ -225,6 +230,47 @@ public class EstadisticasServiceImpl implements EstadisticasService {
                             quiz.getNombre(),
                             quiz.getFechaFinalizacion(),
                             redondear(m.porcentajeAprobacion()),
+                            lista.size());
+                })
+                .toList();
+    }
+
+    @Override
+    public List<EstadisticasTendenciaDTO> obtenerTendenciaAprobacionGrupo(
+            String grupoId,
+            User usuario) {
+        obtenerEstadisticasGrupo(grupoId, usuario);
+
+        List<Intento> intentos = intentoRepository
+                .findByQuiz_Grupo_IdInAndFechaEnvioIsNotNull(List.of(grupoId));
+        if (intentos.isEmpty()) {
+            return List.of();
+        }
+        Map<String, List<IntentoDetalle>> detallesPorIntento = agruparDetalles(
+                detalleRepository.findByIntento_IdIn(idsDe(intentos)));
+        Instant ahora = Instant.now();
+
+        return intentos.stream()
+                .filter(intento -> intento.getQuiz() != null)
+                .collect(Collectors.groupingBy(
+                        intento -> intento.getQuiz().getId()))
+                .values().stream()
+                .filter(lista -> {
+                    Instant fin = fechaFin(lista);
+                    return fin != null && !fin.isAfter(ahora);
+                })
+                .sorted(Comparator.comparing(this::fechaFin).reversed())
+                .limit(QUIZZES_EN_TENDENCIA)
+                .sorted(Comparator.comparing(this::fechaFin))
+                .map(lista -> {
+                    Quiz quiz = lista.get(0).getQuiz();
+                    Metricas metricas = calcularMetricas(
+                            lista, detallesPorIntento);
+                    return new EstadisticasTendenciaDTO(
+                            quiz.getId(),
+                            quiz.getNombre(),
+                            quiz.getFechaFinalizacion(),
+                            redondear(metricas.porcentajeAprobacion()),
                             lista.size());
                 })
                 .toList();
@@ -422,13 +468,70 @@ public class EstadisticasServiceImpl implements EstadisticasService {
                     return new EstadisticasPlantelDTO(
                             plantel.getId(),
                             plantel.getNombre(),
+                            redondear(m.promedioGeneral()),
                             redondear(m.porcentajeAprobacion()),
+                            redondear(m.porcentajeReprobacion()),
+                            redondear(m.indiceFocoLimpio()),
                             m.alumnosEvaluados().size(),
                             lista.size(),
-                            m.incidenciasFoco());
+                            m.incidenciasFoco(),
+                            m.intentosAprobados(),
+                            m.intentosReprobados());
                 })
                 .sorted(Comparator.comparing(EstadisticasPlantelDTO::nombrePlantel))
                 .toList();
+    }
+
+    @Override
+    public EstadisticasPlantelDTO obtenerEstadisticasPlantel(
+            Long plantelId,
+            User usuario) {
+        if (usuario == null || usuario.getPersona() == null) {
+            throw new AccessDeniedException("Usuario no autenticado.");
+        }
+
+        Plantel plantel = plantelRepository.findById(plantelId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "No se encontró el plantel solicitado."));
+        var rol = RolAutorizacion.obtenerRol(usuario);
+        boolean accesoInstitucional = rol == Roles.ADMIN
+                || rol == Roles.DEV
+                || rol == Roles.DIRECTOR_GENERAL;
+        boolean accesoAlPlantel = (rol == Roles.COORDINADOR
+                || rol == Roles.DIRECTOR_PLANTEL)
+                && usuario.getPersona().getPlantel() != null
+                && plantelId.equals(usuario.getPersona().getPlantel().getId());
+        if (!accesoInstitucional && !accesoAlPlantel) {
+            throw new AccessDeniedException(
+                    "No tienes permiso para consultar este plantel.");
+        }
+
+        List<Grupo> grupos = grupoRepository.findByPlantelId(plantelId);
+        if (grupos.isEmpty()) {
+            return estadisticasPlantelVacias(plantel);
+        }
+        List<Intento> intentos = intentoRepository
+                .findByQuiz_Grupo_IdInAndFechaEnvioIsNotNull(
+                        grupos.stream().map(Grupo::getId).toList());
+        if (intentos.isEmpty()) {
+            return estadisticasPlantelVacias(plantel);
+        }
+        Map<String, List<IntentoDetalle>> detalles = agruparDetalles(
+                detalleRepository.findByIntento_IdIn(idsDe(intentos)));
+        Metricas metricas = calcularMetricas(intentos, detalles);
+        return new EstadisticasPlantelDTO(
+                plantel.getId(),
+                plantel.getNombre(),
+                redondear(metricas.promedioGeneral()),
+                redondear(metricas.porcentajeAprobacion()),
+                redondear(metricas.porcentajeReprobacion()),
+                redondear(metricas.indiceFocoLimpio()),
+                metricas.alumnosEvaluados().size(),
+                intentos.size(),
+                metricas.incidenciasFoco(),
+                metricas.intentosAprobados(),
+                metricas.intentosReprobados());
     }
 
     // Permisos de las estadisticas
@@ -455,7 +558,7 @@ public class EstadisticasServiceImpl implements EstadisticasService {
                 grupoRepository.findByPlantelId(
                         persona.getPlantel().getId());
 
-            case DEV, DIRECTOR_GENERAL ->
+            case ADMIN, DEV, DIRECTOR_GENERAL ->
                 grupoRepository.findAll();
 
             default ->
@@ -692,6 +795,13 @@ public class EstadisticasServiceImpl implements EstadisticasService {
                 grupo.getSemestre(),
                 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0);
+    }
+
+    private EstadisticasPlantelDTO estadisticasPlantelVacias(Plantel plantel) {
+        return new EstadisticasPlantelDTO(
+                plantel.getId(),
+                plantel.getNombre(),
+                0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     private double redondear(double valor) {

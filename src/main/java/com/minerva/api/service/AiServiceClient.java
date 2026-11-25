@@ -80,6 +80,24 @@ public class AiServiceClient {
         }
     }
 
+    public JsonNode consultMetricsAssistant(JsonNode request) {
+        try {
+            JsonNode response = restClient.post()
+                    .uri("/v1/metrics-assistant")
+                    .body(request)
+                    .retrieve()
+                    .body(JsonNode.class);
+            if (response == null || !response.isObject()) {
+                throw new AiServiceUnavailableException(
+                        "AI-Service returned an invalid Minerva response.");
+            }
+            return response;
+        } catch (RestClientException exception) {
+            throw new AiServiceUnavailableException(
+                    "Could not consult Minerva metrics assistant.", exception);
+        }
+    }
+
     public void deleteTask(String tareaId) {
         try {
             restClient.delete()

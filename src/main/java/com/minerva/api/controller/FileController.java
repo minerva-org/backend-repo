@@ -7,6 +7,8 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,17 +40,18 @@ public class FileController {
         }
 
         @GetMapping("/{fileId}")
-        public ResponseEntity<byte[]> download(@PathVariable UUID fileId) {
-                FileStorageService.StoredFile file = fileStorageService.download(fileId);
+        public ResponseEntity<Resource> download(@PathVariable UUID fileId) {
+                FileStorageService.StoredFileStream file =
+                                fileStorageService.downloadStream(fileId);
                 ContentDisposition disposition = ContentDisposition.attachment()
                                 .filename(file.fileName(), StandardCharsets.UTF_8)
                                 .build();
 
                 return ResponseEntity.ok()
                                 .contentType(MediaType.APPLICATION_PDF)
-                                .contentLength(file.content().length)
+                                .contentLength(file.contentLength())
                                 .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
-                                .body(file.content());
+                                .body(new InputStreamResource(file.content()));
         }
 
         @DeleteMapping("/{fileId}")

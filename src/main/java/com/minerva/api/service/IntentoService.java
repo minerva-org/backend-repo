@@ -14,7 +14,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.minerva.api.dto.IntentoResponse;
+import com.minerva.api.dto.IntentoDTO;
+import com.minerva.api.dto.IntentoEstadoDTO;
 import com.minerva.api.dto.OpcionAlumnoDTO;
 import com.minerva.api.dto.PreguntaAlumnoDTO;
 import com.minerva.api.dto.RespuestaRequestDTO;
@@ -51,7 +52,7 @@ public class IntentoService {
     }
 
     @Transactional
-    public IntentoResponse iniciarOReanudar(String quizId, String alumnoId) {
+    public IntentoDTO iniciarOReanudar(String quizId, String alumnoId) {
         Quiz quiz = quizRepository.findById(quizId)
                 .orElseThrow(() -> new EntityNotFoundException("Quiz no encontrado con el id: " + quizId));
 
@@ -90,7 +91,7 @@ public class IntentoService {
     }
 
     @Transactional
-    public IntentoResponse responder(String quizId, String intentoId, String alumnoId,
+    public IntentoDTO responder(String quizId, String intentoId, String alumnoId,
             RespuestaRequestDTO body) {
         Intento intento = cargarIntento(quizId, intentoId, alumnoId);
         Quiz quiz = intento.getQuiz();
@@ -145,6 +146,16 @@ public class IntentoService {
                 detalleRepository.countByIntentoId(intentoId));
     }
 
+    @Transactional(readOnly = true)
+    public List<IntentoEstadoDTO> misIntentos(String alumnoId) {
+        return intentoRepository.findByAlumnoId(alumnoId).stream()
+                .map(i -> new IntentoEstadoDTO(
+                        i.getQuiz().getId(),
+                        i.getId(),
+                        i.getFechaEnvio() != null))
+                .toList();
+    }
+
     private Intento cargarIntento(String quizId, String intentoId, String alumnoId) {
         Intento intento = intentoRepository.findById(intentoId)
                 .orElseThrow(() -> new EntityNotFoundException("Intento no encontrado con el id: " + intentoId));
@@ -193,14 +204,14 @@ public class IntentoService {
         return fila.get(0).getPregunta();
     }
 
-    private IntentoResponse estado(Intento intento) {
+    private IntentoDTO estado(Intento intento) {
         String quizId = intento.getQuiz().getId();
         int respondidas = (int) detalleRepository.countByIntentoId(intento.getId());
         int total = (int) quizXPreguntaRepository.countByQuizId(quizId);
         return construirRespuesta(intento, respondidas, total);
     }
 
-    private IntentoResponse construirRespuesta(Intento intento, int respondidas, int total) {
+    private IntentoDTO construirRespuesta(Intento intento, int respondidas, int total) {
         Quiz quiz = intento.getQuiz();
         boolean finalizado = intento.getFechaEnvio() != null;
         PreguntaAlumnoDTO actual = null;
@@ -217,7 +228,7 @@ public class IntentoService {
             actual = new PreguntaAlumnoDTO(p.getId(), p.getDescripcion(), respondidas + 1, total, opciones);
         }
 
-        return new IntentoResponse(intento.getId(), quiz.getId(), quiz.getFechaFinalizacion(),
+        return new IntentoDTO(intento.getId(), quiz.getId(), quiz.getFechaFinalizacion(),
                 finalizado, actual);
     }
 }

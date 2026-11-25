@@ -7,13 +7,15 @@ import com.minerva.api.model.SolicitudesGrupos;
 
 public class MapperSolicitudesGrupos {
 
-    public static SolicitudesGruposResponseDTO toDTO(SolicitudesGrupos solicitud, Alumno alumno, Grupo grupo){
-        if(alumno == null || grupo == null || solicitud == null) return null;
+    public static SolicitudesGruposResponseDTO toDTO(SolicitudesGrupos solicitud, Alumno alumno, Grupo grupo) {
+        if (alumno == null || grupo == null || solicitud == null)
+            return null;
 
-        String nombre = alumno.getNombre() + " " + alumno.getApellidoPaterno(); 
+        String nombre = alumno.getNombre() + " " + alumno.getApellidoPaterno();
         return new SolicitudesGruposResponseDTO(
-            solicitud.getId(),
-            alumno.getId(), nombre,
-            grupo.getId(), grupo.getNombre());
+                solicitud.getId(),
+                grupo.getId(), grupo.getNombre(),
+                alumno.getId(), nombre);
+
     }
 }

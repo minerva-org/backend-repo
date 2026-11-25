@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.minerva.api.User.User;
 import com.minerva.api.dto.SolicitudesGruposRequestDTO;
 import com.minerva.api.dto.SolicitudesGruposResponseDTO;
-import com.minerva.api.service.SolicitudesGruposeService;
+import com.minerva.api.service.SolicitudesGrupoService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -25,19 +25,22 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("api/solicitud")
 public class SolicitudGrupoController {
 
-    private final SolicitudesGruposeService solicitudService;
-    
+    private final SolicitudesGrupoService solicitudService;
+
     @GetMapping("/solicitudes")
-    public ResponseEntity<List<SolicitudesGruposResponseDTO>> getSolicitudesMisGrupos(Authentication authentication){
+    public ResponseEntity<List<SolicitudesGruposResponseDTO>> getSolicitudesMisGrupos(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         String id = user.getPersona().getId();
         return ResponseEntity.ok(solicitudService.findByDocenteId(id));
     }
 
     @PostMapping
-    public ResponseEntity<SolicitudesGruposResponseDTO> crear(@RequestBody SolicitudesGruposRequestDTO request) {
-        SolicitudesGruposResponseDTO creada = solicitudService.saveSolicitud(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(creada);
+    public ResponseEntity<SolicitudesGruposResponseDTO> crear(
+            @RequestBody SolicitudesGruposRequestDTO request,
+            Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(solicitudService.saveSolicitud(request.grupoId(), user.getPersona().getId()));
     }
 
     @PostMapping("/{solicitudId}/aceptar")
@@ -55,6 +58,5 @@ public class SolicitudGrupoController {
         solicitudService.rechazar(solicitudId, id);
         return ResponseEntity.noContent().build();
     }
-
 
 }

@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.minerva.api.dto.AlumnoDesgloseDTO;
@@ -31,7 +30,8 @@ public class ResumenVistasController {
     }
 
     @GetMapping("/plantel/{plantelId}")
-    public ResponseEntity<List<ResumenGeneralPlantelDTO>> resumenesPlantel(@RequestParam String plantelId){
+    public ResponseEntity<List<ResumenGeneralPlantelDTO>> resumenesPlantel(
+            @PathVariable String plantelId) {
         return ResponseEntity.ok(resumenVistasService.generalPorPlantel(plantelId));
     }
     
@@ -60,9 +60,10 @@ public class ResumenVistasController {
         return ResponseEntity.ok(resumenVistasService.alumnosPorGrupo(grupoId));
     }
 
-    @GetMapping("/alumnos/{alumnoId}")
-    public ResponseEntity<AlumnoDesgloseDTO> alumno(@PathVariable String quizId,
-                                                    @PathVariable String alumnoId) {
+    @GetMapping("/alumnos/quiz/{quizId}/{alumnoId}")
+    public ResponseEntity<AlumnoDesgloseDTO> alumno(
+            @PathVariable String quizId,
+            @PathVariable String alumnoId) {
         return ResponseEntity.ok(resumenVistasService.alumno(quizId, alumnoId));
     }
 }
