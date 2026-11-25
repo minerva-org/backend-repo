@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.LinkedHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +18,9 @@ import com.minerva.api.User.User;
 import com.minerva.api.User.Roles;
 import com.minerva.api.dto.MetricsAssistantRequestDTO;
 import com.minerva.api.dto.MetricsAssistantResponseDTO;
+import com.minerva.api.dto.AlumnoDesgloseDTO;
+import com.minerva.api.dto.EstadisticasDTO.EstadisticasDocentesDTO;
+import com.minerva.api.dto.EstadisticasDTO.EstadisticasGrupoResumenDTO;
 import com.minerva.api.security.RolAutorizacion;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -67,13 +71,13 @@ public class MetricsAssistantService {
         JsonNode response = aiServiceClient.consultMetricsAssistant(context);
         JsonNode answer = response.get("answer");
         JsonNode model = response.get("model");
-        if (answer == null || !answer.isTextual() || answer.asText().isBlank()) {
+        if (answer == null || !answer.isString() || answer.asString().isBlank()) {
             throw new AiServiceClient.AiServiceUnavailableException(
                     "AI-Service returned an invalid metrics assistant response.");
         }
         return new MetricsAssistantResponseDTO(
-                answer.asText(),
-                model != null && model.isTextual() ? model.asText() : "unknown");
+                answer.asString(),
+                model != null && model.isString() ? model.asString() : "unknown");
     }
 
     private List<Map<String, String>> buildMessages(
@@ -138,14 +142,14 @@ public class MetricsAssistantService {
         statistics.put("entityName", quiz.nombreQuiz());
         statistics.set("metrics", objectMapper.valueToTree(quiz));
         try {
-            statistics.set("summary",
+            statistics.set("summary", sanitizeQuizSummary(
                     objectMapper.valueToTree(
-                            resumenVistasService.generalPorQuiz(quizId)));
+                            resumenVistasService.generalPorQuiz(quizId))));
         } catch (EntityNotFoundException exception) {
             statistics.putNull("summary");
         }
-        statistics.set("students",
-                objectMapper.valueToTree(resumenVistasService.alumnos(quizId)));
+        statistics.set("students", sanitizeStudents(
+                resumenVistasService.alumnos(quizId)));
         return statistics;
     }
 
@@ -179,18 +183,98 @@ public class MetricsAssistantService {
                 objectMapper.valueToTree(
                         estadisticasService.obtenerEstadisticasMateria(user)));
         statistics.set("teachers",
-                objectMapper.valueToTree(
-                        estadisticasService.obtenerEstadisticasDocentes(user)));
+                sanitizeTeachers(estadisticasService
+                        .obtenerEstadisticasDocentes(user)));
         statistics.set("trend",
                 objectMapper.valueToTree(
                         estadisticasService.obtenerTendenciaAprobacion(user)));
         statistics.set("groups",
-                objectMapper.valueToTree(
-                        estadisticasService.obtenerResumenGrupos(user)));
+                sanitizeGroups(estadisticasService
+                        .obtenerResumenGrupos(user)));
         statistics.set("campuses",
                 objectMapper.valueToTree(
                         estadisticasService.obtenerEstadisticasPlanteles(user)));
         return statistics;
+    }
+
+    private JsonNode sanitizeQuizSummary(JsonNode summary) {
+        ObjectNode sanitized = objectMapper.createObjectNode();
+        Set<String> allowed = Set.of(
+                "quizId", "grupoClave", "grupoNombre",
+                "numPreguntas", "numIntentos", "numRespondieron",
+                "numEnCurso", "numAprobados", "numReprobados",
+                "promedio", "calificacionMaxima", "calificacionMinima",
+                "duracionPromedioSegundos", "plantelNombre");
+        for (String name : summary.propertyNames()) {
+            if (allowed.contains(name)) {
+                sanitized.set(name, summary.get(name));
+            }
+        }
+        return sanitized;
+    }
+
+    private JsonNode sanitizeStudents(
+            List<AlumnoDesgloseDTO> students) {
+        var sanitized = objectMapper.createArrayNode();
+        int index = 1;
+        for (var student : students) {
+            ObjectNode item = objectMapper.createObjectNode();
+            item.put("studentOrdinal", index++);
+            item.put("finalizado", student.finalizado());
+            item.put("correctas", student.correctas());
+            item.put("total", student.total());
+            item.put("calificacion", student.calificacion());
+            var answers = objectMapper.createArrayNode();
+            for (var answer : student.respuestas()) {
+                ObjectNode sanitizedAnswer = objectMapper.createObjectNode();
+                sanitizedAnswer.put("numero", answer.numero());
+                sanitizedAnswer.put("pregunta", answer.pregunta());
+                sanitizedAnswer.put(
+                        "conceptoDescripcion",
+                        answer.conceptoDescripcion());
+                sanitizedAnswer.put(
+                        "opcionElegida",
+                        answer.opcionElegida());
+                sanitizedAnswer.put(
+                        "opcionCorrecta",
+                        answer.opcionCorrecta());
+                sanitizedAnswer.put("resultado", answer.resultado());
+                sanitizedAnswer.put(
+                        "cambiosPantalla",
+                        answer.cambiosPantalla());
+                answers.add(sanitizedAnswer);
+            }
+            item.set("respuestas", answers);
+            sanitized.add(item);
+        }
+        return sanitized;
+    }
+
+    private JsonNode sanitizeTeachers(
+            List<EstadisticasDocentesDTO> teachers) {
+        return objectMapper.valueToTree(teachers.stream()
+                .map(teacher -> Map.of(
+                        "quizzesAplicados", teacher.quizzesAplicados(),
+                        "intentosFinalizados", teacher.intentosFinalizados()))
+                .toList());
+    }
+
+    private JsonNode sanitizeGroups(
+            List<EstadisticasGrupoResumenDTO> groups) {
+        var sanitized = new ArrayList<Map<String, Object>>();
+        for (var group : groups) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("grupo", group.nombreGrupo());
+            item.put("claveGrupo", group.claveGrupo());
+            item.put("semestre", group.semestre());
+            item.put("materia", group.nombreMateria());
+            item.put("porcentajeAprobacion", group.porcentajeAprobacion());
+            item.put("alumnosEvaluados", group.alumnosEvaluados());
+            item.put("intentosFinalizados", group.intentosFinalizados());
+            item.put("incidenciasFoco", group.incidenciasFoco());
+            sanitized.add(item);
+        }
+        return objectMapper.valueToTree(sanitized);
     }
 
     private String requiredId(String entityId, String scope) {
