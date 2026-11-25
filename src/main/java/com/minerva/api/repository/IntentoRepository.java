@@ -16,6 +16,8 @@ public interface IntentoRepository extends JpaRepository<Intento, String> {
 
     List<Intento> findByQuizId(String quizId);
 
+    List<Intento> findByAlumnoId(String alumnoId);
+
     @EntityGraph(attributePaths = {
             "quiz",
             "quiz.grupo",
