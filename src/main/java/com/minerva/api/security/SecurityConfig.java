@@ -81,6 +81,9 @@ public class SecurityConfig {
                                                                 "DEV", "ROLE_DEV",
                                                                 "DIRECTOR_GENERAL", "ROLE_DIRECTOR_GENERAL",
                                                                 "DIRECTOR_PLANTEL", "ROLE_DIRECTOR_PLANTEL")
+
+                                                .requestMatchers(HttpMethod.POST, "/api/solicitud")
+                                                .hasAnyAuthority("ALUMNO", "ROLE_ALUMNO", "DEV", "ROLE_DEV")
                                                 .requestMatchers(HttpMethod.GET, "/api/solicitud/solicitudes")
                                                 .hasAnyAuthority(
                                                                 "DEV", "ROLE_DEV",
