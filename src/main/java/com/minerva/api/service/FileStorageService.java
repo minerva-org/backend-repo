@@ -47,6 +47,10 @@ public class FileStorageService {
 
     private static final long MAX_FILE_SIZE = 10L * 1024 * 1024;
     private static final byte[] PDF_SIGNATURE = "%PDF-".getBytes(StandardCharsets.US_ASCII);
+    private static final byte[] ZIP_SIGNATURE = {0x50, 0x4b, 0x03, 0x04};
+    private static final String PDF_CONTENT_TYPE = "application/pdf";
+    private static final String PPTX_CONTENT_TYPE =
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation";
     private static final String ORIGINAL_FILENAME_METADATA = "original-filename-b64";
     private static final String DEFAULT_DOCUMENTS_PREFIX = "documentos/";
 
@@ -77,15 +81,21 @@ public class FileStorageService {
 
     public FileDTO upload(MultipartFile file, String uploadedBy) {
         if (file == null || file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selecciona un archivo PDF.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Selecciona un archivo PDF o PPTX.");
         }
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new ResponseStatusException(HttpStatusCode.valueOf(413), "El tamaño máximo permitido es 10 MiB.");
         }
 
         String originalName = file.getOriginalFilename() == null ? "document.pdf" : file.getOriginalFilename();
-        if (!originalName.toLowerCase(Locale.ROOT).endsWith(".pdf")) {
-            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Solo se permiten archivos PDF.");
+        String normalizedName = originalName.toLowerCase(Locale.ROOT);
+        boolean powerpoint = normalizedName.endsWith(".pptx");
+        boolean pdf = normalizedName.endsWith(".pdf");
+        if (!pdf && !powerpoint) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                    "Solo se permiten archivos PDF o PPTX.");
         }
 
         final byte[] content;
@@ -94,9 +104,14 @@ public class FileStorageService {
         } catch (java.io.IOException exception) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se pudo leer el archivo.");
         }
-        if (!hasPdfSignature(content)) {
-            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "El contenido no parece ser un PDF válido.");
+        if (!(powerpoint ? hasZipSignature(content) : hasPdfSignature(content))) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                    powerpoint
+                            ? "El contenido no parece ser una presentación PPTX válida."
+                            : "El contenido no parece ser un PDF válido.");
         }
+        String contentType = powerpoint ? PPTX_CONTENT_TYPE : PDF_CONTENT_TYPE;
 
         String checksum = sha256Hex(content);
         Optional<Documento> documentoExistente =
@@ -110,7 +125,8 @@ public class FileStorageService {
         }
 
         UUID fileId = UUID.randomUUID();
-        String objectKey = documentsPrefix + fileId + ".pdf";
+        String extension = powerpoint ? ".pptx" : ".pdf";
+        String objectKey = documentsPrefix + fileId + extension;
         String encodedName = Base64.getUrlEncoder().withoutPadding()
                 .encodeToString(originalName.getBytes(StandardCharsets.UTF_8));
 
@@ -119,7 +135,7 @@ public class FileStorageService {
                     PutObjectRequest.builder()
                             .bucket(bucket)
                             .key(objectKey)
-                            .contentType("application/pdf")
+                            .contentType(contentType)
                             .metadata(Map.of(ORIGINAL_FILENAME_METADATA, encodedName))
                             .build(),
                     RequestBody.fromBytes(content));
@@ -134,14 +150,14 @@ public class FileStorageService {
                     null,
                     objectKey,
                     originalName,
-                    "application/pdf",
+                    contentType,
                     content.length,
                     checksum,
                     uploadedBy,
                     null));
             return new FileDTO(UUID.fromString(documentoGuardado.id()),
                     originalName,
-                    "application/pdf",
+                    contentType,
                     content.length);
         } catch (RuntimeException exception) {
             // por si falla la BD, no dejamos el archivo huérfano en S3
@@ -325,7 +341,9 @@ public class FileStorageService {
 
 
     private static boolean matchesReference(String objectKey, String planToken, String fuenteToken) {
-        if (objectKey == null || !objectKey.toLowerCase(Locale.ROOT).endsWith(".pdf")) {
+        if (objectKey == null
+                || !(objectKey.toLowerCase(Locale.ROOT).endsWith(".pdf")
+                        || objectKey.toLowerCase(Locale.ROOT).endsWith(".pptx"))) {
             return false;
         }
 
@@ -362,6 +380,18 @@ public class FileStorageService {
         }
         for (int index = 0; index < PDF_SIGNATURE.length; index++) {
             if (content[index] != PDF_SIGNATURE[index]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean hasZipSignature(byte[] content) {
+        if (content.length < ZIP_SIGNATURE.length) {
+            return false;
+        }
+        for (int index = 0; index < ZIP_SIGNATURE.length; index++) {
+            if (content[index] != ZIP_SIGNATURE[index]) {
                 return false;
             }
         }

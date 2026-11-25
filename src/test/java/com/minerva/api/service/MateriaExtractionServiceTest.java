@@ -69,6 +69,25 @@ class MateriaExtractionServiceTest {
         verify(aiLaboratoryClient).extractDocument(file);
     }
 
+    @Test
+    void extractsValidPowerPointForAuthorizedRole() {
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "plan.pptx",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                new byte[]{0x50, 0x4b, 0x03, 0x04, 1, 2});
+        var tree = mapper.readTree(
+                "{\"units\":[{\"name\":\"Unidad\",\"topics\":[{\"name\":\"Tema\",\"concepts\":[{\"name\":\"Concepto\"}]}]}]}");
+        when(aiLaboratoryClient.extractDocument(file))
+                .thenReturn(ResponseEntity.ok(tree));
+
+        ResponseEntity<tools.jackson.databind.JsonNode> response =
+                service.extract(file, usuario(Roles.DIRECTOR_GENERAL));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(aiLaboratoryClient).extractDocument(file);
+    }
+
     // Input: mismo PDF válido enviado dos veces.
     // Resultado esperado: reutiliza caché y no llama AI dos veces.
     @Test

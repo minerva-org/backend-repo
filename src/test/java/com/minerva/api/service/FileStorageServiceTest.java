@@ -14,6 +14,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
@@ -171,6 +172,48 @@ class FileStorageServiceTest {
 
         assertEquals(documentoId, result.fileId().toString());
         verify(s3Client).putObject(any(PutObjectRequest.class), any(RequestBody.class));
+    }
+
+    @Test
+    void upload_shouldPersistPowerPointWithItsExtensionAndContentType() {
+        byte[] content = {0x50, 0x4b, 0x03, 0x04, 1, 2};
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "clase.pptx",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                content);
+        String documentoId = UUID.randomUUID().toString();
+        DocumentoDTO guardado = new DocumentoDTO(
+                documentoId,
+                "documentos/" + UUID.randomUUID() + ".pptx",
+                "clase.pptx",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                content.length,
+                "checksum",
+                "PERSONA-1",
+                null);
+
+        when(documentoRepository.findFirstByChecksumSha256OrderByCreatedAtDesc(any()))
+                .thenReturn(Optional.empty());
+        when(documentoService.saveDocumento(any(DocumentoDTO.class)))
+                .thenReturn(guardado);
+
+        FileDTO result = service.upload(file, "PERSONA-1");
+
+        assertEquals(documentoId, result.fileId().toString());
+        assertEquals(
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                result.contentType());
+        ArgumentCaptor<DocumentoDTO> documentCaptor =
+                ArgumentCaptor.forClass(DocumentoDTO.class);
+        verify(documentoService).saveDocumento(documentCaptor.capture());
+        assertTrue(documentCaptor.getValue().objectKey().endsWith(".pptx"));
+        ArgumentCaptor<PutObjectRequest> requestCaptor =
+                ArgumentCaptor.forClass(PutObjectRequest.class);
+        verify(s3Client).putObject(requestCaptor.capture(), any(RequestBody.class));
+        assertEquals(
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                requestCaptor.getValue().contentType());
     }
 
     // Input: PDF nuevo cuyo registro en BD falla.

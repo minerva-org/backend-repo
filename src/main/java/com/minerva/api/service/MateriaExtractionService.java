@@ -33,6 +33,7 @@ public class MateriaExtractionService {
     private static final long MAX_FILE_SIZE = 10L * 1024 * 1024;
     private static final byte[] PDF_SIGNATURE =
             "%PDF-".getBytes(StandardCharsets.US_ASCII);
+    private static final byte[] ZIP_SIGNATURE = {0x50, 0x4b, 0x03, 0x04};
     private static final int CACHE_LIMIT = 256;
 
     private final AiLaboratoryClient aiLaboratoryClient;
@@ -50,7 +51,7 @@ public class MateriaExtractionService {
 
     public ResponseEntity<JsonNode> extract(MultipartFile file, User usuario) {
         validarRol(usuario);
-        byte[] content = validarPdf(file);
+        byte[] content = validarDocumento(file);
         String checksum = sha256Hex(content);
 
         synchronized (extractionCache) {
@@ -64,7 +65,7 @@ public class MateriaExtractionService {
         }
 
         LOGGER.log(Level.INFO,
-                "Enviando PDF a AI-Service: checksum={0}, archivo={1}, bytes={2}, rol={3}",
+                "Enviando documento a AI-Service: checksum={0}, archivo={1}, bytes={2}, rol={3}",
                 new Object[]{
                         checksumPrefix(checksum),
                         file.getOriginalFilename(),
@@ -118,11 +119,11 @@ public class MateriaExtractionService {
         }
     }
 
-    private byte[] validarPdf(MultipartFile file) {
+    private byte[] validarDocumento(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Selecciona un archivo PDF.");
+                    "Selecciona un archivo PDF o PPTX.");
         }
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new ResponseStatusException(
@@ -130,11 +131,15 @@ public class MateriaExtractionService {
                     "El archivo supera el limite permitido de 10 MiB.");
         }
         String originalName = file.getOriginalFilename();
-        if (originalName == null
-                || !originalName.toLowerCase(Locale.ROOT).endsWith(".pdf")) {
+        String normalizedName = originalName == null
+                ? ""
+                : originalName.toLowerCase(Locale.ROOT);
+        boolean pdf = normalizedName.endsWith(".pdf");
+        boolean powerpoint = normalizedName.endsWith(".pptx");
+        if (!pdf && !powerpoint) {
             throw new ResponseStatusException(
                     HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-                    "Solo se permiten archivos PDF.");
+                    "Solo se permiten archivos PDF o PPTX.");
         }
 
         final byte[] content;
@@ -146,10 +151,14 @@ public class MateriaExtractionService {
                     "No se pudo leer el archivo.",
                     exception);
         }
-        if (!hasPdfSignature(content)) {
+        if (!(powerpoint
+                ? hasZipSignature(content)
+                : hasPdfSignature(content))) {
             throw new ResponseStatusException(
                     HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-                    "El contenido no parece ser un PDF valido.");
+                    powerpoint
+                            ? "El contenido no parece ser una presentacion PPTX valida."
+                            : "El contenido no parece ser un PDF valido.");
         }
         return content;
     }
@@ -171,6 +180,18 @@ public class MateriaExtractionService {
             }
         }
         return false;
+    }
+
+    private boolean hasZipSignature(byte[] content) {
+        if (content == null || content.length < ZIP_SIGNATURE.length) {
+            return false;
+        }
+        for (int index = 0; index < ZIP_SIGNATURE.length; index++) {
+            if (content[index] != ZIP_SIGNATURE[index]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private List<String> validateTree(JsonNode tree) {
