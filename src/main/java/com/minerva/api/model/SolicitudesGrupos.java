@@ -4,10 +4,7 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -23,15 +20,12 @@ public class SolicitudesGrupos {
     @Column(name = "id")
     private String id;
 
-    @ManyToOne (fetch = FetchType.LAZY)
-    @JoinColumn (name = "id_grupo", nullable = false)
-    private Grupo grupoId;
+    @Column(name = "id_grupo", nullable = false)
+    private String grupoId;
 
-    
-    @ManyToOne (fetch = FetchType.LAZY)
-    @JoinColumn (name = "id_alumno", nullable = false)
-    private Alumno alumnoId; 
-    
+    @Column(name = "id_alumno", nullable = false)
+    private String alumnoId;
+
     @PrePersist
     public void generarUUID() {
         if (this.id == null || this.id.isBlank()) {
