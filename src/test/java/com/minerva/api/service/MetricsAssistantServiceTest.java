@@ -20,8 +20,11 @@ import org.springframework.security.access.AccessDeniedException;
 import com.minerva.api.User.User;
 import com.minerva.api.User.Roles;
 import com.minerva.api.dto.MetricsAssistantRequestDTO;
+import com.minerva.api.dto.AlumnoDesgloseDTO;
+import com.minerva.api.dto.RespuestaAlumnoDTO;
 import com.minerva.api.dto.EstadisticasDTO.EstadisticasGrupoDTO;
 import com.minerva.api.dto.EstadisticasDTO.EstadisticasTendenciaDTO;
+import com.minerva.api.dto.EstadisticasDTO.EstadisticasQuizDTO;
 import com.minerva.api.model.Persona;
 
 import tools.jackson.databind.JsonNode;
@@ -107,5 +110,44 @@ class MetricsAssistantServiceTest {
                         "Muéstrame toda la institución",
                         List.of()),
                 user));
+    }
+
+    @Test
+    void removesStudentNamesAndIdentifiersFromQuizContext() {
+        User user = new User();
+        Persona persona = new Persona();
+        persona.setRol(Roles.DOCENTE);
+        user.setPersona(persona);
+        when(estadisticasService.obtenerEstadisticasQuiz("QUIZ-1", user))
+                .thenReturn(new EstadisticasQuizDTO(
+                        "QUIZ-1", "Evaluación 1",
+                        80, 75, 25, 90,
+                        1, 1, 0, 1, 0));
+        when(resumenVistasService.alumnos("QUIZ-1"))
+                .thenReturn(List.of(new AlumnoDesgloseDTO(
+                        "AL-SECRET", "Nombre Confidencial",
+                        "GRP-1", "A1", "Grupo 1",
+                        "INTENTO-SECRET", true,
+                        1, 1, 100,
+                        List.of(new RespuestaAlumnoDTO(
+                                1, "P-1", "Pregunta",
+                                "C-1", "Concepto",
+                                "Respuesta", "Respuesta",
+                                "CORRECTA", 2)))));
+        when(aiServiceClient.consultMetricsAssistant(any()))
+                .thenReturn(mapper.readTree(
+                        "{\"answer\":\"Análisis\",\"model\":\"test\"}"));
+
+        service.consult(new MetricsAssistantRequestDTO(
+                "QUIZ", "QUIZ-1", "Analiza", List.of()), user);
+
+        ArgumentCaptor<JsonNode> request =
+                ArgumentCaptor.forClass(JsonNode.class);
+        verify(aiServiceClient).consultMetricsAssistant(request.capture());
+        String payload = request.getValue().toString();
+        assertTrue(payload.contains("\"studentOrdinal\":1"));
+        assertTrue(!payload.contains("Nombre Confidencial"));
+        assertTrue(!payload.contains("AL-SECRET"));
+        assertTrue(!payload.contains("INTENTO-SECRET"));
     }
 }
